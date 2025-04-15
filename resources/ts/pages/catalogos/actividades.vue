@@ -19,16 +19,17 @@ const formSchema = [
 
 const tableHeaders = [
   { title: "ID", key: "id" },
-  { title: "Label", key: "nombre" },
+  { title: "Label", key: "label" },
   { title: "Estatus", key: "estatus" },
   { title: "Creación", key: "email" },
 ];
 
 const apiEndpoints = {
-  fetch: "/api/actividades", // Endpoint para obtener datos
-  create: "/api/actividades", // Endpoint para crear un elemento
-  update: "/api/actividades", // Endpoint para actualizar un elemento
-  delete: "/api/actividades", // Endpoint para eliminar un elemento
+  // fetch: "/api/test", // Endpoint para obtener datos
+  fetch: "/api/catalogo/actividades/get", // Endpoint para obtener datos
+  create: "/api/catalogo/actividades", // Endpoint para crear un elemento
+  update: "/api/catalogo/actividades", // Endpoint para actualizar un elemento
+  delete: "/api/catalogo/actividades/delete", // Endpoint para eliminar un elemento
 };
 </script>
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import axios from "axios";
-import FormFactory from "@/components/apps/FormFactory.vue";
 import DataTable from "@/components/apps/DataTable.vue";
+import FormFactory from "@/components/apps/FormFactory.vue";
+import { customRequest } from "@/utils/axiosInstance";
+import { ref } from "vue";
 
 interface FormSchemaField {
   label: string;
@@ -38,7 +38,7 @@ const isDialogVisible = ref(false);
 
 async function fetchTableData() {
   try {
-    const response = await axios.get(props.apiEndpoints.fetch);
+    const response = await customRequest(props.apiEndpoints.fetch);
     if (Array.isArray(response.data)) {
       tableData.value = response.data;
     } else {
@@ -52,9 +52,12 @@ async function fetchTableData() {
 async function handleFormSubmit(data: Record<string, any>) {
   try {
     if (data.id) {
-      await axios.put(`${props.apiEndpoints.update}/${data.id}`, data);
+      await customRequest({
+        url: `${props.apiEndpoints.delete}`,
+        data,
+      });
     } else {
-      await axios.post(props.apiEndpoints.create, data);
+      await customRequest(props.apiEndpoints.create, data);
     }
     await fetchTableData();
   } catch (error) {
@@ -64,7 +67,10 @@ async function handleFormSubmit(data: Record<string, any>) {
 
 async function handleDeleteItem(id: string | number) {
   try {
-    await axios.delete(`${props.apiEndpoints.delete}/${id}`);
+    await customRequest({
+      url: `${props.apiEndpoints.delete}/${id}`,
+      data: { id },
+    });
     await fetchTableData();
   } catch (error) {
     console.error("Error al eliminar el elemento:", error);

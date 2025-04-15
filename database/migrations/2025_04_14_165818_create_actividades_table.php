@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCompaniasTable extends Migration
+class CreateActividadesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateCompaniasTable extends Migration
      */
     public function up()
     {
-        Schema::create('companias', function (Blueprint $table) {
+        Schema::create('actividades', function (Blueprint $table) {
             $table->id(); // id
             $table->string('label'); // label
             $table->boolean('estatus')->default(true); // estatus
@@ -29,6 +29,6 @@ class CreateCompaniasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('companias');
+        Schema::dropIfExists('actividades');
     }
 }

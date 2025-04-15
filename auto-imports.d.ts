@@ -16,6 +16,7 @@ declare global {
   const asyncComputed: typeof import('@vueuse/core')['asyncComputed']
   const autoResetRef: typeof import('@vueuse/core')['autoResetRef']
   const avatarText: typeof import('./resources/ts/@core/utils/formatters')['avatarText']
+  const axiosInstance: typeof import('./resources/ts/utils/axiosInstance')['axiosInstance']
   const betweenValidator: typeof import('./resources/ts/@core/utils/validators')['betweenValidator']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
@@ -38,7 +39,9 @@ declare global {
   const createTemplatePromise: typeof import('@vueuse/core')['createTemplatePromise']
   const createUnrefFn: typeof import('@vueuse/core')['createUnrefFn']
   const createUrl: typeof import('./resources/ts/@core/composable/createUrl')['createUrl']
+  const customAxios: typeof import('./resources/ts/utils/customAxios')['default']
   const customRef: typeof import('vue')['customRef']
+  const customRequest: typeof import('./resources/ts/utils/axiosInstance')['customRequest']
   const debouncedRef: typeof import('@vueuse/core')['debouncedRef']
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
@@ -384,6 +387,7 @@ declare module 'vue' {
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly avatarText: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['avatarText']>
+    readonly axiosInstance: UnwrapRef<typeof import('./resources/ts/utils/axiosInstance')['axiosInstance']>
     readonly betweenValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['betweenValidator']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
@@ -407,6 +411,7 @@ declare module 'vue' {
     readonly createUnrefFn: UnwrapRef<typeof import('@vueuse/core')['createUnrefFn']>
     readonly createUrl: UnwrapRef<typeof import('./resources/ts/@core/composable/createUrl')['createUrl']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
+    readonly customRequest: UnwrapRef<typeof import('./resources/ts/utils/axiosInstance')['customRequest']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
