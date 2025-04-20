@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import DataTable from "@/components/apps/DataTable.vue";
 import FormFactory from "@/components/apps/FormFactory.vue";
+import {
+  showDeleteItem,
+  showSuccessMessage,
+} from "@/components/apps/sweetAlerts/sweetDeleteItem";
 import { customRequest } from "@/utils/axiosInstance";
-import { ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 
 interface FormSchemaField {
   label: string;
@@ -39,10 +43,12 @@ const isDialogVisible = ref(false);
 async function fetchTableData() {
   try {
     const response = await customRequest(props.apiEndpoints.fetch);
-    if (Array.isArray(response.data)) {
-      tableData.value = response.data;
-    } else {
-      tableData.value = [];
+    if (response.data.result && response.data.data) {
+      tableData.value = response.data.data.map((item: any) => ({
+        ...item,
+        estatus: item.estatus ? "Activo" : "Inactivo",
+        created_at: formatToAmPm(item.created_at),
+      }));
     }
   } catch (error) {
     console.error("Error al obtener los datos:", error);
@@ -51,14 +57,11 @@ async function fetchTableData() {
 
 async function handleFormSubmit(data: Record<string, any>) {
   try {
-    if (data.id) {
-      await customRequest({
-        url: `${props.apiEndpoints.delete}`,
-        data,
-      });
-    } else {
-      await customRequest(props.apiEndpoints.create, data);
-    }
+    await customRequest({
+      url: props.apiEndpoints.create,
+      method: "POST",
+      data,
+    });
     await fetchTableData();
   } catch (error) {
     console.error("Error al enviar el formulario:", error);
@@ -68,7 +71,8 @@ async function handleFormSubmit(data: Record<string, any>) {
 async function handleDeleteItem(id: string | number) {
   try {
     await customRequest({
-      url: `${props.apiEndpoints.delete}/${id}`,
+      url: `${props.apiEndpoints.delete}`,
+      method: "POST",
       data: { id },
     });
     await fetchTableData();
@@ -88,6 +92,10 @@ function handleCancelarForm() {
   }
 }
 
+function handleNewItem() {
+  handleShowForm({});
+}
+
 function handleShowForm(item: Record<string, any> | null = null) {
   formData.value = item ? { ...item } : {};
   if (props.formModal) {
@@ -97,17 +105,47 @@ function handleShowForm(item: Record<string, any> | null = null) {
   }
 }
 
-function handleActionClick({ action, item }: { action: string; item: any }) {
-  if (action === "Eliminar") {
-    if (confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
-      handleDeleteItem(item.id);
-    }
-  } else if (action === "Editar") {
-    handleShowForm(item);
-  }
+function formatToAmPm(dateString: string): string {
+  const date = new Date(dateString);
+
+  // Formatear la fecha (día/mes/año)
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Los meses comienzan en 0
+  const year = date.getFullYear();
+
+  // Formatear la hora (AM/PM)
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const amPm = hours >= 12 ? "PM" : "AM";
+  const formattedHours = hours % 12 || 12; // Convierte 0 a 12 para la medianoche
+  const formattedMinutes = minutes.toString().padStart(2, "0");
+
+  // Combinar fecha y hora
+  return `${day}/${month}/${year} ${formattedHours}:${formattedMinutes} ${amPm}`;
 }
 
-fetchTableData();
+function handleActionClick({ action, item }: { action: string; item: any }) {
+  if (action === "Eliminar") {
+    showDeleteItem({
+      title: "¿Estás seguro de eliminar este registro?",
+      message: "Esta acción no se puede deshacer.",
+      confirmText: "Sí, eliminar",
+      cancelText: "Cancelar",
+      onConfirm: () => {
+        handleDeleteItem(item.id);
+        showSuccessMessage({});
+      },
+      onCancel: () => {},
+    });
+  } else if (action === "Editar") {
+    let tmp = { ...item };
+    tmp.estatus = tmp.estatus === "Activo" ? true : false;
+    handleShowForm(tmp);
+  }
+}
+onBeforeMount(() => {
+  fetchTableData();
+});
 </script>
 
 <template>
@@ -128,7 +166,7 @@ fetchTableData();
       </div>
       <div v-if="showForm == false || props.formModal">
         <div class="d-flex justify-end align-center mb-5">
-          <VBtn @click="handleShowForm">
+          <VBtn @click="handleNewItem">
             <VIcon start icon="tabler-checkbox" />
             Nuevo
           </VBtn>
@@ -150,5 +188,26 @@ fetchTableData();
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   background-color: #fff;
+}
+.swal2-confirm {
+  color: white !important; /* Cambia el color del texto del botón de confirmación */
+  font-weight: bold !important;
+  background-color: #a7c7e7 !important; /* Azul pastel */
+  border: none !important;
+}
+
+.swal2-confirm button {
+  color: white !important; /* Cambia el color del texto del botón de confirmación */
+  font-weight: bold !important;
+  background-color: #a7c7e7 !important; /* Azul pastel */
+  border: none !important;
+}
+
+/* Estilo para el botón de cancelar */
+.swal2-cancel {
+  color: black !important; /* Cambia el color del texto del botón de cancelar */
+  font-weight: bold !important;
+  background-color: #b0b0b0 !important; /* Negro pastel */
+  border: none !important;
 }
 </style>

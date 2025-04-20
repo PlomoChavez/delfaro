@@ -35,6 +35,13 @@ class CatalogoController extends Controller
     {
         try {
             $data = $request->all();
+
+            // Eliminar los campos 'created_at', 'deleted_at' y 'updated_at' si existen
+            unset($data['created_at'], $data['deleted_at'], $data['updated_at']);
+            // Validar y transformar el campo 'estatus' a 1 o 0
+            if (isset($data['estatus'])) {
+                $data['estatus'] = ($data['estatus'] === 'Activo' || $data['estatus'] === true || $data['estatus'] === 'true') ? 1 : 0;
+            }
             if (isset($data['id'])) {
                 // Actualizar si existe un ID
                 DB::table($tabla)->where('id', $data['id'])->update($data);
@@ -44,6 +51,7 @@ class CatalogoController extends Controller
                     'data' => $data,
                 ]);
             } else {
+                // dd("else",$data);
                 // Crear si no existe un ID
                 $id = DB::table($tabla)->insertGetId($data);
                 $data['id'] = $id;

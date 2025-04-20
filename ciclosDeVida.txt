@@ -1,0 +1,9 @@
+onBeforeMount -> Antes de montar el componente en el DOM.
+onMounted -> Después de montar el componente en el DOM.
+onBeforeUpdate -> Antes de actualizar el DOM debido a cambios reactivos.
+onUpdated -> Después de que el DOM ha sido actualizado.
+onBeforeUnmount -> Antes de desmontar el componente del DOM.
+onUnmounted -> Después de desmontar el componente del DOM.
+onErrorCaptured -> Cuando ocurre un error en un componente hijo.
+onRenderTracked -> Cuando se rastrea una dependencia reactiva durante el renderizado.
+onRenderTriggered -> Cuando un cambio reactivo desencadena un nuevo renderizado.

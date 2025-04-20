@@ -383,6 +383,7 @@ declare module 'vue' {
     ScrollToTop: typeof import('./resources/ts/@core/components/ScrollToTop.vue')['default']
     ShareProjectDialog: typeof import('./resources/ts/components/dialogs/ShareProjectDialog.vue')['default']
     Shortcuts: typeof import('./resources/ts/@core/components/Shortcuts.vue')['default']
+    SweetDeleteItem: typeof import('./resources/ts/components/apps/sweetAlerts/sweetDeleteItem.vue')['default']
     TablePagination: typeof import('./resources/ts/@core/components/TablePagination.vue')['default']
     TheCustomizer: typeof import('./resources/ts/@core/components/TheCustomizer.vue')['default']
     ThemeSwitcher: typeof import('./resources/ts/@core/components/ThemeSwitcher.vue')['default']

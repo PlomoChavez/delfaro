@@ -10,3 +10,10 @@ Route::post('/test', function () {
 Route::middleware('api')->post('/catalogo/actividades/get', function (Request $request) {
     return app(CatalogoController::class)->getAll($request, 'actividades');
 })->name('catalogo.actividades.getAll');
+
+Route::post('catalogo/actividades/delete', function (Request $request) {
+    return app(CatalogoController::class)->delete($request, 'actividades');
+})->name('catalogo.actividades.delete');
+Route::post('catalogo/actividades', function (Request $request) {
+    return app(CatalogoController::class)->createOrUpdate($request, 'actividades');
+})->name('catalogo.actividades.delete');

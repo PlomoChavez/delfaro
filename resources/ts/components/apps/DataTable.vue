@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
-import { defineProps, defineEmits } from "vue";
+import { computed, defineEmits, defineProps, ref, watch } from "vue";
 
-const selected = ref([]);
+const selected: any = ref([]);
 
 interface Header {
   title: string;
@@ -40,7 +39,7 @@ const defaultConfig = {
 const mergedConfig = { ...defaultConfig, ...props.config };
 
 // Estado para la búsqueda
-const searchQuery = ref("");
+const searchQuery: any = ref("");
 
 // Filtrar datos según la búsqueda
 const filteredData = computed(() => {
@@ -105,11 +104,11 @@ watch(selected, () => {
       :show-select="mergedConfig.seleccionar"
       v-model="selected"
       select-strategy="all"
-      height="300"
-      fixed-header
       no-data-text="No hay datos disponibles"
       items-per-page-text="Elementos por página:"
+      fixed-header
     >
+      <!-- height="300" -->
       <!-- Numerador -->
       <template #item.numerador="{ index }">
         {{ index + 1 }}
@@ -124,9 +123,12 @@ watch(selected, () => {
       <!-- Acciones -->
       <template #item.actions="{ item }">
         <div class="actions">
+          <!-- Botones con íconos de Font Awesome -->
+
           <!-- prettier-ignore -->
-          <button v-for="(action, index) in props.config.actions" :key="index" @click="() => emit('action-click', { action, item })">
-            {{ action }}
+          <button v-for="(action, index) in props.config.actions" :key="index" @click="() => emit('action', { action, item })" class="action-button">
+            <VIcon icon="tabler-edit"  size="27" v-if="action == 'Editar'"   style="color: #007bff; font-weight: bold;" />
+            <VIcon icon="tabler-trash" size="27" v-if="action == 'Eliminar'" style="color: #dc3545; font-weight: bold;" />
           </button>
         </div>
       </template>
@@ -165,5 +167,21 @@ watch(selected, () => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  color: #212529;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #e2e6ea;
 }
 </style>

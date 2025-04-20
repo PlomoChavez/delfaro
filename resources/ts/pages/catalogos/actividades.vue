@@ -5,14 +5,8 @@ const formSchema = [
   {
     label: "Nombre",
     type: "text",
-    model: "nombre",
+    model: "label",
     placeholder: "Ingresa el nombre",
-  },
-  {
-    label: "Correo",
-    type: "email",
-    model: "email",
-    placeholder: "Ingresa el correo",
   },
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
@@ -21,7 +15,7 @@ const tableHeaders = [
   { title: "ID", key: "id" },
   { title: "Label", key: "label" },
   { title: "Estatus", key: "estatus" },
-  { title: "Creación", key: "email" },
+  { title: "Creación", key: "created_at" },
 ];
 
 const apiEndpoints = {
