@@ -26,10 +26,14 @@ export default [
             to: { name: "catalogos-estatus-clientes" },
           },
           { title: "Método de pago", to: { name: "catalogos-metodo-pago" } },
-          { title: "Lineas", to: { name: "catalogos-lineas" } },
+          { title: "Ramos", to: { name: "catalogos-lineas" } },
           {
             title: "Tipos de vencimiento",
             to: { name: "catalogos-tipos-vencimiento" },
+          },
+          {
+            title: "Tipos de usuarios",
+            to: { name: "catalogos-tipos-usuarios" },
           },
         ],
       },

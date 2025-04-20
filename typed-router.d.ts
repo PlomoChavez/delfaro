@@ -27,6 +27,7 @@ declare module 'vue-router/auto-routes' {
     'catalogos-estatus-clientes': RouteRecordInfo<'catalogos-estatus-clientes', '/catalogos/estatus-clientes', Record<never, never>, Record<never, never>>,
     'catalogos-lineas': RouteRecordInfo<'catalogos-lineas', '/catalogos/lineas', Record<never, never>, Record<never, never>>,
     'catalogos-metodo-pago': RouteRecordInfo<'catalogos-metodo-pago', '/catalogos/metodo-pago', Record<never, never>, Record<never, never>>,
+    'catalogos-tipos-usuarios': RouteRecordInfo<'catalogos-tipos-usuarios', '/catalogos/tipos-usuarios', Record<never, never>, Record<never, never>>,
     'catalogos-tipos-vencimiento': RouteRecordInfo<'catalogos-tipos-vencimiento', '/catalogos/tipos-vencimiento', Record<never, never>, Record<never, never>>,
     'clientes': RouteRecordInfo<'clientes', '/clientes', Record<never, never>, Record<never, never>>,
     'denegado': RouteRecordInfo<'denegado', '/denegado', Record<never, never>, Record<never, never>>,

@@ -93,7 +93,7 @@ function handleCancelarForm() {
 }
 
 function handleNewItem() {
-  handleShowForm({});
+  handleShowForm(null);
 }
 
 function handleShowForm(item: Record<string, any> | null = null) {

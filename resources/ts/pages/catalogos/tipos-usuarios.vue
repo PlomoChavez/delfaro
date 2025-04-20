@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
+
 // prettier-ignore
 const formSchema = [
   { label: "Nombre", type: "text", model: "label", placeholder: "Ingresa el nombre" },
@@ -14,16 +15,17 @@ const tableHeaders = [
 ];
 
 const apiEndpoints = {
-  fetch: "/api/catalogo/metodo-pago/get", // Endpoint para obtener datos
-  create: "/api/catalogo/metodo-pago", // Endpoint para crear un elemento
-  update: "/api/catalogo/metodo-pago", // Endpoint para actualizar un elemento
-  delete: "/api/catalogo/metodo-pago/delete", // Endpoint para eliminar un elemento
+  // fetch: "/api/test", // Endpoint para obtener datos
+  fetch: "/api/catalogo/tipo-usuario/get", // Endpoint para obtener datos
+  create: "/api/catalogo/tipo-usuario", // Endpoint para crear un elemento
+  update: "/api/catalogo/tipo-usuario", // Endpoint para actualizar un elemento
+  delete: "/api/catalogo/tipo-usuario/delete", // Endpoint para eliminar un elemento
 };
 </script>
 
 <template>
   <CrudManager
-    title="Métodos de Pago"
+    title="Tipos de usuario"
     :formModal="true"
     :formSchema="formSchema"
     :tableHeaders="tableHeaders"

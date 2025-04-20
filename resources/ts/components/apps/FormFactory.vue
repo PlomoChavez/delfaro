@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineEmits, defineProps, ref, watch } from "vue";
+import { defineEmits, defineProps, watch } from "vue";
 
 interface Field {
   label: string;
@@ -26,12 +26,13 @@ const emit = defineEmits<{
 }>();
 
 // Crea un modelo local reactivo
-const formLocal: any = ref({});
+const formLocal: any = reactive(props.modelValue || {});
 // Sincroniza los cambios entre `props.modelValue` y `formLocal`
 watch(
   () => props.modelValue,
   (newValue) => {
-    formLocal.value = { ...newValue };
+    Object.keys(formLocal).forEach((key) => delete formLocal[key]);
+    Object.assign(formLocal, { ...newValue });
   }
 );
 
@@ -61,14 +62,17 @@ function handleSubmit() {
     props.schema.map((field) => [field.model, tmp[field.model]])
   );
   if (props.modelValue) {
+    console.log("entra al if de props");
     tmp = {
       ...props.modelValue,
     };
   }
+  console.log("Valores originales:", tmp);
   tmp = {
     ...tmp,
     ...filteredForm,
   };
+  console.log("Valores filtrados:", tmp);
   // Emite solo los valores filtrados
   emit("submit", tmp);
   emit("update:isDialogVisible", false); // Cerrar el modal

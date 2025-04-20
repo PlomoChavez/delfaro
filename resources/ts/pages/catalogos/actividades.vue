@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
 
+// prettier-ignore
 const formSchema = [
-  {
-    label: "Nombre",
-    type: "text",
-    model: "label",
-    placeholder: "Ingresa el nombre",
-  },
+  { label: "Nombre", type: "text", model: "label", placeholder: "Ingresa el nombre" },
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
 
