@@ -1,42 +1,54 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-
+import FormEdit from "@/components/forms/CompaniasFormEdit.vue";
+// prettier-ignore
 const formSchema = [
-  {
-    label: "Nombre",
-    type: "text",
-    model: "nombre",
-    placeholder: "Ingresa el nombre",
-  },
-  {
-    label: "Correo",
-    type: "email",
-    model: "email",
-    placeholder: "Ingresa el correo",
-  },
+  { label: "RFC", type: "text", model: "rfc", placeholder: "Ingresa el nombre" },
+  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
+  { label: "Nombre corto", type: "text", model: "nombreCorto", placeholder: "Ingresa el nombre" },
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
 
+const showFormEdit = ref(false); // Referencia al componente FormFactory
+const data = ref(null); // Referencia al componente FormFactory
+
 const tableHeaders = [
   { title: "ID", key: "id" },
-  { title: "Label", key: "nombre" },
+  { title: "Label", key: "label" },
   { title: "Estatus", key: "estatus" },
-  { title: "Creación", key: "email" },
+  { title: "Creación", key: "created_at" },
 ];
 
 const apiEndpoints = {
-  fetch: "/api/actividades", // Endpoint para obtener datos
-  create: "/api/actividades", // Endpoint para crear un elemento
-  update: "/api/actividades", // Endpoint para actualizar un elemento
-  delete: "/api/actividades", // Endpoint para eliminar un elemento
+  // fetch: "/api/test", // Endpoint para obtener datos
+  fetch: "/api/companias/get", // Endpoint para obtener datos
+  create: "/api/companias/create", // Endpoint para crear un elemento
+  update: "/api/companias/update", // Endpoint para actualizar un elemento
+  delete: "/api/companias/delete", // Endpoint para eliminar un elemento
+};
+
+const handleActionsEdit = (data: any) => {
+  showFormEdit.value = true;
+  console.log("handleActionsEdit", data);
+};
+const handleAtras = () => {
+  showFormEdit.value = false;
 };
 </script>
 
 <template>
+  <h1>Compañias</h1>
+  <FormEdit v-if="showFormEdit" :data="data" @atras="handleAtras" />
   <CrudManager
-    title="Compañías"
+    v-else
+    title="
+    Compañias"
+    :emitEdit="true"
+    :formModal="true"
+    :show-title="false"
     :formSchema="formSchema"
     :tableHeaders="tableHeaders"
     :apiEndpoints="apiEndpoints"
+    @customEdit="handleActionsEdit"
   />
 </template>

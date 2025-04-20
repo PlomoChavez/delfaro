@@ -34,12 +34,28 @@ class UsuarioController extends Controller
     public function create(Request $request)
     {
         try {
+            // Validar los datos de entrada
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'correo' => 'required|string|unique:usuarios,correo',
+                // 'correo' => 'required|email|unique:usuarios,correo',
+                'tipo_id' => 'required|array', // Debe ser un array u objeto
+                'tipo_id.id' => 'required|integer', // Validar que tenga la propiedad `id`
+                'password' => 'required|string|min:2',
+                'estatus' => 'required|boolean', // Debe ser un booleano
+            ]);
+
             $data = $request->all();
 
             // Validar y transformar el campo 'estatus' a 1 o 0
             if (isset($data['estatus'])) {
                 $data['estatus'] = ($data['estatus'] === 'Activo' || $data['estatus'] === true || $data['estatus'] === 'true') ? 1 : 0;
             }
+            // Validar y transformar el campo 'tipo_id'
+            if (isset($data['tipo_id']) && (is_array($data['tipo_id']) || is_object($data['tipo_id']))) {
+                $data['tipo_id'] = $data['tipo_id']['id'] ?? null; // Extraer la propiedad 'id' si existe
+            }
+            $data['password'] = bcrypt($data['password']);
 
             // Crear el nuevo usuario
             $usuario = Usuario::create($data);

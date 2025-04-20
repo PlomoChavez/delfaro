@@ -4,14 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Compania extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+
+    protected $table = 'compania';
 
     protected $fillable = [
-        'label',
-        'estatus',
+        'rfc',
+        'nombre',
+        'nombreCorto',
+        'direccion',
+        'codigoPostal',
+        'ciudad',
+        'limitePrimerPago',
+        'limitePrimerSubsecuente',
     ];
+
+    public function representantes()
+    {
+        return $this->hasMany(CompaniaRepresentante::class);
+    }
 }

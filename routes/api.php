@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\CompaniaController;
+use App\Http\Controllers\CatalogosController;
 // @formatter:off
 // Actividades
 Route::post('catalogo/actividades/get',     function (Request $request) { return app(CatalogoController::class)->getAll($request, 'actividades'); })->name('catalogo.actividades.getAll');
@@ -35,6 +37,15 @@ Route::post('usuarios/get',     [UsuarioController::class, 'getAll'])->name('usu
 Route::post('usuarios/create',  [UsuarioController::class, 'create'])->name('usuarios.create');
 Route::post('usuarios/update',  [UsuarioController::class, 'update'])->name('usuarios.update');
 Route::post('usuarios/delete',  [UsuarioController::class, 'delete'])->name('usuarios.delete');
+// companias
+Route::post('companias/get',     [CompaniaController::class, 'getAll'])->name('companias.getAll');
+Route::post('companias/create',  [CompaniaController::class, 'create'])->name('companias.create');
+Route::post('companias/update',  [CompaniaController::class, 'update'])->name('companias.update');
+Route::post('companias/delete',  [CompaniaController::class, 'delete'])->name('companias.delete');
+
+
+// usuarios
+Route::post('catalogos/tipos-usuarios',   function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-usuarios'); })->name('catalogos.getCatalogo.tipos-usuarios');
 
 
 // @formatter:on
