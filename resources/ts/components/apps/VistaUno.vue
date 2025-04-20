@@ -21,18 +21,29 @@ interface TableHeader {
   key: string;
 }
 
-const props = defineProps<{
-  title: string; // Título del módulo
-  formSchema: FormSchemaField[]; // Esquema del formulario
-  tableHeaders: TableHeader[]; // Esquema de la tabla
-  formModal?: boolean; // Indica si el formulario será un modal
-  apiEndpoints: {
-    fetch: string; // Endpoint para obtener datos
-    create: string; // Endpoint para crear un elemento
-    update: string; // Endpoint para actualizar un elemento
-    delete: string; // Endpoint para eliminar un elemento
-  };
+const emit = defineEmits<{
+  (event: "custom-edit", item: any): void;
 }>();
+
+const props = withDefaults(
+  defineProps<{
+    title: string; // Título del módulo
+    formSchema: FormSchemaField[]; // Esquema del formulario
+    tableHeaders: TableHeader[]; // Esquema de la tabla
+    formModal?: boolean; // Indica si el formulario será un modal
+    emitEdit?: boolean; // Indica si el formulario será un modal
+    showTitle?: boolean; // Indica si se debe mostrar el título
+    apiEndpoints: {
+      fetch: string; // Endpoint para obtener datos
+      create: string; // Endpoint para crear un elemento
+      update: string; // Endpoint para actualizar un elemento
+      delete: string; // Endpoint para eliminar un elemento
+    };
+  }>(),
+  {
+    showTitle: true, // Valor predeterminado
+  }
+);
 
 const showForm = ref(false); // Referencia al componente FormFactory
 const formFactoryRef = ref(null); // Referencia al componente FormFactory
@@ -138,9 +149,14 @@ function handleActionClick({ action, item }: { action: string; item: any }) {
       onCancel: () => {},
     });
   } else if (action === "Editar") {
-    let tmp = { ...item };
-    tmp.estatus = tmp.estatus === "Activo" ? true : false;
-    handleShowForm(tmp);
+    if (props.emitEdit) {
+      emit("custom-edit", item); // Emite el evento personalizado con la información del elemento
+    } else {
+      // Comportamiento predeterminado
+      let tmp = { ...item };
+      tmp.estatus = tmp.estatus === "Activo" ? true : false;
+      handleShowForm(tmp);
+    }
   }
 }
 onBeforeMount(() => {
@@ -150,7 +166,7 @@ onBeforeMount(() => {
 
 <template>
   <div class="">
-    <h1>{{ title }}</h1>
+    <h1 v-if="showTitle">{{ title }}</h1>
     <div class="card">
       <div v-if="showForm || props.formModal">
         <FormFactory

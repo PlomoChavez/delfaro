@@ -3,10 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CatalogoController;
-
-Route::post('/test', function () {
-    return response()->json(['message' => 'API funcionando correctamente']);
-});
+use App\Http\Controllers\UsuarioController;
 // @formatter:off
 // Actividades
 Route::post('catalogo/actividades/get',     function (Request $request) { return app(CatalogoController::class)->getAll($request, 'actividades'); })->name('catalogo.actividades.getAll');
@@ -32,4 +29,12 @@ Route::post('catalogo/tipo-vencimiento',         function (Request $request) { r
 Route::post('catalogo/tipo-usuario/get',     function (Request $request) { return app(CatalogoController::class)->getAll($request, 'tipos_de_usuarios'); })->name('catalogo.tipo-usuario.getAll');
 Route::post('catalogo/tipo-usuario/delete',  function (Request $request) { return app(CatalogoController::class)->delete($request, 'tipos_de_usuarios'); })->name('catalogo.tipo-usuario.delete');
 Route::post('catalogo/tipo-usuario',         function (Request $request) { return app(CatalogoController::class)->createOrUpdate($request, 'tipos_de_usuarios'); })->name('catalogo.tipo-usuario.delete');
+
+// usuarios
+Route::post('usuarios/get',     [UsuarioController::class, 'getAll'])->name('usuarios.getAll');
+Route::post('usuarios/create',  [UsuarioController::class, 'create'])->name('usuarios.create');
+Route::post('usuarios/update',  [UsuarioController::class, 'update'])->name('usuarios.update');
+Route::post('usuarios/delete',  [UsuarioController::class, 'delete'])->name('usuarios.delete');
+
+
 // @formatter:on

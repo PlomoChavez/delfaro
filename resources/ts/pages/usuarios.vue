@@ -1,13 +1,44 @@
+<script setup lang="ts">
+import CrudManager from "@/components/apps/VistaUno.vue";
+// prettier-ignore
+const formSchema = [
+  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
+  { label: "Correo electronico", type: "text", model: "correo", placeholder: "Ingresa el nombre" },
+  { label: "Contraseña", type: "text", model: "password", placeholder: "Ingresa el nombre" },
+  { label: "Tipo de usuario", type: "select", model: "tipo_id", placeholder: "Ingresa el nombre" },
+  { label: "Estatus", type: "switch", model: "estatus" },
+];
+
+const tableHeaders = [
+  { title: "ID", key: "id" },
+  { title: "Label", key: "label" },
+  { title: "Estatus", key: "estatus" },
+  { title: "Creación", key: "created_at" },
+];
+
+const apiEndpoints = {
+  // fetch: "/api/test", // Endpoint para obtener datos
+  fetch: "/api/usuarios/get", // Endpoint para obtener datos
+  create: "/api/usuarios/create", // Endpoint para crear un elemento
+  update: "/api/usuarios/update", // Endpoint para actualizar un elemento
+  delete: "/api/usuarios/delete", // Endpoint para eliminar un elemento
+};
+</script>
+
 <template>
-  <div>
-    <VCard title="Create Awesome 🙌">
-      <VCardText>This is your second page.</VCardText>
-      <VCardText>
-        Chocolate sesame snaps pie carrot cake pastry pie lollipop muffin.
-        Carrot cake dragée chupa chups jujubes. Macaroon liquorice cookie
-        wafer tart marzipan bonbon. Gingerbread jelly-o dragée
-        chocolate.
-      </VCardText>
-    </VCard>
-  </div>
+  <h1>Usuarios</h1>
+  <CrudManager
+    title="Usuarios"
+    :emitEdit="true"
+    :formModal="true"
+    :show-title="false"
+    :formSchema="formSchema"
+    :tableHeaders="tableHeaders"
+    :apiEndpoints="apiEndpoints"
+    @custom-edit="
+      (item) => {
+        console.log(item);
+      }
+    "
+  />
 </template>

@@ -103,25 +103,27 @@ function handleCancel() {
               <!-- Render dynamic fields -->
               <template v-for="field in schema" :key="field.model">
                 <!-- Campo de texto -->
-                <VTextField
-                  v-if="field.type === 'text'"
-                  :label="field.label"
-                  :placeholder="field.placeholder || ''"
-                  variant="outlined"
-                  :id="field.model"
-                  v-model="formLocal[field.model]"
-                  @input="handleInputChange(field.model, $event.target.value)"
-                />
+                <template v-if="field.type === 'text'" class="mb-5">
+                  <label :for="field.model"> {{ field.label }} </label>
+                  <VTextField
+                    :placeholder="field.placeholder || ''"
+                    variant="outlined"
+                    :id="field.model"
+                    v-model="formLocal[field.model]"
+                    @input="handleInputChange(field.model, $event.target.value)"
+                  />
+                </template>
 
                 <!-- Campo select -->
-                <AppSelect
-                  v-else-if="field.type === 'select'"
-                  :items="field.options?.map((option) => option.label) || []"
-                  :label="field.label"
-                  :placeholder="field.placeholder || ''"
-                  :value="formLocal[field.model]"
-                  @change="handleInputChange(field.model, $event)"
-                />
+                <template v-else-if="field.type === 'select'">
+                  <AppSelect
+                    :items="field.options?.map((option) => option.label) || []"
+                    :label="field.label"
+                    :placeholder="field.placeholder || ''"
+                    :value="formLocal[field.model]"
+                    @change="handleInputChange(field.model, $event)"
+                  />
+                </template>
                 <!-- Campo switch -->
                 <div v-else-if="field.type === 'switch'" class="form-group">
                   <label :for="field.model">
