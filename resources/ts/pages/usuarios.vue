@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-import FormEdit from "@/components/forms/CompaniasFormEdit.vue";
+import FormEdit from "@/components/forms/UsuarioFormEdit.vue";
 // prettier-ignore
 const formSchema = [
   { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
@@ -32,7 +32,7 @@ const handleActionsEdit = (data: any) => {
   showFormEdit.value = true;
   console.log("handleActionsEdit", data);
 };
-const handleCancelar = (data: any) => {
+const handleCancelar = () => {
   showFormEdit.value = false;
 };
 </script>

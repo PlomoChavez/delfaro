@@ -17,10 +17,9 @@ const formDataLocal = ref({});
 
 // prettier-ignore
 const formSchema = [
+  { label: "RFC", type: "text", model: "rfc", placeholder: "Ingresa el nombre" },
   { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
-  { label: "Correo electronico", type: "text", model: "correo", placeholder: "Ingresa el nombre" },
-  { label: "Contraseña", type: "text", model: "password", placeholder: "Ingresa el nombre" },
-  { label: "Tipo de usuario", type: "select", model: "tipo_id", placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios" },
+  { label: "Nombre corto", type: "text", model: "nombreCorto", placeholder: "Ingresa el nombre" },
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
 
@@ -56,6 +55,7 @@ const handleFormSubmit = () => {
             :modelValue="formDataLocal"
             :isDialogVisible="false"
             @submit="handleFormSubmit"
+            @cancel="handleAtras"
           />
         </VWindowItem>
       </VWindow>
