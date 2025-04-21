@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DataTable from "@/components/apps/DataTable.vue";
-import FormFactory from "@/components/apps/FormFactory.vue";
+import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
 import {
   showDeleteItem,
   showSuccessMessage,
@@ -52,7 +52,6 @@ const props = withDefaults(
 );
 
 const showForm = ref(false); // Referencia al componente FormFactory
-const formFactoryRef = ref(null); // Referencia al componente FormFactory
 const formData = ref<Record<string, any>>({});
 const tableData = ref<any[]>([]);
 const isDialogVisible = ref(false);
@@ -89,7 +88,9 @@ async function handleFormSubmit(data: Record<string, any>) {
       console.log("handleFormSubmit", { ...data });
       emit("customCreate", { ...data });
     } else {
+      console.log("handleFormSubmit -> VistaUno ", { ...data });
       let url = props?.apiEndpoints?.create ?? "";
+      console.log("url", url);
       let payload = { ...data };
       if (props.payloadDefault) {
         payload = { ...props.payloadDefault, ...payload };
@@ -99,6 +100,7 @@ async function handleFormSubmit(data: Record<string, any>) {
         method: "POST",
         data: payload,
       });
+      await handleCancelarForm();
       await fetchTableData();
     }
   } catch (error) {
@@ -202,8 +204,7 @@ onBeforeMount(() => {
     <h1 v-if="showTitle">{{ title }}</h1>
     <div class="card">
       <div v-if="showForm || props.formModal">
-        <FormFactory
-          ref="formFactoryRef"
+        <ModuladorFormFactory
           :title="title"
           :schema="formSchema"
           :modelValue="formData"

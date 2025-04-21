@@ -17,6 +17,7 @@ class CompaniaRepresentante extends Model
         'telefono',
         'correo',
         'cargo',
+        'estatus',
     ];
 
     public function compania()

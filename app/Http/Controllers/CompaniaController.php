@@ -65,40 +65,46 @@ class CompaniaController extends Controller
     /**
      * Actualizar una compañía existente.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         try {
             $validatedData = $request->validate([
-                'rfc' => 'sometimes|string|unique:compania,rfc,' . $id,
+                'rfc' => 'sometimes|string',
+                'id' => 'sometimes|integer|exists:compania,id',
                 'nombre' => 'sometimes|string|max:255',
                 'nombreCorto' => 'sometimes|string|max:255',
-                'direccion' => 'sometimes|string',
-                'codigoPostal' => 'sometimes|string|max:10',
-                'ciudad' => 'sometimes|string|max:255',
-                'limitePrimerPago' => 'sometimes|numeric|min:0',
-                'limitePrimerSubsecuente' => 'sometimes|numeric|min:0',
-                'representantes' => 'sometimes|array',
-                'representantes.*.id' => 'sometimes|exists:compania_representantes,id',
-                'representantes.*.nombre' => 'sometimes|string|max:255',
-                'representantes.*.telefono' => 'sometimes|string|max:20',
-                'representantes.*.correo' => 'sometimes|email|unique:compania_representantes,correo',
-                'representantes.*.cargo' => 'sometimes|string|max:255',
+                'direccion' => 'sometimes|nullable|string',
+                'codigoPostal' => 'sometimes|nullable|string|max:10',
+                'ciudad' => 'sometimes|nullable|string|max:255',
+                'estado' => 'sometimes|nullable|string|max:255',
+                'colonia' => 'sometimes|nullable|string|max:255',
+                'estatus' => 'sometimes|nullable|boolean',
+                'limitePrimerPago' => 'sometimes|nullable|numeric|min:0',
+                'limitePrimerSubsecuente' => 'sometimes|nullable|numeric|min:0'
             ]);
+            $id = $validatedData['id'] ?? null;
+            if (!$id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'ID de compañía no proporcionado',
+                    'data' => [],
+                ]);
+            }
+            $rfc = $validatedData['rfc'] ?? null;
+            $exiteRFC = Compania::where('rfc', $rfc)->where('id', '!=', $id)->exists();
+            if ($exiteRFC) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'El RFC ya está en uso por otra compañía',
+                    'data' => [],
+                ]);
+            }
 
+            if (isset($validatedData['estatus'])) {
+                $validatedData['estatus'] = ($validatedData['estatus'] === 'Activo' || $validatedData['estatus'] === true || $validatedData['estatus'] === 'true') ? 1 : 0;
+            }
             $compania = Compania::findOrFail($id);
             $compania->update($validatedData);
-
-            if (isset($validatedData['representantes'])) {
-                foreach ($validatedData['representantes'] as $representante) {
-                    if (isset($representante['id'])) {
-                        $existingRepresentante = CompaniaRepresentante::findOrFail($representante['id']);
-                        $existingRepresentante->update($representante);
-                    } else {
-                        $representante['compania_id'] = $compania->id;
-                        CompaniaRepresentante::create($representante);
-                    }
-                }
-            }
 
             return response()->json([
                 'result' => true,

@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import FormFactory from "@/components/apps/FormFactory.vue";
 import CompaniasRepresentantes from "@/components/forms/CompaniasRepresentantesV1.vue";
+
+import { showSuccessMessage } from "@/components/apps/sweetAlerts/sweetDeleteItem";
+import { customRequest } from "@/utils/axiosInstance";
 // prettier-ignore
 import { defineEmits, defineProps, ref, watch } from "vue";
 const props = withDefaults(
@@ -19,9 +22,16 @@ const formDataLocal = ref(props.data);
 
 // prettier-ignore
 const formSchema = [
-  { label: "RFC", type: "text", model: "rfc", placeholder: "Ingresa el nombre" },
-  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
   { label: "Nombre corto", type: "text", model: "nombreCorto", placeholder: "Ingresa el nombre" },
+  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
+  { label: "RFC", type: "text", model: "rfc", placeholder: "Ingresa el nombre" },
+  { label: "Direcciòn", type: "text", model: "direccion", placeholder: "Ingresa el nombre" },
+  { label: "Colonia", type: "text", model: "colonia", placeholder: "Ingresa el nombre" },
+  { label: "Codigo Postal", type: "text", model: "codigoPostal", placeholder: "Ingresa el nombre" },
+  { label: "Estado", type: "text", model: "estado", placeholder: "Ingresa el nombre" },
+  { label: "Ciudad", type: "text", model: "ciudad", placeholder: "Ingresa el nombre" },
+  { label: "Limite Primer pago", type: "text", model: "limitePrimerPago", placeholder: "Ingresa el nombre" },
+  { label: "Limite Primer Subsecuente", type: "text", model: "limitePrimerSubsecuente", placeholder: "Ingresa el nombre" },
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
 
@@ -29,8 +39,14 @@ const handleAtras = () => {
   emit("atras");
 };
 
-const handleFormSubmit = () => {
-  emit("atras");
+const handleFormSubmit = async (data: any) => {
+  let response = await customRequest({
+    url: "/api/companias/update",
+    method: "POST",
+    data: { ...data },
+  });
+  console.log("handleFormSubmit", response);
+  showSuccessMessage({});
 };
 
 // prettier-ignore

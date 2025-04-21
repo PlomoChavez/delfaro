@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\CompaniaRepresentante;
+use Illuminate\Support\Facades\Log;
 
 class CompaniaRepresentantesController extends Controller
 {
@@ -47,8 +48,12 @@ class CompaniaRepresentantesController extends Controller
             'telefono' => 'nullable|string|max:20',
             'correo' => 'nullable|max:255',
             'cargo' => 'nullable|string|max:255',
+            'estatus' => 'nullable',
         ]);
-
+        if (isset($validatedData['estatus'])) {
+            $validatedData['estatus'] = ($validatedData['estatus'] === 'Activo' || $validatedData['estatus'] === true || $validatedData['estatus'] === 'true') ? 1 : 0;
+        }
+        Log::info('Datos validados:', $validatedData);
         if (isset($validatedData['id'])) {
             // Actualizar
             $representante = CompaniaRepresentante::find($validatedData['id']);

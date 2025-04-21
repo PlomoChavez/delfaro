@@ -17,7 +17,10 @@ class Compania extends Model
         'nombreCorto',
         'direccion',
         'codigoPostal',
+        'estado',
+        'colonia',
         'ciudad',
+        'estatus',
         'limitePrimerPago',
         'limitePrimerSubsecuente',
     ];

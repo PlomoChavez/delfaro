@@ -8,8 +8,8 @@ const data = ref(null); // Referencia al componente FormFactory
 // prettier-ignore
 const formSchema = [
   { label: "RFC", type: "text", model: "rfc", placeholder: "Ingresa el nombre" },
-  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
   { label: "Nombre corto", type: "text", model: "nombreCorto", placeholder: "Ingresa el nombre" },
+  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
 
