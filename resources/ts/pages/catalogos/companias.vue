@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
 import FormEdit from "@/components/forms/CompaniasFormEdit.vue";
+
+const showFormEdit = ref(false); // Referencia al componente FormFactory
+const data = ref(null); // Referencia al componente FormFactory
+
 // prettier-ignore
 const formSchema = [
   { label: "RFC", type: "text", model: "rfc", placeholder: "Ingresa el nombre" },
@@ -9,12 +13,9 @@ const formSchema = [
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
 
-const showFormEdit = ref(false); // Referencia al componente FormFactory
-const data = ref(null); // Referencia al componente FormFactory
-
 const tableHeaders = [
   { title: "ID", key: "id" },
-  { title: "Label", key: "label" },
+  { title: "Nombre corto", key: "nombreCorto" },
   { title: "Estatus", key: "estatus" },
   { title: "Creación", key: "created_at" },
 ];
@@ -27,10 +28,12 @@ const apiEndpoints = {
   delete: "/api/companias/delete", // Endpoint para eliminar un elemento
 };
 
-const handleActionsEdit = (data: any) => {
-  showFormEdit.value = true;
+const handleActionsEdit = (dataRow: any) => {
+  data.value = { ...dataRow };
   console.log("handleActionsEdit", data);
+  showFormEdit.value = true;
 };
+
 const handleAtras = () => {
   showFormEdit.value = false;
 };

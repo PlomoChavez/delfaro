@@ -1,24 +1,9 @@
 <script setup lang="ts">
 import { useCatalogo } from "@/hooks/useCatalogo";
-import {
-  defineEmits,
-  defineProps,
-  h,
-  onMounted,
-  reactive,
-  ref,
-  watch,
-} from "vue";
-import {
-  VBtn,
-  VCard,
-  VCardText,
-  VDialog,
-  VIcon,
-  VSelect,
-  VSwitch,
-  VTextField,
-} from "vuetify/components";
+// prettier-ignore
+import { defineEmits, defineProps, h, onMounted, reactive, ref, watch, } from "vue";
+// prettier-ignore
+import { VBtn, VCard, VCardText, VDialog, VIcon, VSelect, VSwitch, VTextField } from "vuetify/components";
 
 interface Field {
   label: string;
@@ -32,7 +17,7 @@ interface Field {
 
 const props = withDefaults(
   defineProps<{
-    title: any;
+    title?: any;
     schema: Field[];
     modelValue: Record<string, any>;
     formModal?: boolean;
@@ -64,12 +49,8 @@ watch(
   }
 );
 
-watch(
-  () => formLocal,
-  (newValue) => {
-    console.log("formLocal", newValue);
-  }
-);
+// prettier-ignore
+watch(() => formLocal,(newValue) => { console.log("formLocal", newValue); });
 
 function handleInputChange(field: string, value: any) {
   formLocal[field] = value;
@@ -79,6 +60,13 @@ function handleInputChange(field: string, value: any) {
 }
 
 function handleSwitchChange(field: string) {
+  console.log("");
+  console.log(field);
+  console.log(" -> ", formLocal[field]);
+  console.log(!!formLocal[field]);
+  if (formLocal[field] === undefined) {
+    formLocal[field] = false;
+  }
   formLocal[field] = !!formLocal[field];
   if (props.formLive) {
     emit("update:modelValue", { ...formLocal });
@@ -95,16 +83,12 @@ function handleSelectChange(field: any, selected: any) {
   }
 }
 
+// prettier-ignore
 function handleSubmit() {
   const tmp = { ...formLocal };
-  const filteredForm = Object.fromEntries(
-    props.schema.map((field) => [field.model, tmp[field.model]])
-  );
+  const filteredForm = Object.fromEntries( props.schema.map((field) => [field.model, tmp[field.model]]) );
 
-  const result = {
-    ...props.modelValue,
-    ...filteredForm,
-  };
+  const result = { ...props.modelValue, ...filteredForm };
 
   emit("submit", result);
   emit("update:isDialogVisible", false);
@@ -171,6 +155,7 @@ function renderForm() {
         } else if (field.type === "switch") {
           return h("div", { class: "form-group", key: field.model }, [
             h("label", { for: field.model }, field.label),
+            h("label", { for: field.model }, formLocal[field.model]),
             h(VSwitch, {
               id: field.model,
               modelValue: formLocal[field.model],
@@ -192,16 +177,11 @@ function renderForm() {
 <template>
   <div>
     <!-- Modal Form -->
-    <VDialog
-      v-if="formModal"
-      :model-value="isDialogVisible"
-      persistent
-      class="v-dialog-sm"
-    >
+    <!-- prettier-ignore -->
+    <VDialog v-if="formModal" :model-value="isDialogVisible" persistent class="v-dialog-sm" >
       <DialogCloseBtn @click="handleCancel" />
-      <VCard
-        :title="title != null ? 'Formulario de ' + title.toLowerCase() : ''"
-      >
+      <!-- prettier-ignore -->
+      <VCard :title="title != null ? 'Formulario de ' + title.toLowerCase() : ''" >
         <VCardText>
           <component :is="renderForm" />
           <div class="d-flex justify-end gap-3 mt-4">

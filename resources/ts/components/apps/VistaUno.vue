@@ -22,7 +22,9 @@ interface TableHeader {
 }
 
 const emit = defineEmits<{
-  (event: "custom-edit", item: any): void;
+  (event: "customEdit", item: any): void;
+  (event: "customCreate", item: any): void;
+  (event: "customDelete", item: any): void;
 }>();
 
 const props = withDefaults(
@@ -31,17 +33,21 @@ const props = withDefaults(
     formSchema: FormSchemaField[]; // Esquema del formulario
     tableHeaders: TableHeader[]; // Esquema de la tabla
     formModal?: boolean; // Indica si el formulario será un modal
+    emitCreate?: boolean; // Indica si el formulario será un modal
     emitEdit?: boolean; // Indica si el formulario será un modal
+    emitDelete?: boolean; // Indica si el formulario será un modal
+    payloadDefault?: any; // Indica si se debe mostrar el título
     showTitle?: boolean; // Indica si se debe mostrar el título
-    apiEndpoints: {
-      fetch: string; // Endpoint para obtener datos
-      create: string; // Endpoint para crear un elemento
-      update: string; // Endpoint para actualizar un elemento
-      delete: string; // Endpoint para eliminar un elemento
+    apiEndpoints?: {
+      fetch?: string; // Endpoint para obtener datos
+      create?: string; // Endpoint para crear un elemento
+      update?: string; // Endpoint para actualizar un elemento
+      delete?: string; // Endpoint para eliminar un elemento
     };
   }>(),
   {
     showTitle: true, // Valor predeterminado
+    payloadDefault: null, // Valor predeterminado
   }
 );
 
@@ -53,13 +59,24 @@ const isDialogVisible = ref(false);
 
 async function fetchTableData() {
   try {
-    const response = await customRequest(props.apiEndpoints.fetch);
-    if (response.data.result && response.data.data) {
-      tableData.value = response.data.data.map((item: any) => ({
-        ...item,
-        estatus: item.estatus ? "Activo" : "Inactivo",
-        created_at: formatToAmPm(item.created_at),
-      }));
+    let url = props?.apiEndpoints?.fetch ?? "";
+    if (url != "") {
+      let payload = {};
+      if (props.payloadDefault) {
+        payload = { ...props.payloadDefault, ...payload };
+      }
+      const response = await customRequest({
+        url: url,
+        method: "POST",
+        data: payload,
+      });
+      if (response.data.result && response.data.data) {
+        tableData.value = response.data.data.map((item: any) => ({
+          ...item,
+          estatus: item.estatus ? "Activo" : "Inactivo",
+          created_at: formatToAmPm(item.created_at),
+        }));
+      }
     }
   } catch (error) {
     console.error("Error al obtener los datos:", error);
@@ -68,33 +85,50 @@ async function fetchTableData() {
 
 async function handleFormSubmit(data: Record<string, any>) {
   try {
-    await customRequest({
-      url: props.apiEndpoints.create,
-      method: "POST",
-      data,
-    });
-    await fetchTableData();
+    if (props.emitCreate) {
+      console.log("handleFormSubmit", { ...data });
+      emit("customCreate", { ...data });
+    } else {
+      let url = props?.apiEndpoints?.create ?? "";
+      let payload = { ...data };
+      if (props.payloadDefault) {
+        payload = { ...props.payloadDefault, ...payload };
+      }
+      await customRequest({
+        url: url,
+        method: "POST",
+        data: payload,
+      });
+      await fetchTableData();
+    }
   } catch (error) {
     console.error("Error al enviar el formulario:", error);
   }
 }
 
-async function handleDeleteItem(id: string | number) {
+async function handleDeleteItem(item: any) {
   try {
-    await customRequest({
-      url: `${props.apiEndpoints.delete}`,
-      method: "POST",
-      data: { id },
-    });
-    await fetchTableData();
+    if (props.emitCreate) {
+      // Emitir evento personalizado para manejar la eliminación
+      emit("customDelete", item);
+    } else {
+      let url = props?.apiEndpoints?.delete ?? "";
+      let payload = { id: item.id };
+      if (props.payloadDefault) {
+        payload = { ...props.payloadDefault, ...payload };
+      }
+      await customRequest({
+        url: url,
+        method: "POST",
+        data: payload,
+      });
+      await fetchTableData();
+    }
   } catch (error) {
     console.error("Error al eliminar el elemento:", error);
   }
 }
 
-function openModal() {
-  isDialogVisible.value = true;
-}
 function handleCancelarForm() {
   if (props.formModal) {
     isDialogVisible.value = !isDialogVisible.value;
@@ -118,7 +152,6 @@ function handleShowForm(item: Record<string, any> | null = null) {
 
 function formatToAmPm(dateString: string): string {
   const date = new Date(dateString);
-
   // Formatear la fecha (día/mes/año)
   const day = date.getDate().toString().padStart(2, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Los meses comienzan en 0
@@ -143,14 +176,14 @@ function handleActionClick({ action, item }: { action: string; item: any }) {
       confirmText: "Sí, eliminar",
       cancelText: "Cancelar",
       onConfirm: () => {
-        handleDeleteItem(item.id);
+        handleDeleteItem(item);
         showSuccessMessage({});
       },
       onCancel: () => {},
     });
   } else if (action === "Editar") {
     if (props.emitEdit) {
-      emit("custom-edit", item); // Emite el evento personalizado con la información del elemento
+      emit("customEdit", item); // Emite el evento personalizado con la información del elemento
     } else {
       // Comportamiento predeterminado
       let tmp = { ...item };

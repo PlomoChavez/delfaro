@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\CompaniaController;
+use App\Http\Controllers\CompaniaRepresentantesController;
 use App\Http\Controllers\CatalogosController;
 // @formatter:off
 // Actividades
@@ -42,6 +43,10 @@ Route::post('companias/get',     [CompaniaController::class, 'getAll'])->name('c
 Route::post('companias/create',  [CompaniaController::class, 'create'])->name('companias.create');
 Route::post('companias/update',  [CompaniaController::class, 'update'])->name('companias.update');
 Route::post('companias/delete',  [CompaniaController::class, 'delete'])->name('companias.delete');
+// companias-representantes
+Route::post('companias/representantes/get',     [CompaniaRepresentantesController::class, 'getAll'])->name('companias.getAll');
+Route::post('companias/representantes',         [CompaniaRepresentantesController::class, 'createOrUpdate'])->name('companias.update');
+Route::post('companias/representantes/delete',  [CompaniaRepresentantesController::class, 'delete'])->name('companias.delete');
 
 
 // usuarios

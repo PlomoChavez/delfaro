@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import FormFactory from "@/components/apps/FormFactory.vue";
+import CompaniasRepresentantes from "@/components/forms/CompaniasRepresentantesV1.vue";
+// prettier-ignore
+import { defineEmits, defineProps, ref, watch } from "vue";
 const props = withDefaults(
   defineProps<{
-    title: string; // Título del módulo
-    formSchema: any; // Esquema del formulario
+    data: any;
   }>(),
   {}
 );
@@ -13,7 +15,7 @@ const emit = defineEmits<{
 }>();
 
 const currentTab = ref("tab1");
-const formDataLocal = ref({});
+const formDataLocal = ref(props.data);
 
 // prettier-ignore
 const formSchema = [
@@ -30,6 +32,12 @@ const handleAtras = () => {
 const handleFormSubmit = () => {
   emit("atras");
 };
+
+// prettier-ignore
+watch(() => props.data , (newValue) => { formDataLocal.value = newValue } );
+onMounted(() => {
+  console.log("onMounted", props.data);
+});
 </script>
 
 <template>
@@ -50,13 +58,15 @@ const handleFormSubmit = () => {
         <VWindowItem :value="`tab1`">
           <FormFactory
             ref="formFactoryRef"
-            :title="''"
             :schema="formSchema"
             :modelValue="formDataLocal"
             :isDialogVisible="false"
             @submit="handleFormSubmit"
             @cancel="handleAtras"
           />
+        </VWindowItem>
+        <VWindowItem :value="`tab2`">
+          <CompaniasRepresentantes :data="formDataLocal" />
         </VWindowItem>
       </VWindow>
     </VCardText>
