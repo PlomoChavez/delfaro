@@ -18,4 +18,12 @@ class Usuario extends Model
         'tipo_id',
         'estatus',
     ];
+
+    /**
+     * Relación con el modelo TipoUsuario.
+     */
+    public function tipo()
+    {
+        return $this->belongsTo(TipoDeUsuario::class, 'tipo_id');
+    }
 }

@@ -13,7 +13,7 @@ class UsuarioController extends Controller
     public function getAll(Request $request)
     {
         try {
-            $usuarios = Usuario::all();
+            $usuarios = Usuario::with('tipo')->get();
             return response()->json([
                 'result' => true,
                 'message' => 'Registros obtenidos con éxito',
@@ -39,8 +39,8 @@ class UsuarioController extends Controller
                 'nombre' => 'required|string|max:255',
                 'correo' => 'required|string|unique:usuarios,correo',
                 // 'correo' => 'required|email|unique:usuarios,correo',
-                'tipo_id' => 'required|array', // Debe ser un array u objeto
-                'tipo_id.id' => 'required|integer', // Validar que tenga la propiedad `id`
+                'tipo' => 'required|array', // Debe ser un array u objeto
+                'tipo.id' => 'required|integer', // Validar que tenga la propiedad `id`
                 'password' => 'required|string|min:2',
                 'estatus' => 'required|boolean', // Debe ser un booleano
             ]);
@@ -52,8 +52,8 @@ class UsuarioController extends Controller
                 $data['estatus'] = ($data['estatus'] === 'Activo' || $data['estatus'] === true || $data['estatus'] === 'true') ? 1 : 0;
             }
             // Validar y transformar el campo 'tipo_id'
-            if (isset($data['tipo_id']) && (is_array($data['tipo_id']) || is_object($data['tipo_id']))) {
-                $data['tipo_id'] = $data['tipo_id']['id'] ?? null; // Extraer la propiedad 'id' si existe
+            if (isset($data['tipo']) && (is_array($data['tipo']) || is_object($data['tipo']))) {
+                $data['tipo_id'] = $data['tipo']['id'] ?? null; // Extraer la propiedad 'id' si existe
             }
             $data['password'] = bcrypt($data['password']);
 

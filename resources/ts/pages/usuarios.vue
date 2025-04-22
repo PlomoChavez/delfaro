@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-import FormEdit from "@/components/forms/UsuarioFormEdit.vue";
+import ManagerUsuario from "@/components/managers/ManagerUsuario.vue";
 // prettier-ignore
 const formSchema = [
   { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
   { label: "Correo electronico", type: "text", model: "correo", placeholder: "Ingresa el nombre" },
   { label: "Contraseña", type: "text", model: "password", placeholder: "Ingresa el nombre" },
-  { label: "Tipo de usuario", type: "select", model: "tipo_id", placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios" },
+  { label: "Tipo de usuario", type: "select", model: "tipo", placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios" },
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
 
@@ -28,7 +28,8 @@ const apiEndpoints = {
   delete: "/api/usuarios/delete", // Endpoint para eliminar un elemento
 };
 
-const handleActionsEdit = (data: any) => {
+const handleActionsEdit = (dataRow: any) => {
+  data.value = { ...dataRow };
   showFormEdit.value = true;
   console.log("handleActionsEdit", data);
 };
@@ -38,17 +39,19 @@ const handleCancelar = () => {
 </script>
 
 <template>
-  <h1>Usuarios</h1>
-  <FormEdit v-if="showFormEdit" :data="data" @cancelar="handleCancelar" />
-  <CrudManager
-    v-else
-    title="Usuarios"
-    :emitEdit="true"
-    :formModal="true"
-    :show-title="false"
-    :formSchema="formSchema"
-    :tableHeaders="tableHeaders"
-    :apiEndpoints="apiEndpoints"
-    @customEdit="handleActionsEdit"
-  />
+  <!-- prettier-ignore -->
+  <ManagerUsuario v-if="showFormEdit" :data="data" @cancelar="handleCancelar" />
+  <div v-else>
+    <h1>Usuarios</h1>
+    <CrudManager
+      title="Usuarios"
+      :emitEdit="true"
+      :formModal="true"
+      :show-title="false"
+      :formSchema="formSchema"
+      :tableHeaders="tableHeaders"
+      :apiEndpoints="apiEndpoints"
+      @customEdit="handleActionsEdit"
+    />
+  </div>
 </template>

@@ -36,6 +36,7 @@ const emit = defineEmits<{
 // Crea un modelo local reactivo
 const formLocal: any = reactive(props.modelValue || {});
 const schemaLocal: any = ref({});
+const showForm: any = ref(false);
 // Sincroniza los cambios entre `props.modelValue` y `formLocal`
 watch(
   () => props.modelValue,
@@ -124,9 +125,16 @@ onMounted(() => {
     if (field.type === "select" && field.catalogo) {
       const catalogoData = await obtenerCatalogo(field);
       field.options = catalogoData;
+      setTimeout(() => {}, 100);
     } else if (field.type === "select" && field.options) {
       field.options = field.options;
     }
+
+    if (field.type === "select") {
+      console.log("field ", field);
+      console.log("formLocal ", formLocal[field.model]);
+    }
+
     if (field.type === "switch") {
       if (formLocal[field.model]) {
         if (field.options) {
@@ -149,13 +157,15 @@ onMounted(() => {
     }
   });
   schemaLocal.value = tmp;
+  setTimeout(() => {}, 500);
+  showForm.value = true;
 });
 </script>
 
 <template>
   <div>
     <!-- Inline Form -->
-    <div>
+    <div v-if="showForm">
       <!-- Renderiza el formulario -->
       <div class="form-group mb-3">
         <!-- Render dynamic fields -->
@@ -176,6 +186,7 @@ onMounted(() => {
           <!-- Campo select -->
           <template v-else-if="field.type === 'select'">
             <label :for="field.model"> {{ field.label }} </label>
+            <pre :for="field.model"> {{ formLocal[field.model] }} </pre>
             <VSelect
               v-bind="{
                 ...$attrs,

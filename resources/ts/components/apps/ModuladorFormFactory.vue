@@ -18,6 +18,7 @@ interface Field {
 const props = withDefaults(
   defineProps<{
     title?: any;
+    showTitle?: boolean;
     schema: Field[];
     modelValue: Record<string, any>;
     formModal?: boolean;
