@@ -12,17 +12,25 @@ interface Field {
 
 const props = withDefaults(
   defineProps<{
-    title?: any; // Título del formulario
-    schema: Field[]; // Esquema del formulario
-    modelValue: Record<string, any>; // Modelo reactivo
-    formModal?: boolean; // Indica si el formulario será un modal
-    isDialogVisible: boolean; // Controla la visibilidad del modal desde el padre
-    formLive?: boolean; // Si es 1, emite los valores en tiempo real
+    title?: any;
+    schema: Field[];
+    modelValue: Record<string, any>;
+    formModal?: boolean;
+    isDialogVisible: boolean;
+    formLive?: boolean;
+    isDisabled?: boolean;
+    showButtonsAction?: boolean;
+    textButtonCancel?: string | null;
+    textButtonSubmit?: string | null;
   }>(),
   {
-    title: null, // Valor predeterminado
-    formModal: false, // Valor predeterminado
-    formLive: false, // Valor predeterminado
+    title: null,
+    formModal: false,
+    formLive: false,
+    isDisabled: false,
+    showButtonsAction: true,
+    textButtonCancel: null,
+    textButtonSubmit: null,
   }
 );
 
@@ -131,8 +139,12 @@ onMounted(() => {
     }
 
     if (field.type === "select") {
-      console.log("field ", field);
-      console.log("formLocal ", formLocal[field.model]);
+      // prettier-ignore
+      formLocal[field.model] = {
+        value: formLocal[field.model].id || formLocal[field.model].value || "",
+        label:formLocal[field.model].label || formLocal[field.model].nombre || "",
+        ...formLocal[field.model], // Mantener otras propiedades si existen
+      };
     }
 
     if (field.type === "switch") {
@@ -150,9 +162,6 @@ onMounted(() => {
           formLocal[field.model] =
             formLocal[field.model] == "Activo" ? true : false;
         }
-        console.log("field", [field]);
-        // formLocal[field.model] = field.options[0].value;
-        console.log("field", formLocal[field.model]);
       }
     }
   });
@@ -164,6 +173,9 @@ onMounted(() => {
 
 <template>
   <div>
+    <div v-if="!showForm" class="d-flex justify-center align-center">
+      <h1 class="text-center my-5">Cargando formulario ...</h1>
+    </div>
     <!-- Inline Form -->
     <div v-if="showForm">
       <!-- Renderiza el formulario -->
@@ -179,6 +191,7 @@ onMounted(() => {
               variant="outlined"
               :id="field.model"
               v-model="formLocal[field.model]"
+              :disabled="props.isDisabled || field.disabled"
               @input="handleInputChange(field.model, $event.target.value)"
             />
           </template>
@@ -186,28 +199,13 @@ onMounted(() => {
           <!-- Campo select -->
           <template v-else-if="field.type === 'select'">
             <label :for="field.model"> {{ field.label }} </label>
-            <pre :for="field.model"> {{ formLocal[field.model] }} </pre>
+            <!-- prettier-ignore -->
             <VSelect
-              v-bind="{
-                ...$attrs,
-                class: null,
-                variant: 'outlined',
-                id: field.model,
-                menuProps: {
-                  contentClass: [
-                    'app-inner-list',
-                    'app-select__content',
-                    'v-select__content',
-                    field.multiple ? 'v-list-select-multiple' : '',
-                  ],
-                },
-              }"
               :items="field.options || []"
-              :value="formLocal[field.model]"
+              :value="formLocal[field.model]?.label ?? ''"
               item-title="label"
-              @update:modelValue="
-                (selected) => handleSelectChange(field, selected)
-              "
+              :disabled="props.isDisabled || field.disabled"
+              @update:modelValue=" (selected) => handleSelectChange(field, selected) "
             >
               <template v-for="(_, label) in $slots" v-slot:[label]="slotProps">
                 <slot :name="label" v-bind="slotProps || {}" />
@@ -221,6 +219,7 @@ onMounted(() => {
             <VSwitch
               v-model="formLocal[field.model]"
               :id="field.model"
+              :disabled="props.isDisabled || field.disabled"
               :label="
                 (field.options || [
                   { value: true, label: 'Activo' },
@@ -232,15 +231,16 @@ onMounted(() => {
           </div>
         </template>
       </div>
-      <div class="d-flex justify-end gap-3 mt-4">
-        <VBtn @click.prevent="handleCancel" color="error">
+      <div v-if="showButtonsAction" class="d-flex justify-end gap-3 mt-4">
+        <!-- prettier-ignore -->
+        <VBtn variant="outlined" color="secondary" @click.prevent="handleCancel"  > 
           <VIcon start icon="tabler-x" />
-          Cancelar
+          {{ props.textButtonCancel || "Cancelar" }} 
         </VBtn>
 
         <VBtn @click="handleSubmit" type="submit" color="success">
           <VIcon start icon="tabler-check" />
-          Enviar
+          {{ props.textButtonSubmit || "Enviar" }}
         </VBtn>
       </div>
     </div>

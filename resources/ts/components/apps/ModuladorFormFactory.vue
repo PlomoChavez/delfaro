@@ -19,16 +19,20 @@ const props = withDefaults(
   defineProps<{
     title?: any;
     showTitle?: boolean;
-    schema: Field[];
+    schema: any[];
     modelValue: Record<string, any>;
     formModal?: boolean;
     isDialogVisible: boolean;
+    isDisabled?: boolean;
     formLive?: boolean;
+    showButtonsAction?: boolean;
   }>(),
   {
     title: null,
     formModal: false,
     formLive: false,
+    isDisabled: false,
+    showButtonsAction: true,
   }
 );
 
@@ -66,6 +70,8 @@ function handleCancel() {
           :schema="props.schema"
           :modelValue="props.modelValue"
           :isDialogVisible="props.isDialogVisible"
+          :isDisabled="props.isDisabled"
+          :showButtonsAction="props.showButtonsAction"
           @update:isDialogVisible="handleCancel"
           @submit="handleSubmit"
            />
@@ -81,6 +87,8 @@ function handleCancel() {
         :modelValue="props.modelValue"
         :isDialogVisible="props.isDialogVisible"
         @update:isDialogVisible="handleCancel"
+        :isDisabled="props.isDisabled"
+        :showButtonsAction="props.showButtonsAction"
         @submit="handleSubmit"
       />
     </div>

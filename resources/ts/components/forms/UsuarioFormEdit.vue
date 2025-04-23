@@ -43,8 +43,19 @@ const apiEndpoints = {
 };
 
 const handleActionsEdit = (dataRow: any) => {
-  data.value = { ...dataRow };
-  console.log("handleActionsEdit", data);
+  let tmp = { ...dataRow };
+  tmp.tipo = {
+    id: 1,
+    label: "Director",
+    estatus: 1,
+    created_at: "2025-04-20 00:48:28",
+    updated_at: "2025-04-20 00:48:28",
+    deleted_at: null,
+  };
+
+  data.value = { ...tmp };
+
+  console.log("handleActionsEdit", tmp);
   showFormEdit.value = true;
 };
 

@@ -2,6 +2,9 @@
 import { defineProps, ref } from "vue";
 
 const currentTab = ref("item1");
+const modalContrasenia = ref(false);
+const formDisabled = ref(true);
+const dataContrasenia = ref({});
 
 // prettier-ignore
 const props = withDefaults(
@@ -14,9 +17,28 @@ const formSchema = [
   { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
   { label: "Correo electronico", type: "text", model: "correo", placeholder: "Ingresa el nombre" },
   { label: "Contraseña", type: "text", model: "password", placeholder: "Ingresa el nombre" },
-  { label: "Tipo de usuario", type: "select", model: "tipo", placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios" },
+  { label: "Tipo de usuario", type: "select", model: "tipo", placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios"},
   { label: "Estatus", type: "switch", model: "estatus" },
 ];
+// prettier-ignore
+const formSchemaContrasenia = [
+  { label: "Nombre",              type: "text", model: "nombre",   placeholder: "Ingresa el nombre", disabled:true},
+  { label: "Tipo de usuario",     type: "text", model: "tipo",     placeholder: "Ingresa el nombre", disabled:true},
+  { label: "Correo electronico",  type: "text", model: "correo",   placeholder: "Ingresa el nombre", disabled:true},
+  { label: "Contraseña",          type: "text", model: "password", placeholder: "Ingresa el nombre" },
+];
+
+const handleShowModalContrasenia = () => {
+  dataContrasenia.value = {
+    ...props.data,
+    tipo: props.data.tipo.label,
+    password: "",
+  };
+  modalContrasenia.value = true;
+};
+
+// prettier-ignore
+const handleEditForm = () => { formDisabled.value = !formDisabled.value; };
 </script>
 
 <template>
@@ -40,8 +62,34 @@ const formSchema = [
             :isDialogVisible="false"
             :schema="formSchema"
             :showTitle="false"
+            :isDisabled="formDisabled"
+            :showButtonsAction="!formDisabled"
             :modelValue="props.data"
+            @cancel="formDisabled = true"
           />
+          <ModuladorFormFactory
+            :title="'Cambiar contraseña'"
+            :isDialogVisible="modalContrasenia"
+            :schema="formSchemaContrasenia"
+            :showTitle="false"
+            :formModal="true"
+            :modelValue="dataContrasenia"
+            @update:isDialogVisible="modalContrasenia = false"
+            @cancel="modalContrasenia = false"
+          />
+
+          <div v-if="formDisabled" class="d-flex justify-end gap-3 mt-4">
+            <!-- prettier-ignore -->
+            <VBtn color="secondary" @click="handleShowModalContrasenia">
+              <VIcon start icon="tabler-key" />
+              Cambiar contraseña
+            </VBtn>
+
+            <VBtn color="warning" @click="handleEditForm">
+              <VIcon start icon="tabler-edit" />
+              Editar
+            </VBtn>
+          </div>
           <!-- @submit="handleFormSubmit" -->
         </VWindowItem>
         <VWindowItem :value="`item2`">
