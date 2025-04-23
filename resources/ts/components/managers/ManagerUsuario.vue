@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import UsuarioClavesV1 from "@/components/forms/UsuarioClavesV1.vue";
+import UsuarioSubagentesV1 from "@/components/forms/UsuarioSubagentesV1.vue";
+import UsuariosAsistentesV1 from "@/components/forms/UsuariosAsistentesV1.vue";
 import { defineProps, ref } from "vue";
 
 const currentTab = ref("item1");
@@ -12,6 +15,9 @@ const props = withDefaults(
     data: any;
   }>(),{});
 
+const emit = defineEmits<{
+  (event: "cancelar"): void;
+}>();
 // prettier-ignore
 const formSchema = [
   { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
@@ -39,11 +45,13 @@ const handleShowModalContrasenia = () => {
 
 // prettier-ignore
 const handleEditForm = () => { formDisabled.value = !formDisabled.value; };
+// prettier-ignore
+const handleBack = () => { emit("cancelar"); };
 </script>
 
 <template>
   <div class="d-flex justify-start align-center mb-5">
-    <VIcon start icon="tabler-arrow-left cursor-pointer" />
+    <VIcon start icon="tabler-arrow-left cursor-pointer" @click="handleBack" />
     <h1 class="ml-4">{{ props.data.nombre }}</h1>
   </div>
   <VCard>
@@ -93,13 +101,13 @@ const handleEditForm = () => { formDisabled.value = !formDisabled.value; };
           <!-- @submit="handleFormSubmit" -->
         </VWindowItem>
         <VWindowItem :value="`item2`">
-          <h1>Claves del usuario</h1>
+          <UsuarioClavesV1 :data="props.data" />
         </VWindowItem>
         <VWindowItem :value="`item3`">
-          <h1>SubAgentes del usuario</h1>
+          <UsuarioSubagentesV1 :data="props.data" />
         </VWindowItem>
         <VWindowItem :value="`item4`">
-          <h1>Asistentes del usuario</h1>
+          <UsuariosAsistentesV1 :data="props.data" />
         </VWindowItem>
       </VWindow>
     </VCardText>

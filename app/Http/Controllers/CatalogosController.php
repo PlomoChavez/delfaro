@@ -29,6 +29,9 @@ class CatalogosController extends Controller
                 case 'tipos-vencimiento':
                     $tabla = 'tipos_de_vencimiento';
                     break;
+                case 'companias':
+                    $tabla = 'compania';
+                    break;
                 default:
                     return response()->json([
                         'result' => false,

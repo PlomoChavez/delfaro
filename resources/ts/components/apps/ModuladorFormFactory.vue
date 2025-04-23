@@ -45,13 +45,11 @@ const emit = defineEmits<{
 
 // prettier-ignore
 function handleSubmit(data: any) {
-  console.log("Enviando datos:", data);
   emit("submit", data);
   emit("update:isDialogVisible", false);
 }
 
 function handleCancel() {
-  console.log("Cancelando...");
   emit("cancel");
   emit("update:isDialogVisible", false);
 }
@@ -72,8 +70,8 @@ function handleCancel() {
           :isDialogVisible="props.isDialogVisible"
           :isDisabled="props.isDisabled"
           :showButtonsAction="props.showButtonsAction"
-          @update:isDialogVisible="handleCancel"
           @submit="handleSubmit"
+          @cancel="handleCancel"
            />
         </VCardText>
       </VCard>
@@ -86,10 +84,10 @@ function handleCancel() {
         :schema="props.schema"
         :modelValue="props.modelValue"
         :isDialogVisible="props.isDialogVisible"
-        @update:isDialogVisible="handleCancel"
         :isDisabled="props.isDisabled"
         :showButtonsAction="props.showButtonsAction"
         @submit="handleSubmit"
+        @cancel="handleCancel"
       />
     </div>
   </div>

@@ -3,8 +3,9 @@ import DataTable from "@/components/apps/DataTable.vue";
 import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
 import {
   showDeleteItem,
+  showErrorMessage,
   showSuccessMessage,
-} from "@/components/apps/sweetAlerts/sweetDeleteItem";
+} from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
 import { onBeforeMount, ref } from "vue";
 
@@ -85,21 +86,29 @@ async function fetchTableData() {
 async function handleFormSubmit(data: Record<string, any>) {
   try {
     if (props.emitCreate) {
-      console.log("handleFormSubmit", { ...data });
       emit("customCreate", { ...data });
     } else {
-      console.log("handleFormSubmit -> VistaUno ", { ...data });
       let url = props?.apiEndpoints?.create ?? "";
-      console.log("url", url);
       let payload = { ...data };
       if (props.payloadDefault) {
         payload = { ...props.payloadDefault, ...payload };
       }
-      await customRequest({
+      let response = await customRequest({
         url: url,
         method: "POST",
         data: payload,
       });
+      if (response.data.result) {
+        showSuccessMessage({
+          title: "Guardado",
+          message: "El elemento ha sido guardado correctamente.",
+        });
+      } else {
+        showErrorMessage({
+          title: "Error",
+          message: response.data.message,
+        });
+      }
       await handleCancelarForm();
       await fetchTableData();
     }
@@ -119,11 +128,22 @@ async function handleDeleteItem(item: any) {
       if (props.payloadDefault) {
         payload = { ...props.payloadDefault, ...payload };
       }
-      await customRequest({
+      let response = await customRequest({
         url: url,
         method: "POST",
         data: payload,
       });
+      if (response.data.result) {
+        showSuccessMessage({
+          title: "Eliminado",
+          message: "El elemento ha sido eliminado correctamente.",
+        });
+      } else {
+        showSuccessMessage({
+          title: "Error",
+          message: "No se pudo eliminar el elemento.",
+        });
+      }
       await fetchTableData();
     }
   } catch (error) {
@@ -133,7 +153,7 @@ async function handleDeleteItem(item: any) {
 
 function handleCancelarForm() {
   if (props.formModal) {
-    isDialogVisible.value = !isDialogVisible.value;
+    isDialogVisible.value = false;
   } else {
     showForm.value = !showForm.value;
   }
@@ -179,7 +199,6 @@ function handleActionClick({ action, item }: { action: string; item: any }) {
       cancelText: "Cancelar",
       onConfirm: () => {
         handleDeleteItem(item);
-        showSuccessMessage({});
       },
       onCancel: () => {},
     });

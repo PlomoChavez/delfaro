@@ -95,4 +95,41 @@ export function showSuccessMessage({
   });
 }
 
+export function showErrorMessage({
+  title = "Eliminado",
+  message = "El elemento ha sido eliminado con éxito.",
+  confirmText = "Okay ..!!", // Solo el texto es personalizable
+}: {
+  title?: string;
+  message?: string;
+  confirmText?: string; // Texto personalizable para el botón de confirmación
+}) {
+  Swal.fire({
+    title,
+    html: `
+      <p style="
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 0px;
+        margin-bottom: 0px;
+      ">
+        ${message}
+      </p>
+    `,
+    icon: "error",
+    showConfirmButton: true,
+    customClass: {
+      confirmButton: "custom-confirm-button", // Clase personalizada para el botón
+    },
+    didRender: () => {
+      const confirmButton = document.querySelector(".custom-confirm-button");
+      if (confirmButton) {
+        confirmButton.innerHTML = `<span style="font-weight: bold; color: white;">${confirmText}</span>`; // Solo el texto es dinámico
+      }
+    },
+    confirmButtonColor: "#dc3545", // Verde para el botón de éxito
+  });
+}
+
 // Swal.fire("Eliminado", "El elemento ha sido eliminado.", "success");

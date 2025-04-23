@@ -2,7 +2,7 @@
 import FormFactory from "@/components/apps/FormFactory.vue";
 import CompaniasRepresentantes from "@/components/forms/CompaniasRepresentantesV1.vue";
 
-import { showSuccessMessage } from "@/components/apps/sweetAlerts/sweetDeleteItem";
+import { showSuccessMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
 // prettier-ignore
 import { defineEmits, defineProps, ref, watch } from "vue";

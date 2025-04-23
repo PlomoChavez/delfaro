@@ -33,11 +33,6 @@ Route::post('catalogo/tipo-usuario/get',     function (Request $request) { retur
 Route::post('catalogo/tipo-usuario/delete',  function (Request $request) { return app(CatalogoController::class)->delete($request, 'tipos_de_usuarios'); })->name('catalogo.tipo-usuario.delete');
 Route::post('catalogo/tipo-usuario',         function (Request $request) { return app(CatalogoController::class)->createOrUpdate($request, 'tipos_de_usuarios'); })->name('catalogo.tipo-usuario.delete');
 
-// usuarios
-Route::post('usuarios/get',     [UsuarioController::class, 'getAll'])->name('usuarios.getAll');
-Route::post('usuarios/create',  [UsuarioController::class, 'create'])->name('usuarios.create');
-Route::post('usuarios/update',  [UsuarioController::class, 'update'])->name('usuarios.update');
-Route::post('usuarios/delete',  [UsuarioController::class, 'delete'])->name('usuarios.delete');
 // companias
 Route::post('companias/get',     [CompaniaController::class, 'getAll'])->name('companias.getAll');
 Route::post('companias/create',  [CompaniaController::class, 'create'])->name('companias.create');
@@ -48,9 +43,27 @@ Route::post('companias/representantes/get',     [CompaniaRepresentantesControlle
 Route::post('companias/representantes',         [CompaniaRepresentantesController::class, 'createOrUpdate'])->name('companias.update');
 Route::post('companias/representantes/delete',  [CompaniaRepresentantesController::class, 'delete'])->name('companias.delete');
 
+// usuarios
+Route::post('usuarios/get',     [UsuarioController::class, 'getAll'])->name('usuarios.getAll');
+Route::post('usuarios/create',  [UsuarioController::class, 'create'])->name('usuarios.create');
+Route::post('usuarios/update',  [UsuarioController::class, 'update'])->name('usuarios.update');
+Route::post('usuarios/delete',  [UsuarioController::class, 'delete'])->name('usuarios.delete');
+
+// usuarios-claves
+Route::post('usuario/claves/get',     [UsuarioController::class, 'getAllClaves'])->name('usuariosClaves.getAll');
+Route::post('usuario/claves',         [UsuarioController::class, 'createOrUpdateClaves'])->name('usuariosClaves.create');
+Route::post('usuario/claves',         [UsuarioController::class, 'createOrUpdateClaves'])->name('usuariosClaves.update');
+Route::post('usuario/claves/delete',  [UsuarioController::class, 'deleteClaves'])->name('usuariosClaves.delete');
+
+// usuarios-team
+Route::post('usuario/team/get',     [UsuarioController::class, 'getAllTeam'])->name('usuariosTeam.getAll');
+Route::post('usuario/team',         [UsuarioController::class, 'createOrUpdateTeam'])->name('usuariosTeam.create');
+Route::post('usuario/team',         [UsuarioController::class, 'createOrUpdateTeam'])->name('usuariosTeam.update');
+Route::post('usuario/team/delete',  [UsuarioController::class, 'deleteTeam'])->name('usuariosTeam.delete');
 
 // usuarios
-Route::post('catalogos/tipos-usuarios',   function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-usuarios'); })->name('catalogos.getCatalogo.tipos-usuarios');
+Route::post('catalogos/tipos-usuarios', function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-usuarios'); })->name('catalogos.getCatalogo.tipos-usuarios');
+Route::post('catalogos/companias',      function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'companias'); })->name('catalogos.getCatalogo.companias');
 
 
 // @formatter:on

@@ -15,7 +15,8 @@ const data = ref(null); // Referencia al componente FormFactory
 
 const tableHeaders = [
   { title: "ID", key: "id" },
-  { title: "Label", key: "label" },
+  { title: "Nombre", key: "nombre" },
+  { title: "Tipo", key: "tipo.nombre" },
   { title: "Estatus", key: "estatus" },
   { title: "Creación", key: "created_at" },
 ];

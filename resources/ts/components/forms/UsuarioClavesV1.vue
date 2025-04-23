@@ -10,20 +10,18 @@ const props = withDefaults(
   {}
 );
 
-const title = ref("Representantes"); // Referencia al componente FormFactory
+const title = ref("Claves de compañias"); // Referencia al componente FormFactory
 const showFormEdit = ref(false); // Referencia al componente FormFactory
 const data = ref(null); // Referencia al componente FormFactory
 const payloadDefault = ref({
-  compania_id: props.data.id,
+  usuario_id: props.data.id,
 }); // Referencia al componente FormFactory
 
 // prettier-ignore
 const formSchema = [
-  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
-  { label: "Telefono", type: "text", model: "telefono", placeholder: "Ingresa el nombre" },
-  { label: "Correo electronico", type: "text", model: "correo", placeholder: "Ingresa el nombre" },
-  { label: "Cargo", type: "text", model: "cargo", placeholder: "Ingresa el nombre" },
-  { label: "Estatus", type: "switch", model: "estatus" },
+  { label: "Clave",     model: "clave",   type: "text",    placeholder: "Ingresa la clave del agente" },
+  { label: "Compañia",  model: "compania", type: "select",  placeholder: "Selecciona una compañia", catalogo: "companias", config: { label: "nombreCorto", } },
+  { label: "Estatus",   model: "estatus" , type: "switch"},
 ];
 
 const tableHeaders = [
@@ -34,12 +32,12 @@ const tableHeaders = [
   { title: "Creación", key: "created_at" },
 ];
 
+// prettier-ignore
 const apiEndpoints = {
-  // fetch: "/api/test", // Endpoint para obtener datos
-  fetch: "/api/companias/representantes/get", // Endpoint para obtener datos
-  create: "/api/companias/representantes", // Endpoint para crear un elemento
-  update: "/api/companias/representantes", // Endpoint para actualizar un elemento
-  delete: "/api/companias/representantes/delete", // Endpoint para eliminar un elemento
+  fetch:  "/api/usuario/claves/get", // Endpoint para obtener datos
+  create: "/api/usuario/claves", // Endpoint para crear un elemento
+  update: "/api/usuario/claves", // Endpoint para actualizar un elemento
+  delete: "/api/usuario/claves/delete", // Endpoint para eliminar un elemento
 };
 
 const handleActionsEdit = (dataRow: any) => {
