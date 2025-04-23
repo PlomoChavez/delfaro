@@ -30,7 +30,6 @@ const apiEndpoints = {
 
 const handleActionsEdit = (dataRow: any) => {
   data.value = { ...dataRow };
-  console.log("handleActionsEdit", data);
   showFormEdit.value = true;
 };
 

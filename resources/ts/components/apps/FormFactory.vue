@@ -149,8 +149,12 @@ onMounted(async () => {
             formLocal[field.model] = false;
           }
         } else {
-          formLocal[field.model] =
-            formLocal[field.model] == "Activo" ? true : false;
+          // prettier-ignore
+          if(typeof formLocal[field.model] == "string"){
+            formLocal[field.model] = formLocal[field.model].toLowerCase() === "activo" || formLocal[field.model] === "1";
+          } else {
+            formLocal[field.model] = formLocal[field.model] === true || formLocal[field.model] === 1;
+          }
         }
       }
     }
@@ -204,7 +208,9 @@ onMounted(async () => {
           </template>
 
           <!-- Campo switch -->
-          <div v-else-if="field.type === 'switch'" class="form-group">
+          <!-- prettier-ignore -->
+
+          <div v-else-if="field.type === 'switch'" >
             <label :for="field.model"> {{ field.label }} </label>
             <VSwitch
               v-model="formLocal[field.model]"

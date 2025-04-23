@@ -26,8 +26,8 @@ const formSchema = [
 
 const tableHeaders = [
   { title: "ID", key: "id" },
-  { title: "Nombre", key: "nombre" },
-  { title: "Cargo", key: "cargo" },
+  { title: "Clave Agente", key: "clave" },
+  { title: "Compañia", key: "compania.nombreCorto" },
   { title: "Estatus", key: "estatus" },
   { title: "Creación", key: "created_at" },
 ];
@@ -42,7 +42,6 @@ const apiEndpoints = {
 
 const handleActionsEdit = (dataRow: any) => {
   data.value = { ...dataRow };
-  console.log("handleActionsEdit", data);
   showFormEdit.value = true;
 };
 

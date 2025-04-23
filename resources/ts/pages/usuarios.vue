@@ -16,7 +16,7 @@ const data = ref(null); // Referencia al componente FormFactory
 const tableHeaders = [
   { title: "ID", key: "id" },
   { title: "Nombre", key: "nombre" },
-  { title: "Tipo", key: "tipo.nombre" },
+  { title: "Tipo", key: "tipo.label" },
   { title: "Estatus", key: "estatus" },
   { title: "Creación", key: "created_at" },
 ];
@@ -32,7 +32,6 @@ const apiEndpoints = {
 const handleActionsEdit = (dataRow: any) => {
   data.value = { ...dataRow };
   showFormEdit.value = true;
-  console.log("handleActionsEdit", data);
 };
 const handleCancelar = () => {
   showFormEdit.value = false;

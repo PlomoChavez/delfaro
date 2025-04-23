@@ -62,6 +62,11 @@ function exportData() {
   console.log("Exportar datos:", props.data);
   // Aquí puedes implementar la lógica para exportar los datos (CSV, Excel, etc.)
 }
+
+function getNestedValue(obj: any, key: string): any {
+  return key.split(".").reduce((acc, curr) => acc && acc[curr], obj);
+}
+
 watch(selected, () => {
   const selectedById = props.data.filter((item) =>
     selected.value.includes(item.id)
@@ -116,8 +121,10 @@ watch(selected, () => {
 
       <!-- Datos dinámicos -->
       <!-- prettier-ignore -->
-      <template v-for="header in props.headers" :key="header.key" #[`item.${header.key}`]="{ item }" >
-        {{ item[header.key] }}
+      <template v-for="header in props.headers" :key="header.key" #[`item.${header.key}`]="{ item }">
+        <span>
+          {{ getNestedValue(item, header.key) || '' }}
+        </span>
       </template>
 
       <!-- Acciones -->
