@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import UsuarioClavesV1 from "@/components/forms/UsuarioClavesV1.vue";
 import UsuarioSubagentesV1 from "@/components/forms/UsuarioSubagentesV1.vue";
-import UsuariosAsistentesV1 from "@/components/forms/UsuariosAsistentesV1.vue";
 import { defineProps, ref } from "vue";
 
 const currentTab = ref("item1");
@@ -58,8 +57,7 @@ const handleBack = () => { emit("cancelar"); };
     <VTabs v-model="currentTab">
       <VTab>Detalles del usario</VTab>
       <VTab>Claves</VTab>
-      <VTab>SubAgentes</VTab>
-      <VTab>Asistentes</VTab>
+      <VTab>Permisos</VTab>
     </VTabs>
 
     <VCardText>
@@ -105,9 +103,6 @@ const handleBack = () => { emit("cancelar"); };
         </VWindowItem>
         <VWindowItem :value="`item3`">
           <UsuarioSubagentesV1 :data="props.data" />
-        </VWindowItem>
-        <VWindowItem :value="`item4`">
-          <UsuariosAsistentesV1 :data="props.data" />
         </VWindowItem>
       </VWindow>
     </VCardText>

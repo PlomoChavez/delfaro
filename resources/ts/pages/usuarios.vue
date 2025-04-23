@@ -3,13 +3,12 @@ import CrudManager from "@/components/apps/VistaUno.vue";
 import ManagerUsuario from "@/components/managers/ManagerUsuario.vue";
 // prettier-ignore
 const formSchema = [
-  { label: "Nombre", type: "text", model: "nombre", placeholder: "Ingresa el nombre" },
-  { label: "Correo electronico", type: "text", model: "correo", placeholder: "Ingresa el nombre" },
-  { label: "Contraseña", type: "text", model: "password", placeholder: "Ingresa el nombre" },
-  { label: "Tipo de usuario", type: "select", model: "tipo", placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios" },
-  { label: "Estatus", type: "switch", model: "estatus" },
+  { label: "Nombre",              type: "text",   model: "nombre",    placeholder: "Ingresa el nombre" },
+  { label: "Correo electronico",  type: "text",   model: "correo",    placeholder: "Ingresa el nombre" },
+  { label: "Contraseña",          type: "text",   model: "password",  placeholder: "Ingresa el nombre" },
+  { label: "Tipo de usuario",     type: "select", model: "tipo",      placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios"},
+  { label: "Estatus",             type: "switch", model: "estatus" },
 ];
-
 const showFormEdit = ref(false); // Referencia al componente FormFactory
 const data = ref(null); // Referencia al componente FormFactory
 
