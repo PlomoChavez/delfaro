@@ -39,6 +39,7 @@ const props = withDefaults(
     emitDelete?: boolean; // Indica si el formulario será un modal
     payloadDefault?: any; // Indica si se debe mostrar el título
     showTitle?: boolean; // Indica si se debe mostrar el título
+    filtroAgrupador?: string | null; // Indica si se debe mostrar el título
     apiEndpoints?: {
       fetch?: string; // Endpoint para obtener datos
       create?: string; // Endpoint para crear un elemento
@@ -47,6 +48,7 @@ const props = withDefaults(
     };
   }>(),
   {
+    filtroAgrupador: null,
     showTitle: true, // Valor predeterminado
     payloadDefault: null, // Valor predeterminado
   }
@@ -55,6 +57,9 @@ const props = withDefaults(
 const showForm = ref(false); // Referencia al componente FormFactory
 const formData = ref<Record<string, any>>({});
 const tableData = ref<any[]>([]);
+const respaldoData = ref<any[]>([]);
+const filtroAgrupador = ref<any[]>([]);
+const filtroAgrupadorSelected = ref(null);
 const isDialogVisible = ref(false);
 
 async function fetchTableData() {
@@ -71,11 +76,17 @@ async function fetchTableData() {
         data: payload,
       });
       if (response.data.result && response.data.data) {
-        tableData.value = response.data.data.map((item: any) => ({
+        let tmp = response.data.data.map((item: any) => ({
           ...item,
           estatus: item.estatus ? "Activo" : "Inactivo",
           created_at: formatToAmPm(item.created_at),
         }));
+
+        tableData.value = tmp;
+        respaldoData.value = tmp;
+        if (props.filtroAgrupador) {
+          processFiltroagrupador(tmp);
+        }
       }
     }
   } catch (error) {
@@ -163,6 +174,41 @@ function handleNewItem() {
   handleShowForm(null);
 }
 
+function processFiltroagrupador(dataHaProcesar: any) {
+  const filtroAgrupadorProps = props.filtroAgrupador ?? "";
+  const uniqueOptions = Array.from(
+    new Set(
+      dataHaProcesar
+        .map((item: any) =>
+          filtroAgrupadorProps.split(".").reduce((acc, key) => acc?.[key], item)
+        )
+        .filter((value: any) => value) // Filtrar valores no nulos o no definidos
+    )
+  );
+  filtroAgrupador.value = ["Todos", ...uniqueOptions];
+  handleSelectFiltroAgrupador("Todos");
+}
+
+function handleSelectFiltroAgrupador(item: any) {
+  filtroAgrupadorSelected.value = item;
+
+  const filtroAgrupadorProps = props.filtroAgrupador ?? "";
+
+  // Si se selecciona "Todos", mostrar todos los registros
+  if (item === "Todos") {
+    tableData.value = [...respaldoData.value];
+    return;
+  }
+
+  // Filtrar los registros según el valor seleccionado
+  tableData.value = respaldoData.value.filter((data: any) => {
+    const agrupadorValue = filtroAgrupadorProps
+      .split(".")
+      .reduce((acc, key) => acc?.[key], data); // Acceder dinámicamente al valor del agrupador
+    return agrupadorValue === item; // Comparar con el valor seleccionado
+  });
+}
+
 function handleShowForm(item: Record<string, any> | null = null) {
   formData.value = item ? { ...item } : {};
   if (props.formModal) {
@@ -213,6 +259,25 @@ function handleActionClick({ action, item }: { action: string; item: any }) {
     }
   }
 }
+
+const countRegistros = computed(() => {
+  return (item: any) => {
+    if (item === "Todos") {
+      return respaldoData.value.length; // Retorna el total de registros
+    }
+
+    const filtroAgrupadorProps = props.filtroAgrupador ?? "";
+
+    // Filtrar los registros según el valor del agrupador
+    return respaldoData.value.filter((data: any) => {
+      const agrupadorValue = filtroAgrupadorProps
+        .split(".")
+        .reduce((acc, key) => acc?.[key], data); // Acceder dinámicamente al valor del agrupador
+      return agrupadorValue === item; // Comparar con el valor seleccionado
+    }).length; // Retorna el número de registros filtrados
+  };
+});
+
 onBeforeMount(() => {
   fetchTableData();
 });
@@ -234,11 +299,30 @@ onBeforeMount(() => {
         />
       </div>
       <div v-if="showForm == false || props.formModal">
-        <div class="d-flex justify-end align-center mb-5">
+        <div
+          class="d-flex justify-end align-center"
+          :class="props.filtroAgrupador ? '' : ' mb-5 '"
+        >
           <VBtn @click="handleNewItem">
             <VIcon start icon="tabler-checkbox" />
             Nuevo
           </VBtn>
+        </div>
+        <div class="d-flex flex-column mb-3" v-if="filtroAgrupador.length > 0">
+          <p class="my-1 textFiltroRapido">Filtro rapido:</p>
+          <div class="d-flex flex-wrap gap-2">
+            <VChip
+              size="small"
+              :color="filtroAgrupadorSelected == item ? 'primary' : 'secondary'"
+              :variant="
+                filtroAgrupadorSelected == item ? 'elevated' : 'outlined'
+              "
+              @click="handleSelectFiltroAgrupador(item)"
+              v-for="(item, index) in filtroAgrupador"
+            >
+              {{ item }} ( {{ countRegistros(item) }} )
+            </VChip>
+          </div>
         </div>
         <DataTable
           :headers="tableHeaders"
@@ -252,6 +336,13 @@ onBeforeMount(() => {
 </template>
 
 <style scoped>
+.textFiltroRapido {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+}
 .card {
   padding: 20px;
   border-radius: 8px;
