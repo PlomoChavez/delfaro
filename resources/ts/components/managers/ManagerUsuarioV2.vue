@@ -12,7 +12,12 @@ const dataContrasenia = ref({});
 const props = withDefaults(
   defineProps<{
     data: any;
-  }>(),{});
+    title?: string | null;
+    isChild?: boolean;
+  }>(),{
+    isChild: false,
+    title: null,
+  });
 
 const emit = defineEmits<{
   (event: "cancelar"): void;
@@ -49,9 +54,15 @@ const handleBack = () => { emit("cancelar"); };
 </script>
 
 <template>
-  <div class="d-flex justify-start align-center mb-5">
-    <VIcon start icon="tabler-arrow-left cursor-pointer" @click="handleBack" />
-    <h1 class="ml-4">{{ props.data.nombre }}</h1>
+  <div class="d-flex justify-start align-center mb-2">
+    <VBtn
+      icon="tabler-arrow-left"
+      class="cursor-pointer"
+      variant="text"
+      color="secondary"
+      @click="handleBack"
+    />
+    <h2 class="ml-4">{{ props.title }}</h2>
   </div>
   <VCard>
     <VTabs v-model="currentTab">

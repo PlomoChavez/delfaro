@@ -40,6 +40,7 @@ const props = withDefaults(
     payloadDefault?: any; // Indica si se debe mostrar el título
     showTitle?: boolean; // Indica si se debe mostrar el título
     filtroAgrupador?: string | null; // Indica si se debe mostrar el título
+    filtroAgrupadorInicial?: string | null; // Indica si se debe mostrar el título
     apiEndpoints?: {
       fetch?: string; // Endpoint para obtener datos
       create?: string; // Endpoint para crear un elemento
@@ -48,9 +49,10 @@ const props = withDefaults(
     };
   }>(),
   {
+    filtroAgrupadorInicial: null,
     filtroAgrupador: null,
-    showTitle: true, // Valor predeterminado
     payloadDefault: null, // Valor predeterminado
+    showTitle: true, // Valor predeterminado
   }
 );
 
@@ -186,7 +188,9 @@ function processFiltroagrupador(dataHaProcesar: any) {
     )
   );
   filtroAgrupador.value = ["Todos", ...uniqueOptions];
-  handleSelectFiltroAgrupador("Todos");
+  handleSelectFiltroAgrupador(
+    props.filtroAgrupadorInicial ? props.filtroAgrupadorInicial : "Todos"
+  );
 }
 
 function handleSelectFiltroAgrupador(item: any) {
@@ -308,7 +312,10 @@ onBeforeMount(() => {
             Nuevo
           </VBtn>
         </div>
-        <div class="d-flex flex-column mb-3" v-if="filtroAgrupador.length > 0">
+        <div
+          class="d-flex flex-column mb-3"
+          v-if="props.filtroAgrupador != null"
+        >
           <p class="my-1 textFiltroRapido">Filtro rapido:</p>
           <div class="d-flex flex-wrap gap-2">
             <VChip

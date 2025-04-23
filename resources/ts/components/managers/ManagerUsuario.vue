@@ -51,7 +51,13 @@ const handleBack = () => { emit("cancelar"); };
 
 <template>
   <div class="d-flex justify-start align-center mb-5">
-    <VIcon start icon="tabler-arrow-left cursor-pointer" @click="handleBack" />
+    <VBtn
+      icon="tabler-arrow-left"
+      class="cursor-pointer"
+      variant="text"
+      color="secondary"
+      @click="handleBack"
+    />
     <h1 class="ml-4">{{ props.data.nombre }}</h1>
   </div>
   <VCard>

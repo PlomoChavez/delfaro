@@ -19,8 +19,9 @@ const formSchema = [
   { label: "Tipo de usuario",     type: "select", model: "tipo",      placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios"},
   { label: "Estatus",             type: "switch", model: "estatus" },
 ];
+const title = ref("SubAgentes"); // Referencia al componente FormFactory
 const showFormEdit = ref(false); // Referencia al componente FormFactory
-const data = ref(null); // Referencia al componente FormFactory
+const data = ref<any>(null); // Referencia al componente FormFactory
 
 const tableHeaders = [
   { title: "ID", key: "id" },
@@ -42,18 +43,29 @@ const handleActionsEdit = (dataRow: any) => {
   data.value = { ...dataRow, ...dataRow.usuario };
   showFormEdit.value = true;
 };
+
+const getName = computed(() => {
+  let name = data ? data?.value?.nombre : "";
+  return "Subagente: " + name;
+});
+
 const handleCancelar = () => {
   showFormEdit.value = false;
 };
 </script>
 
 <template>
-  <!-- prettier-ignore -->
-  <ManagerUsuario v-if="showFormEdit" :data="data" @cancelar="handleCancelar" />
+  <ManagerUsuario
+    v-if="showFormEdit"
+    :data="data"
+    :isChild="true"
+    :title="getName"
+    @cancelar="handleCancelar"
+  />
   <div v-else>
-    <h1>Subagentes</h1>
+    <h1>{{ title }}</h1>
     <CrudManager
-      title="Subagentes"
+      title="title"
       :emitEdit="true"
       :formModal="true"
       :show-title="false"

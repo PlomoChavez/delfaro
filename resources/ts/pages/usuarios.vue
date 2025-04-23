@@ -47,6 +47,8 @@ const handleCancelar = () => {
       :emitEdit="true"
       :formModal="true"
       :show-title="false"
+      :filtroAgrupador="'tipo.label'"
+      :filtroAgrupadorInicial="'Agente'"
       :formSchema="formSchema"
       :tableHeaders="tableHeaders"
       :apiEndpoints="apiEndpoints"
