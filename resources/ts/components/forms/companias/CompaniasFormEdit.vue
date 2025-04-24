@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import FormFactory from "@/components/apps/FormFactory.vue";
-import CompaniasRepresentantes from "@/components/forms/CompaniasRepresentantesV1.vue";
+import CompaniasRepresentantes from "@/components/forms/companias/CompaniasRepresentantesV1.vue";
 
 import { showSuccessMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import UsuarioClavesV1 from "@/components/forms/UsuarioClavesV1.vue";
-import UsuarioSubagentesV1 from "@/components/forms/UsuarioSubagentesV1.vue";
-import UsuariosAsistentesV1 from "@/components/forms/UsuariosAsistentesV1.vue";
+import UsuarioClavesV1 from "@/components/forms/usuarios/UsuarioClavesV1.vue";
+import UsuarioSubagentesV1 from "@/components/forms/usuarios/UsuarioSubagentesV1.vue";
+import UsuariosAsistentesV1 from "@/components/forms/usuarios/UsuariosAsistentesV1.vue";
 import { defineProps, ref } from "vue";
 
 const currentTab = ref("item1");

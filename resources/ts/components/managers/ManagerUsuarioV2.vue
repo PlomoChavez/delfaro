@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import UsuarioClavesV1 from "@/components/forms/UsuarioClavesV1.vue";
-import UsuarioSubagentesV1 from "@/components/forms/UsuarioSubagentesV1.vue";
+import UsuarioCompanias from "@/components/forms/usuarios/UsuarioCompanias.vue";
 import { defineProps, ref } from "vue";
 
 const currentTab = ref("item1");
@@ -26,7 +25,6 @@ const emit = defineEmits<{
 const formSchema = [
   { label: "Nombre",              type: "text",   model: "nombre",    placeholder: "Ingresa el nombre" },
   { label: "Correo electronico",  type: "text",   model: "correo",    placeholder: "Ingresa el nombre" },
-  { label: "Contraseña",          type: "text",   model: "password",  placeholder: "Ingresa el nombre" },
   { label: "Tipo de usuario",     type: "select", model: "tipo",      placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios"},
   { label: "Estatus",             type: "switch", model: "estatus" },
 ];
@@ -68,7 +66,6 @@ const handleBack = () => { emit("cancelar"); };
     <VTabs v-model="currentTab">
       <VTab>Detalles del usario</VTab>
       <VTab>Claves</VTab>
-      <VTab>Permisos</VTab>
     </VTabs>
 
     <VCardText>
@@ -110,10 +107,7 @@ const handleBack = () => { emit("cancelar"); };
           <!-- @submit="handleFormSubmit" -->
         </VWindowItem>
         <VWindowItem :value="`item2`">
-          <UsuarioClavesV1 :data="props.data" />
-        </VWindowItem>
-        <VWindowItem :value="`item3`">
-          <UsuarioSubagentesV1 :data="props.data" />
+          <UsuarioCompanias />
         </VWindowItem>
       </VWindow>
     </VCardText>

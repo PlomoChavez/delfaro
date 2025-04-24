@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
 import ManagerUsuario from "@/components/managers/ManagerUsuarioV2.vue";
+import { defineProps, ref } from "vue";
 const props = withDefaults(
   defineProps<{
     data: any;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-import FormEdit from "@/components/forms/CompaniasFormEdit.vue";
+import FormEdit from "@/components/forms/companias/CompaniasFormEdit.vue";
 
 const showFormEdit = ref(false); // Referencia al componente FormFactory
 const data = ref(null); // Referencia al componente FormFactory
