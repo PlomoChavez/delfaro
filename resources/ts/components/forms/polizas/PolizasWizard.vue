@@ -1,0 +1,220 @@
+<script lang="ts" setup>
+// prettier-ignore
+import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
+import PolizaWidget from "@/components/forms/polizas/PolizaWidget.vue";
+import { ref } from "vue";
+
+const step = ref<any>(5);
+const poliza = ref<any>({});
+const companias = ref<any>(null);
+const claves = ref<any>(null);
+const ramos = ref<any>([
+  { id: 1, nombreCorto: "Autos", estatus: true },
+  { id: 2, nombreCorto: "Vida", estatus: true },
+  { id: 2, nombreCorto: "GMM", estatus: true },
+  { id: 2, nombreCorto: "Salud", estatus: true },
+]);
+const Productos = ref<any>([
+  { id: 1, nombre: "Producto 1", estatus: true, ramoId: 1 },
+  { id: 2, nombre: "Producto 2", estatus: true, ramoId: 1 },
+  { id: 3, nombre: "Producto 3", estatus: true, ramoId: 2 },
+  { id: 4, nombre: "Producto 4", estatus: true, ramoId: 2 },
+]);
+const Agentes = ref<any>([
+  { id: 1, nombre: "Agente 1", estatus: true, clave: 131 },
+  { id: 2, nombre: "Agente 2", estatus: true, clave: 151 },
+  { id: 3, nombre: "Agente 3", estatus: true, clave: 1972 },
+  { id: 4, nombre: "Agente 4", estatus: true, clave: 132 },
+]);
+
+// prettier-ignore
+const formSchema = [
+  { label: "Compañia",            type: "text",   model: "compania",    placeholder: "Ingresa el nombre" },
+  { label: "Ramo",                type: "text",   model: "ramo",        placeholder: "Ingresa el nombre" },
+  { label: "Producto",            type: "text",   model: "producto",    placeholder: "Ingresa el nombre" },
+  { label: "Cliente",             type: "text",   model: "cliente",     placeholder: "Ingresa el nombre" },
+  { label: "Subagente",           type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Agente",              type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  
+  { label: "Forma de pago",             type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Inicio de vigencia",        type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Fin de vigencia",           type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Antiguedad",                type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Tipo de vencimiento",       type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Metodo de pago",            type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Prima neta anual",          type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Finaciamiento",             type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "PCT COMI (%)",              type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Prima total",               type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Moneda",                    type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Importe pago inicial",      type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Importe pago subsecuente",  type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
+  { label: "Estatus",                   type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+
+];
+
+async function fetchData() {
+  try {
+    let url = "/api/polizas/wizard";
+    if (url != "") {
+      let payload = {
+        usuario_id: 5,
+      };
+      const response = await customRequest({
+        url: url,
+        method: "POST",
+        data: payload,
+      });
+      const data = response.data.data;
+      companias.value = data.companias;
+      claves.value = data.claves;
+    }
+  } catch (error) {
+    console.error("Error al obtener los datos:", error);
+  }
+}
+
+function handleSelectCompania(compania: any) {
+  step.value = 1;
+  poliza.value.compania = compania;
+}
+
+function handleSelectRamo(ramo: any) {
+  step.value = 2;
+  poliza.value.ramo = ramo;
+}
+
+function handleSelectProducto(producto: any) {
+  step.value = 3;
+  poliza.value.producto = producto;
+}
+
+function handleSelectCliente(cliente: any) {
+  step.value = 4;
+  poliza.value.cliente = cliente;
+}
+
+function handleSelectSubAgente(Subagente: any) {
+  step.value = 5;
+  poliza.value.subAgente = Subagente;
+}
+
+onMounted(() => {
+  fetchData();
+});
+</script>
+
+<style scoped lang="scss">
+.cardItem {
+  min-width: 200px;
+  background-color: #f7f7f7;
+  text-align: center;
+  width: fit-content;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.cardsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+</style>
+
+<template>
+  <div class="w-full" v-if="step != 5">
+    <PolizaWidget :data="poliza" />
+    <!-- Compania -->
+    <div class="mb-4" v-if="step == 0">
+      <h1 class="w-full text-center mb-5">Selecciona una compañia:</h1>
+      <div class="cardsWrapper">
+        <div
+          class="cardItem"
+          v-for="(item, index) in companias"
+          :key="index"
+          @click="handleSelectCompania(item)"
+        >
+          <span>{{ item.nombreCorto }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- Ramo -->
+    <div class="mb-4" v-if="step == 1">
+      <h1 class="w-full text-center mb-5">Selecciona un ramo:</h1>
+      <div class="cardsWrapper">
+        <div
+          class="cardItem"
+          v-for="(item, index) in ramos"
+          :key="index"
+          @click="handleSelectRamo(item)"
+        >
+          <span>{{ item.nombreCorto }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- Producto-->
+    <div class="mb-4" v-if="step == 2">
+      <h1 class="w-full text-center mb-5">Selecciona un producto:</h1>
+      <div class="cardsWrapper">
+        <div
+          class="cardItem"
+          v-for="(item, index) in Productos"
+          :key="index"
+          @click="handleSelectProducto(item)"
+        >
+          <span>{{ item.nombre }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- Cliente -->
+    <div class="mb-4" v-if="step == 3">
+      <h1 class="w-full text-center mb-5">Selecciona un cliente:</h1>
+      <div class="cardsWrapper">
+        <div
+          class="cardItem"
+          v-for="(item, index) in Productos"
+          :key="index"
+          @click="handleSelectCliente(item)"
+        >
+          <span>{{ item.nombre }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- Subagente -->
+    <div class="mb-4" v-if="step == 4">
+      <h1 class="w-full text-center mb-5">Selecciona un subagente:</h1>
+      <div class="cardsWrapper">
+        <div
+          class="cardItem"
+          v-for="(item, index) in Productos"
+          :key="index"
+          @click="handleSelectSubAgente(item)"
+        >
+          <span>{{ item.nombre }}</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="d-flex justify-start align-center">
+        <VBtn color="secondary" variant="outlined">
+          <VIcon start icon="tabler-alert-circle" />
+          Cancelar
+        </VBtn>
+      </div>
+    </div>
+  </div>
+  <div>
+    <VCard title="Detalles de la póliza" class="mb-4">
+      <VCardText>
+        <ModuladorFormFactory
+          :title="null"
+          :isDialogVisible="false"
+          :schema="formSchema"
+          :modelValue="{}"
+        />
+      </VCardText>
+    </VCard>
+  </div>
+</template>

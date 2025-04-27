@@ -15,8 +15,13 @@ export function useCatalogo() {
 
       // prettier-ignore
       switch (item.catalogo) {
-        case "tipos-usuarios":  url = "/api/catalogos/tipos-usuarios"; break;
-        case "companias":       url = "/api/catalogos/companias"; break;
+        case "tipos-usuarios":    url = "/api/catalogos/tipos-usuarios"; break;
+        case "companias":         url = "/api/catalogos/companias"; break;
+        case "formas-pagos":      url = "/api/catalogos/formas-pagos"; break;
+        case "tipo-vencimiento":  url = "/api/catalogos/tipo-vencimiento"; break;
+        case "metodos-pago":      url = "/api/catalogos/metodos-pago"; break;
+        case "moneda":            url = "/api/catalogos/moneda"; break;
+        case "estatus-polizas":   url = "/api/catalogos/estatus-polizas"; break;
       }
 
       const response = await customRequest(url);

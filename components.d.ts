@@ -384,6 +384,8 @@ declare module 'vue' {
     MoreBtn: typeof import('./resources/ts/@core/components/MoreBtn.vue')['default']
     Notifications: typeof import('./resources/ts/@core/components/Notifications.vue')['default']
     PaymentProvidersDialog: typeof import('./resources/ts/components/dialogs/PaymentProvidersDialog.vue')['default']
+    PolizasWizard: typeof import('./resources/ts/components/forms/polizas/PolizasWizard.vue')['default']
+    PolizaWidget: typeof import('./resources/ts/components/forms/polizas/PolizaWidget.vue')['default']
     PricingPlanDialog: typeof import('./resources/ts/components/dialogs/PricingPlanDialog.vue')['default']
     ProductDescriptionEditor: typeof import('./resources/ts/@core/components/ProductDescriptionEditor.vue')['default']
     ReferAndEarnDialog: typeof import('./resources/ts/components/dialogs/ReferAndEarnDialog.vue')['default']
