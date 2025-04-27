@@ -34,25 +34,25 @@ class CatalogosController extends Controller
                 case 'companias':
                     $tabla = 'compania';
                     break;
-                case 'moendas':
+                case 'monedas':
                     $tabla = [
-                        ["id" => 1, "nombre" => "MXN - Peso Mexicano"],
-                        ["id" => 2, "nombre" => "USD - Dólar Americano"],
-                        ["id" => 3, "nombre" => "EUR - Euro"],
-                        ["id" => 4, "nombre" => "GBP - Libra Esterlina"],
-                        ["id" => 5, "nombre" => "JPY - Yen Japonés"],
-                        ["id" => 6, "nombre" => "CNY - Yuan Chino"],
-                        ["id" => 7, "nombre" => "INR - Rupia India"],
-                        ["id" => 8, "nombre" => "BRL - Real Brasileño"],
+                        ["id" => 1, "label" => "MXN - Peso Mexicano"],
+                        ["id" => 2, "label" => "USD - Dólar Americano"],
+                        ["id" => 3, "label" => "EUR - Euro"],
+                        ["id" => 4, "label" => "GBP - Libra Esterlina"],
+                        ["id" => 5, "label" => "JPY - Yen Japonés"],
+                        ["id" => 6, "label" => "CNY - Yuan Chino"],
+                        ["id" => 7, "label" => "INR - Rupia India"],
+                        ["id" => 8, "label" => "BRL - Real Brasileño"],
                     ];
                     break;
                 case 'estatus-poliza':
                     $tabla = [
-                        ["id" => 1, "nombre" => "Vigente"],
-                        ["id" => 2, "nombre" => "Cancelada"],
-                        ["id" => 3, "nombre" => "Suspendida"],
-                        ["id" => 4, "nombre" => "En Proceso"],
-                        ["id" => 5, "nombre" => "No Vigente"],
+                        ["id" => 1, "label" => "Vigente"],
+                        ["id" => 2, "label" => "Cancelada"],
+                        ["id" => 3, "label" => "Suspendida"],
+                        ["id" => 4, "label" => "En Proceso"],
+                        ["id" => 5, "label" => "No Vigente"],
                     ];
                     break;
                 default:
@@ -61,6 +61,13 @@ class CatalogosController extends Controller
                         'message' => 'Tabla no válida',
                         'data' => [],
                     ]);
+            }
+            if (is_array($tabla)) {
+                return response()->json([
+                    'result' => true,
+                    'message' => 'Registros obtenidos con éxito',
+                    'data' => $tabla,
+                ]);
             }
             $datos = DB::table($tabla)->get();
             return response()->json([

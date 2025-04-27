@@ -36,20 +36,20 @@ const formSchema = [
   { label: "Subagente",           type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   { label: "Agente",              type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   
-  { label: "Forma de pago",             type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Forma de pago",             type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "formas-pagos"},
   { label: "Inicio de vigencia",        type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   { label: "Fin de vigencia",           type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   { label: "Antiguedad",                type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
-  { label: "Tipo de vencimiento",       type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
-  { label: "Metodo de pago",            type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Tipo de vencimiento",       type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipo-vencimiento"},
+  { label: "Metodo de pago",            type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "metodos-pago"},
   { label: "Prima neta anual",          type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   { label: "Finaciamiento",             type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   { label: "PCT COMI (%)",              type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   { label: "Prima total",               type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
-  { label: "Moneda",                    type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Moneda",                    type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "moneda"},
   { label: "Importe pago inicial",      type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   { label: "Importe pago subsecuente",  type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
-  { label: "Estatus",                   type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipos-usuarios"},
+  { label: "Estatus",                   type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "estatus-polizas"},
 
 ];
 
@@ -208,11 +208,12 @@ onMounted(() => {
   <div>
     <VCard title="Detalles de la póliza" class="mb-4">
       <VCardText>
+        <pre>{{ poliza }}</pre>
         <ModuladorFormFactory
           :title="null"
           :isDialogVisible="false"
           :schema="formSchema"
-          :modelValue="{}"
+          :modelValue="poliza"
         />
       </VCardText>
     </VCard>
