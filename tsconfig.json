@@ -65,6 +65,8 @@
     ]
   },
   "include": [
+    "resources/ts/**/*.ts",
+    "resources/ts/**/*.d.ts",
     "./typed-router.d.ts",
     "./vite.config.*",
     "./env.d.ts",

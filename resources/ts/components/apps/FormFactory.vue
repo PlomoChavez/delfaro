@@ -54,6 +54,27 @@ watch(
   }
 );
 
+watch(
+  () => formLocal, // Observa directamente el objeto reactivo
+  (newValue) => {
+    schemaLocal.value.forEach((field: any) => {
+      if (field?.type === "rangeDate") {
+        if (newValue[field.minModel]) {
+          showForm.value = false;
+          field.maxConfig.minDate = newValue[field.minModel];
+        }
+        if (newValue[field.maxModel]) {
+          showForm.value = false;
+          field.minConfig.maxDate = newValue[field.maxModel];
+        }
+      }
+    });
+    // prettier-ignore
+    setTimeout(() => { showForm.value = true; }, 0.5);
+  },
+  { deep: true } // Habilita la observación profunda
+);
+
 // Maneja los cambios en los inputs
 function handleInputChange(field: string, value: any) {
   formLocal[field] = value;
@@ -137,6 +158,18 @@ onMounted(async () => {
       };
     }
 
+    if (field.type === "rangeDate") {
+      // prettier-ignore
+      // field.minDisable = true;
+      // field.maxDisable = true;
+      field.minConfig = {
+        ...(field?.config || { dateFormat: "Y-m-d" }),
+      };
+      field.maxConfig = {
+        ...(field?.config || { dateFormat: "Y-m-d" }),
+      };
+    }
+
     if (field.type === "switch") {
       if (formLocal[field.model]) {
         if (field.options) {
@@ -190,6 +223,58 @@ onMounted(async () => {
             />
           </template>
 
+          <!-- Campo number -->
+          <template v-else-if="field.type === 'number'">
+            <label :for="field.model"> {{ field.label }} </label>
+            <VTextField
+              v-bind="field?.mask ? { 'v-mask': field.mask } : {}"
+              :key="field.model"
+              v-model="formLocal[field.model]"
+              :placeholder="field.placeholder || ''"
+              type="text"
+              class="form-control"
+            />
+          </template>
+          <!-- Campo date -->
+          <template v-else-if="field.type === 'date'">
+            <label :for="field.model"> {{ field.label }} </label>
+            <!-- prettier-ignore -->
+            <AppDateTimePicker
+              :key="`${field.model}`"
+              v-model="formLocal[field.model]"
+              :placeholder="field?.placeholder ?? 'Ingresa un fecha'"
+              :config="{
+                ...(field?.config || { dateFormat: 'Y-m-d' }),
+                locale: 'es',
+                minDate: field.config?.minDate ? formLocal[field.config.minDate] : undefined,
+                maxDate: field.config?.maxDate ? formLocal[field.config.maxDate] : undefined,
+              }"
+            />
+          </template>
+          <!-- Campo rangeDate -->
+          <template v-else-if="field.type === 'rangeDate'">
+            <label :for="field.minModel"> {{ field.minLabel }} </label>
+            <!-- prettier-ignore -->
+            <AppDateTimePicker
+              :key="`${field.minModel}`"
+              v-model="formLocal[field.minModel]"
+              :placeholder="field?.minPlaceholder ?? 'Ingresa un fecha'"
+              :config="field.minConfig"
+              :disabled="field.minDisable"
+              clearable
+            />
+            <label :for="field.minModel"> {{ field.maxLabel }} </label>
+            <!-- prettier-ignore -->
+            <AppDateTimePicker
+              :key="`${field.maxModel}`"
+              v-model="formLocal[field.maxModel]"
+              :placeholder="field?.maxPlaceholder ?? 'Ingresa un fecha'"
+              :config="field.maxConfig"
+              :disabled="field.maxDisable"
+              clearable
+            />
+          </template>
+
           <!-- Campo select -->
           <template v-else-if="field.type === 'select'">
             <label :for="field.model"> {{ field.label }} </label>
@@ -209,7 +294,6 @@ onMounted(async () => {
 
           <!-- Campo switch -->
           <!-- prettier-ignore -->
-
           <div v-else-if="field.type === 'switch'" >
             <label :for="field.model"> {{ field.label }} </label>
             <VSwitch
