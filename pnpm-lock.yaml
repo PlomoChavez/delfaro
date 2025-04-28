@@ -118,6 +118,9 @@ importers:
       unplugin-vue-define-options:
         specifier: 1.5.3
         version: 1.5.3(rollup@4.39.0)(vue@3.5.13(typescript@5.7.2))
+      v-money3:
+        specifier: ^3.24.1
+        version: 3.24.1(vue@3.5.13(typescript@5.7.2))
       vue:
         specifier: 3.5.13
         version: 3.5.13(typescript@5.7.2)
@@ -4611,6 +4614,11 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  v-money3@3.24.1:
+    resolution: {integrity: sha512-nGnxS06jkNsVzkuMQJ/0we6PSA4HO7jH1B7NeCF3Tv7Xm61poEUW7D1fdXXWR0IWLWneMSsCt3d4YQo6fTeBZA==}
+    peerDependencies:
+      vue: '>= 3.2.0'
 
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
@@ -9842,6 +9850,10 @@ snapshots:
   url-toolkit@2.2.5: {}
 
   util-deprecate@1.0.2: {}
+
+  v-money3@3.24.1(vue@3.5.13(typescript@5.7.2)):
+    dependencies:
+      vue: 3.5.13(typescript@5.7.2)
 
   validate-npm-package-license@3.0.4:
     dependencies:

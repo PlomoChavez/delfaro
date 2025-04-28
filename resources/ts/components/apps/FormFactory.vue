@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { useCatalogo } from "@/hooks/useCatalogo";
-import { defineEmits, defineProps, watch } from "vue";
+import { VMoney } from "v-money3";
+import { defineEmits, defineProps, getCurrentInstance, watch } from "vue";
+
+// Registrar la directiva manualmente
+const instance = getCurrentInstance();
+instance?.appContext.app.directive("money", VMoney);
 
 interface Field {
   label: string;
@@ -130,6 +135,89 @@ function handleCancel() {
   emit("update:isDialogVisible", false); // Cerrar el modal
 }
 
+function handleNumberInput(event: Event, model: string) {
+  const input = event.target as HTMLInputElement;
+
+  // Configuración del formato
+  const config = {
+    decimal: ".",
+    thousands: ",",
+    prefix: "",
+    precision: 2,
+  };
+
+  // Eliminar caracteres no válidos (solo números)
+  let rawValue = input.value.replace(/[^0-9]/g, "");
+
+  // Convertir a número entero
+  let numericValue = parseInt(rawValue, 10);
+
+  // Validar si es un número
+  if (isNaN(numericValue)) {
+    numericValue = 0; // Si no es un número, establecer en 0
+  }
+
+  // Dividir por 10^precision para manejar los decimales
+  numericValue = numericValue / Math.pow(10, config.precision);
+
+  // Aplicar precisión
+  numericValue = parseFloat(numericValue.toFixed(config.precision));
+
+  // Formatear con separadores de miles y decimales
+  const formattedValue = `${config.prefix}${numericValue
+    .toFixed(config.precision)
+    .replace(".", config.decimal)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, config.thousands)}`;
+
+  // Actualizar el modelo con el valor formateado
+  formLocal[model] = formattedValue;
+
+  // Actualizar el valor del input para reflejar el formato en tiempo real
+  input.value = formattedValue;
+
+  // Restaurar la posición del cursor
+  const cursorPosition = input.selectionStart || 0;
+  const newCursorPosition =
+    formattedValue.length - (rawValue.length - cursorPosition);
+  input.setSelectionRange(newCursorPosition, newCursorPosition);
+}
+
+function applyNumberFormat(model: string) {
+  // Configuración del formato
+  const config = {
+    decimal: ",",
+    thousands: ".",
+    prefix: "$ ",
+    precision: 2,
+  };
+
+  // Obtener el valor actual del modelo
+  let rawValue = formLocal[model];
+
+  // Reemplazar separadores incorrectos
+  rawValue = rawValue.replace(",", "."); // Convertir coma en punto para cálculos
+
+  // Convertir a número
+  let numericValue = parseFloat(rawValue);
+
+  // Validar si es un número
+  if (isNaN(numericValue)) {
+    numericValue = 0; // Si no es un número, establecer en 0
+  }
+
+  // Aplicar precisión
+  numericValue = parseFloat(numericValue.toFixed(config.precision));
+
+  // Formatear con separadores de miles y decimales
+  const formattedValue = `${config.prefix}${numericValue
+    .toFixed(config.precision)
+    .replace(".", config.decimal)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, config.thousands)}`;
+
+  // Actualizar el modelo con el valor formateado
+  formLocal[model] = formattedValue;
+}
+
 // Lógica para cargar catálogos dinámicos
 const { obtenerCatalogo } = useCatalogo();
 
@@ -226,12 +314,11 @@ onMounted(async () => {
           <!-- Campo number -->
           <template v-else-if="field.type === 'number'">
             <label :for="field.model"> {{ field.label }} </label>
+            <pre>{{ field }}</pre>
             <VTextField
-              v-bind="field?.mask ? { 'v-mask': field.mask } : {}"
-              :key="field.model"
-              v-model="formLocal[field.model]"
+              @input="handleNumberInput($event, field.model)"
               :placeholder="field.placeholder || ''"
-              type="text"
+              v-model="formLocal[field.model]"
               class="form-control"
             />
           </template>

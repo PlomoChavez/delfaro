@@ -37,14 +37,14 @@ const formSchema = [
   // { label: "Agente",              type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   
   // { label: "Forma de pago",             type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "formas-pagos"},
-  { 
-    type: "rangeDate",   
-    ref: "vigencia",   
-    minModel: "inicioVigencia",
-    minLabel: "Inicio de vigencia",
-    maxModel: "finVigencia",
-    maxLabel: "Fin de vigencia",        
-  },
+  // { 
+  //   type: "rangeDate",   
+  //   ref: "vigencia",   
+  //   minModel: "inicioVigencia",
+  //   minLabel: "Inicio de vigencia",
+  //   maxModel: "finVigencia",
+  //   maxLabel: "Fin de vigencia",        
+  // },
   // { label: "Antiguedad",                type: "text",   model: "subagente",   placeholder: "Ingresa el nombre" },
   // { label: "Tipo de vencimiento",       type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "tipo-vencimiento"},
   // { label: "Metodo de pago",            type: "select", model: "subagente",   placeholder: "Ingresa el nombre", catalogo: "metodos-pago"},
