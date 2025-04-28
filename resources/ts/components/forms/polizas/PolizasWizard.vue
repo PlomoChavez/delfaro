@@ -4,7 +4,7 @@ import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
 import PolizaWidget from "@/components/forms/polizas/PolizaWidget.vue";
 import { ref } from "vue";
 
-const step = ref<any>(5);
+const step = ref<any>(0);
 const poliza = ref<any>({});
 const companias = ref<any>(null);
 const claves = ref<any>(null);
@@ -122,98 +122,97 @@ onMounted(() => {
 </style>
 
 <template>
-  <div class="w-full" v-if="step != 5">
-    <PolizaWidget :data="poliza" />
-    <!-- Compania -->
-    <div class="mb-4" v-if="step == 0">
-      <h1 class="w-full text-center mb-5">Selecciona una compañia:</h1>
-      <div class="cardsWrapper">
-        <div
-          class="cardItem"
-          v-for="(item, index) in companias"
-          :key="index"
-          @click="handleSelectCompania(item)"
-        >
-          <span>{{ item.nombreCorto }}</span>
+  <VCard title="Detalles de la póliza" class="mb-4">
+    <VCardText>
+      <div class="w-full" v-if="step != 5">
+        <PolizaWidget :data="poliza" />
+        <!-- Compania -->
+        <div class="mb-4" v-if="step == 0">
+          <h1 class="w-full text-center mb-5">Selecciona una compañia:</h1>
+          <div class="cardsWrapper">
+            <div
+              class="cardItem"
+              v-for="(item, index) in companias"
+              :key="index"
+              @click="handleSelectCompania(item)"
+            >
+              <span>{{ item.nombreCorto }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Ramo -->
+        <div class="mb-4" v-if="step == 1">
+          <h1 class="w-full text-center mb-5">Selecciona un ramo:</h1>
+          <div class="cardsWrapper">
+            <div
+              class="cardItem"
+              v-for="(item, index) in ramos"
+              :key="index"
+              @click="handleSelectRamo(item)"
+            >
+              <span>{{ item.nombreCorto }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Producto-->
+        <div class="mb-4" v-if="step == 2">
+          <h1 class="w-full text-center mb-5">Selecciona un producto:</h1>
+          <div class="cardsWrapper">
+            <div
+              class="cardItem"
+              v-for="(item, index) in Productos"
+              :key="index"
+              @click="handleSelectProducto(item)"
+            >
+              <span>{{ item.nombre }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Cliente -->
+        <div class="mb-4" v-if="step == 3">
+          <h1 class="w-full text-center mb-5">Selecciona un cliente:</h1>
+          <div class="cardsWrapper">
+            <div
+              class="cardItem"
+              v-for="(item, index) in Productos"
+              :key="index"
+              @click="handleSelectCliente(item)"
+            >
+              <span>{{ item.nombre }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Subagente -->
+        <div class="mb-4" v-if="step == 4">
+          <h1 class="w-full text-center mb-5">Selecciona un subagente:</h1>
+          <div class="cardsWrapper">
+            <div
+              class="cardItem"
+              v-for="(item, index) in Productos"
+              :key="index"
+              @click="handleSelectSubAgente(item)"
+            >
+              <span>{{ item.nombre }}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="d-flex justify-start align-center">
+            <VBtn color="secondary" variant="outlined">
+              <VIcon start icon="tabler-alert-circle" />
+              Cancelar
+            </VBtn>
+          </div>
         </div>
       </div>
-    </div>
-    <!-- Ramo -->
-    <div class="mb-4" v-if="step == 1">
-      <h1 class="w-full text-center mb-5">Selecciona un ramo:</h1>
-      <div class="cardsWrapper">
-        <div
-          class="cardItem"
-          v-for="(item, index) in ramos"
-          :key="index"
-          @click="handleSelectRamo(item)"
-        >
-          <span>{{ item.nombreCorto }}</span>
-        </div>
-      </div>
-    </div>
-    <!-- Producto-->
-    <div class="mb-4" v-if="step == 2">
-      <h1 class="w-full text-center mb-5">Selecciona un producto:</h1>
-      <div class="cardsWrapper">
-        <div
-          class="cardItem"
-          v-for="(item, index) in Productos"
-          :key="index"
-          @click="handleSelectProducto(item)"
-        >
-          <span>{{ item.nombre }}</span>
-        </div>
-      </div>
-    </div>
-    <!-- Cliente -->
-    <div class="mb-4" v-if="step == 3">
-      <h1 class="w-full text-center mb-5">Selecciona un cliente:</h1>
-      <div class="cardsWrapper">
-        <div
-          class="cardItem"
-          v-for="(item, index) in Productos"
-          :key="index"
-          @click="handleSelectCliente(item)"
-        >
-          <span>{{ item.nombre }}</span>
-        </div>
-      </div>
-    </div>
-    <!-- Subagente -->
-    <div class="mb-4" v-if="step == 4">
-      <h1 class="w-full text-center mb-5">Selecciona un subagente:</h1>
-      <div class="cardsWrapper">
-        <div
-          class="cardItem"
-          v-for="(item, index) in Productos"
-          :key="index"
-          @click="handleSelectSubAgente(item)"
-        >
-          <span>{{ item.nombre }}</span>
-        </div>
-      </div>
-    </div>
-    <div>
-      <div class="d-flex justify-start align-center">
-        <VBtn color="secondary" variant="outlined">
-          <VIcon start icon="tabler-alert-circle" />
-          Cancelar
-        </VBtn>
-      </div>
-    </div>
-  </div>
-  <div>
-    <VCard title="Detalles de la póliza" class="mb-4">
-      <VCardText>
-        <pre>{{ poliza }}</pre>
+      <div v-if="step == 5">
         <ModuladorFormFactory
           :title="null"
           :isDialogVisible="false"
           :schema="formSchema"
           :modelValue="poliza"
         />
-      </VCardText>
-    </VCard>
-  </div>
+      </div>
+    </VCardText>
+  </VCard>
 </template>
