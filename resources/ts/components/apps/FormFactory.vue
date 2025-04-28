@@ -135,15 +135,21 @@ function handleCancel() {
   emit("update:isDialogVisible", false); // Cerrar el modal
 }
 
-function handleNumberInput(event: Event, model: string) {
+function handleNumberInput(event: Event, field: any) {
   const input = event.target as HTMLInputElement;
+  const model = field.model;
 
   // Configuración del formato
-  const config = {
+  let config = {
     decimal: ".",
     thousands: ",",
     prefix: "",
+    sufijo: "",
     precision: 2,
+  };
+  config = {
+    ...config,
+    ...(field?.config || {}),
   };
 
   // Eliminar caracteres no válidos (solo números)
@@ -167,7 +173,7 @@ function handleNumberInput(event: Event, model: string) {
   const formattedValue = `${config.prefix}${numericValue
     .toFixed(config.precision)
     .replace(".", config.decimal)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, config.thousands)}`;
+    .replace(/\B(?=(\d{3})+(?!\d))/g, config.thousands)}${config.sufijo}`;
 
   // Actualizar el modelo con el valor formateado
   formLocal[model] = formattedValue;
@@ -180,42 +186,6 @@ function handleNumberInput(event: Event, model: string) {
   const newCursorPosition =
     formattedValue.length - (rawValue.length - cursorPosition);
   input.setSelectionRange(newCursorPosition, newCursorPosition);
-}
-
-function applyNumberFormat(model: string) {
-  // Configuración del formato
-  const config = {
-    decimal: ",",
-    thousands: ".",
-    prefix: "$ ",
-    precision: 2,
-  };
-
-  // Obtener el valor actual del modelo
-  let rawValue = formLocal[model];
-
-  // Reemplazar separadores incorrectos
-  rawValue = rawValue.replace(",", "."); // Convertir coma en punto para cálculos
-
-  // Convertir a número
-  let numericValue = parseFloat(rawValue);
-
-  // Validar si es un número
-  if (isNaN(numericValue)) {
-    numericValue = 0; // Si no es un número, establecer en 0
-  }
-
-  // Aplicar precisión
-  numericValue = parseFloat(numericValue.toFixed(config.precision));
-
-  // Formatear con separadores de miles y decimales
-  const formattedValue = `${config.prefix}${numericValue
-    .toFixed(config.precision)
-    .replace(".", config.decimal)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, config.thousands)}`;
-
-  // Actualizar el modelo con el valor formateado
-  formLocal[model] = formattedValue;
 }
 
 // Lógica para cargar catálogos dinámicos
@@ -279,6 +249,7 @@ onMounted(async () => {
         }
       }
     }
+    field.classElement = field.classElement || "wDefault";
   });
   schemaLocal.value = tmp;
   setTimeout(() => {}, 500);
@@ -286,44 +257,75 @@ onMounted(async () => {
 });
 </script>
 
+<style scoped lang="scss">
+.bgRed {
+  background-color: red !important;
+}
+.wDefault {
+  width: 25% !important;
+  padding: 10px;
+}
+.formWrapper {
+  width: 100% !important;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 1201px) {
+  /* prettier-ignore */
+  .wDefault { width: 25% !important; }
+}
+
+@media (max-width: 1200px) and (min-width: 801px) {
+  /* prettier-ignore */
+  .wDefault { width: 33% !important; }
+}
+
+@media (max-width: 800px) {
+  /* prettier-ignore */
+  .wDefault { width: 100% !important; }
+}
+</style>
+
 <template>
   <div>
     <div v-if="!showForm" class="d-flex justify-center align-center">
       <h1 class="text-center my-5">Cargando formulario ...</h1>
     </div>
     <!-- Inline Form -->
-    <div v-if="showForm">
+    <div v-if="showForm" class="w-full">
       <!-- Renderiza el formulario -->
-      <div class="form-group mb-3">
+      <div class="formWrapper">
         <!-- Render dynamic fields -->
-
         <template v-for="field in schemaLocal" :key="field.model">
           <!-- Campo de texto -->
-          <template v-if="field.type === 'text'" class="mb-5">
+          <!-- prettier-ignore -->
+          <div v-if="field.type === 'text'" :class="field.classElement">
             <label :for="field.model"> {{ field.label }} </label>
             <VTextField
-              :placeholder="field.placeholder || ''"
               variant="outlined"
-              :id="field.model"
               v-model="formLocal[field.model]"
               :disabled="props.isDisabled || field.disabled"
+              :placeholder="field.placeholder || `Introduce el dato requerido`"
               @input="handleInputChange(field.model, $event.target.value)"
             />
-          </template>
+          </div>
 
           <!-- Campo number -->
-          <template v-else-if="field.type === 'number'">
+          <!-- prettier-ignore -->
+          <div v-else-if="field.type === 'number'" :class="field.classElement">
             <label :for="field.model"> {{ field.label }} </label>
-            <pre>{{ field }}</pre>
             <VTextField
-              @input="handleNumberInput($event, field.model)"
-              :placeholder="field.placeholder || ''"
+              @input="handleNumberInput($event, field)"
+              :placeholder="field.placeholder || `Introduce el dato requerido`"
               v-model="formLocal[field.model]"
               class="form-control"
             />
-          </template>
+          </div>
+
           <!-- Campo date -->
-          <template v-else-if="field.type === 'date'">
+          <!-- prettier-ignore -->
+          <div v-else-if="field.type === 'date'" :class="field.classElement">
             <label :for="field.model"> {{ field.label }} </label>
             <!-- prettier-ignore -->
             <AppDateTimePicker
@@ -337,39 +339,46 @@ onMounted(async () => {
                 maxDate: field.config?.maxDate ? formLocal[field.config.maxDate] : undefined,
               }"
             />
-          </template>
-          <!-- Campo rangeDate -->
-          <template v-else-if="field.type === 'rangeDate'">
-            <label :for="field.minModel"> {{ field.minLabel }} </label>
-            <!-- prettier-ignore -->
-            <AppDateTimePicker
-              :key="`${field.minModel}`"
-              v-model="formLocal[field.minModel]"
-              :placeholder="field?.minPlaceholder ?? 'Ingresa un fecha'"
-              :config="field.minConfig"
-              :disabled="field.minDisable"
-              clearable
-            />
-            <label :for="field.minModel"> {{ field.maxLabel }} </label>
-            <!-- prettier-ignore -->
-            <AppDateTimePicker
-              :key="`${field.maxModel}`"
-              v-model="formLocal[field.maxModel]"
-              :placeholder="field?.maxPlaceholder ?? 'Ingresa un fecha'"
-              :config="field.maxConfig"
-              :disabled="field.maxDisable"
-              clearable
-            />
-          </template>
+          </div>
 
+          <!-- Campo rangeDate -->
+          <!-- prettier-ignore -->
+          <template v-else-if="field.type === 'rangeDate'">
+            <div :class="field.classElement">
+              <label :for="field.minModel"> {{ field.minLabel }} </label>
+              <!-- prettier-ignore -->
+              <AppDateTimePicker
+                :key="`${field.minModel}`"
+                v-model="formLocal[field.minModel]"
+                :placeholder="field?.minPlaceholder ?? 'Ingresa un fecha'"
+                :config="field.minConfig"
+                :disabled="field.minDisable"
+                clearable
+              />
+            </div>
+            <div :class="field.classElement">
+              <label :for="field.minModel"> {{ field.maxLabel }} </label>
+              <!-- prettier-ignore -->
+              <AppDateTimePicker
+                :key="`${field.maxModel}`"
+                v-model="formLocal[field.maxModel]"
+                :placeholder="field?.maxPlaceholder ?? 'Ingresa un fecha'"
+                :config="field.maxConfig"
+                :disabled="field.maxDisable"
+                clearable
+              />
+            </div>
+          </template>
           <!-- Campo select -->
-          <template v-else-if="field.type === 'select'">
+          <!-- prettier-ignore -->
+          <div v-else-if="field.type === 'select'" :class="field.classElement">
             <label :for="field.model"> {{ field.label }} </label>
             <!-- prettier-ignore -->
             <VSelect
               :items="field.options || []"
               :value="formLocal[field.model]?.label ?? ''"
               item-title="label"
+              :placeholder="field.placeholder || 'Selecciona una opción'"
               :disabled="props.isDisabled || field.disabled"
               @update:modelValue=" (selected) => handleSelectChange(field, selected) "
             >
@@ -377,11 +386,10 @@ onMounted(async () => {
                 <slot :name="label" v-bind="slotProps || {}" />
               </template>
             </VSelect>
-          </template>
-
+          </div>
           <!-- Campo switch -->
           <!-- prettier-ignore -->
-          <div v-else-if="field.type === 'switch'" >
+          <div v-else-if="field.type === 'switch'" :class="field.classElement">
             <label :for="field.model"> {{ field.label }} </label>
             <VSwitch
               v-model="formLocal[field.model]"
