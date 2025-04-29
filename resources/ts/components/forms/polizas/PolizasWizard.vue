@@ -2,7 +2,11 @@
 // prettier-ignore
 import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
 import PolizaWidget from "@/components/forms/polizas/PolizaWidget.vue";
-import { ref } from "vue";
+import { defineEmits, ref } from "vue";
+
+const emit = defineEmits<{
+  (event: "cancel"): void;
+}>();
 
 const step = ref<any>(0);
 const poliza = ref<any>({});
@@ -95,6 +99,13 @@ function handleSelectCliente(cliente: any) {
 function handleSelectSubAgente(Subagente: any) {
   step.value = 5;
   poliza.value.subAgente = Subagente;
+}
+
+function handleCancel() {
+  emit("cancel");
+}
+function handleSubmit() {
+  emit("cancel");
 }
 
 onMounted(() => {
@@ -198,7 +209,7 @@ onMounted(() => {
         </div>
         <div>
           <div class="d-flex justify-start align-center">
-            <VBtn color="secondary" variant="outlined">
+            <VBtn color="secondary" variant="outlined" @click="handleCancel">
               <VIcon start icon="tabler-alert-circle" />
               Cancelar
             </VBtn>
@@ -211,6 +222,8 @@ onMounted(() => {
           :isDialogVisible="false"
           :schema="formSchema"
           :modelValue="poliza"
+          @submit="handleSubmit"
+          @cancel="handleCancel"
         />
       </div>
     </VCardText>

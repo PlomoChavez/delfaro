@@ -173,7 +173,11 @@ function handleCancelarForm() {
 }
 
 function handleNewItem() {
-  handleShowForm(null);
+  if (props.emitCreate) {
+    emit("customCreate", {});
+  } else {
+    handleShowForm(null);
+  }
 }
 
 function processFiltroagrupador(dataHaProcesar: any) {

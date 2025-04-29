@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-import ManagerUsuario from "@/components/managers/ManagerUsuario.vue";
 import PolizasWizard from "@/components/forms/polizas/PolizasWizard.vue";
 
 // prettier-ignore
@@ -13,6 +12,7 @@ const formSchema = [
 ];
 const showFormEdit = ref(false); // Referencia al componente FormFactory
 const data = ref(null); // Referencia al componente FormFactory
+const showWizard = ref(false); // Referencia al componente FormFactory
 
 const tableHeaders = [
   { title: "ID", key: "id" },
@@ -35,15 +35,17 @@ const handleActionsEdit = (dataRow: any) => {
   showFormEdit.value = true;
 };
 const handleCancelar = () => {
-  showFormEdit.value = false;
+  showWizard.value = false;
+};
+const handleActionsCreate = () => {
+  showWizard.value = true;
 };
 </script>
 
 <template>
-  <PolizasWizard />
-  <!-- prettier-ignore
-  <ManagerUsuario v-if="showFormEdit" :data="data" @cancelar="handleCancelar" />
-
+  <!-- prettier-ignore -->
+  <!-- <ManagerUsuario v-if="showFormEdit" :data="data" @cancelar="handleCancelar" /> -->
+  <PolizasWizard v-if="showWizard" @cancel="handleCancelar" />
   <div v-else>
     <h1>Polizas</h1>
     <CrudManager
@@ -60,5 +62,5 @@ const handleCancelar = () => {
       @customEdit="handleActionsEdit"
       @customCreate="handleActionsCreate"
     />
-  </div> -->
+  </div>
 </template>

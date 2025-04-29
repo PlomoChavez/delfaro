@@ -9,7 +9,12 @@ const props = withDefaults(
 );
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+p {
+  margin: 0;
+  padding: 0;
+}
+</style>
 
 <template>
   <div class="mb-4">
