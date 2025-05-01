@@ -117,6 +117,8 @@ async function handleFormSubmit(data: Record<string, any>) {
         data: payload,
       });
       if (response.data.result) {
+        // await handleCancelarForm();
+        await fetchTableData();
         showSuccessMessage({
           title: "Guardado",
           message: "El elemento ha sido guardado correctamente.",
@@ -127,8 +129,6 @@ async function handleFormSubmit(data: Record<string, any>) {
           message: response.data.message,
         });
       }
-      await handleCancelarForm();
-      await fetchTableData();
     }
   } catch (error) {
     console.error("Error al enviar el formulario:", error);
@@ -181,7 +181,24 @@ function handleNewItem() {
   if (props.emitCreate) {
     emit("customCreate", {});
   } else {
-    handleShowForm(null);
+    handleShowForm({
+      nombre: "fr",
+      rfc: "fr",
+      fechaNacimiento: "2025-05-02",
+      direccion: "fr",
+      colonia: "fr",
+      codigoPostal: "fr",
+      estado: {
+        label: "Baja California",
+        id: 2,
+      },
+      ciudad: "fr",
+      correo: "fr@gmsail.com",
+      telefono: "fr",
+      celular: "fr",
+      oficina: "fr",
+      casa: "fr",
+    });
   }
 }
 

@@ -71,8 +71,9 @@ class ClienteController extends Controller
             $data = $request->all();
             // Validar los datos
             $validatedData = $request->validate([
-                'rfc' => 'required|string|unique:clientes,rfc,' . ($data['id'] ?? 'NULL') . ',id',
                 'nombre' => 'required|string|max:255',
+                'rfc' => 'required|string|unique:clientes,rfc,' . ($data['id'] ?? 'NULL') . ',id',
+                // 'rfc' => 'required|string|unique:clientes,rfc,' . ($data['id'] ?? 'NULL') . ',id',
                 'fechaNacimiento' => 'required|date',
                 'direccion' => 'nullable|string',
                 'colonia' => 'nullable|string',

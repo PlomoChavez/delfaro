@@ -18,7 +18,24 @@ const formSchema = [
   { label: "Casa",                type: "text", model: "casa",              },
 ];
 const showFormEdit = ref(false); // Referencia al componente FormFactory
-const data = ref(null); // Referencia al componente FormFactory
+const data = ref({
+  nombre: "fr",
+  rfc: "fr",
+  fechaNacimiento: "2025-05-02",
+  direccion: "fr",
+  colonia: "fr",
+  codigoPostal: "fr",
+  estado: {
+    label: "Baja California",
+    id: 2,
+  },
+  ciudad: "fr",
+  correo: "fr",
+  telefono: "fr",
+  celular: "fr",
+  oficina: "fr",
+  casa: "fr",
+}); // Referencia al componente FormFactory
 const configTable = ref({ actions: ["Seleccionar"] });
 
 const tableHeaders = [

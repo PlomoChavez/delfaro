@@ -76,6 +76,9 @@ Route::post('usuario/team/delete',              [UsuarioController::class, 'dele
 
 // polizas
 Route::post('polizas/wizard',                   [PolizasController::class, 'getRecursosWizard'])->name('polizas.wizard');
+Route::post('polizas/create',                   [PolizasController::class, 'create'])->name('polizas.create');
+Route::post('polizas/update',                   [PolizasController::class, 'update'])->name('polizas.update');
+Route::post('polizas/delete',                   [PolizasController::class, 'delete'])->name('polizas.delete');
 
 // Catalogos
 Route::post('catalogos/tipos-usuarios',         function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-usuarios');      })->name('catalogos.getCatalogo.tipos-usuarios');
