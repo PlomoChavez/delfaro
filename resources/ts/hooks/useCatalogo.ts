@@ -16,16 +16,27 @@ export function useCatalogo() {
       // prettier-ignore
       switch (item.catalogo) {
         case "tipos-usuarios":    url = "/api/catalogos/tipos-usuarios"; break;
+        case "estados":           url = "/api/catalogos/estados"; break;
         case "companias":         url = "/api/catalogos/companias"; break;
         case "formas-pagos":      url = "/api/catalogos/formas-pagos"; break;
         case "tipo-vencimiento":  url = "/api/catalogos/tipo-vencimiento"; break;
         case "metodos-pago":      url = "/api/catalogos/metodos-pago"; break;
         case "moneda":            url = "/api/catalogos/moneda"; break;
         case "estatus-polizas":   url = "/api/catalogos/estatus-polizas"; break;
+        case "ramos":             url = "/api/catalogos/ramos"; break;
+        case "ramosByCompania":   url = "/api/catalogos/ramosByCompania"; break;
       }
 
-      const response = await customRequest(url);
+      let payload: any = item.payload || {};
+
+      const response = await customRequest({
+        url: url,
+        method: "POST",
+        data: payload,
+      });
+
       data = response.data.data;
+
       if (!item.formatCatalogo) {
         let config = {
           label: "label",

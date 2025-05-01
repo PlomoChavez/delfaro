@@ -12,7 +12,7 @@ const formSchema = [
 ];
 const showFormEdit = ref(false); // Referencia al componente FormFactory
 const data = ref(null); // Referencia al componente FormFactory
-const showWizard = ref(false); // Referencia al componente FormFactory
+const showWizard = ref(true); // Referencia al componente FormFactory
 
 const tableHeaders = [
   { title: "ID", key: "id" },

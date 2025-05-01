@@ -61,6 +61,7 @@ const handleCancelar = () => {
       :formSchema="formSchema"
       :tableHeaders="tableHeaders"
       :apiEndpoints="apiEndpoints"
+      :configTable="configTable"
       @customEdit="handleActionsEdit"
     />
   </div>

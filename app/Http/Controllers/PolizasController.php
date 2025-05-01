@@ -31,7 +31,17 @@ class PolizasController extends Controller
                 ]);
             }
             $companias_id = $claves->pluck('compania_id')->toArray();
-            $companias = Compania::whereIn('id', $companias_id)->get();
+            $companias = Compania::whereIn('id', $companias_id)
+                ->with(['ramos.productos' => function ($query) {
+                    $query->select('id', 'ramo_id', 'nombre', 'estatus'); // Selecciona solo los campos necesarios
+                }])
+                ->get();
+            // Ocultar el atributo 'pivot' de los ramos después de cargar los datos
+            $companias->each(function ($compania) {
+                $compania->ramos->each(function ($ramo) {
+                    $ramo->makeHidden('pivot'); // Oculta el atributo 'pivot' en cada ramo
+                });
+            });
             return response()->json([
                 'result' => true,
                 'message' => 'Registros obtenidos con éxito',

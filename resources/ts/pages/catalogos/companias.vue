@@ -39,18 +39,19 @@ const handleAtras = () => {
 </script>
 
 <template>
-  <h1>Compañias</h1>
   <FormEdit v-if="showFormEdit" :data="data" @atras="handleAtras" />
-  <CrudManager
-    v-else
-    title="
-    Compañias"
-    :emitEdit="true"
-    :formModal="true"
-    :show-title="false"
-    :formSchema="formSchema"
-    :tableHeaders="tableHeaders"
-    :apiEndpoints="apiEndpoints"
-    @customEdit="handleActionsEdit"
-  />
+  <div v-else>
+    <h1>Compañias</h1>
+    <CrudManager
+      title="
+      Compañias"
+      :emitEdit="true"
+      :formModal="true"
+      :show-title="false"
+      :formSchema="formSchema"
+      :tableHeaders="tableHeaders"
+      :apiEndpoints="apiEndpoints"
+      @customEdit="handleActionsEdit"
+    />
+  </div>
 </template>

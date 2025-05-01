@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\CompaniaRamo;
 use Illuminate\Support\Facades\DB;
 
 class CatalogosController extends Controller
@@ -13,6 +14,7 @@ class CatalogosController extends Controller
     public function getCatalogo(Request $request, $tabla)
     {
         try {
+            $datos = $request->all();
             switch ($tabla) {
                 case 'tipos-usuarios':
                     $tabla = 'tipos_de_usuarios';
@@ -27,6 +29,9 @@ class CatalogosController extends Controller
                     break;
                 case 'ramos':
                     $tabla = 'ramos';
+                    break;
+                case 'estados':
+                    $tabla = 'estados';
                     break;
                 case 'tipos-vencimiento':
                     $tabla = 'tipos_de_vencimiento';
@@ -55,6 +60,28 @@ class CatalogosController extends Controller
                         ["id" => 5, "label" => "No Vigente"],
                     ];
                     break;
+                case 'ramosByCompania':
+                    $companiaId = $request->input('compania_id');
+                    $rows = CompaniaRamo::where('compania_id', $companiaId)
+                        ->with('ramo')
+                        ->where('estatus', 1)
+                        ->get();
+
+                    $datos = $rows->map(function ($item) {
+                        return [
+                            ...$item->toArray(),
+                            ...$item->ramo->toArray(),
+                            'compania_id' => $item->compania_id,
+                            'estatus' => $item->estatus,
+                        ];
+                    });
+
+                    return response()->json([
+                        'result' => true,
+                        'message' => 'Registros obtenidos con éxito',
+                        'data' => $datos,
+                    ]);
+                    break;
                 default:
                     return response()->json([
                         'result' => false,
@@ -69,7 +96,19 @@ class CatalogosController extends Controller
                     'data' => $tabla,
                 ]);
             }
-            $datos = DB::table($tabla)->get();
+            // Construir la consulta base
+            $query = DB::table($tabla);
+
+            // Agregar condiciones `where` si `$data` tiene opciones
+            if (!empty($datos)) {
+                foreach ($datos as $key => $value) {
+                    $query->where($key, $value);
+                }
+            }
+
+            // Ejecutar la consulta
+            $datos = $query->get();
+
             return response()->json([
                 'result' => true,
                 'message' => 'Registros obtenidos con éxito',

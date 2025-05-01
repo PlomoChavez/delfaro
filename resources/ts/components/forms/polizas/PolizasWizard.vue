@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 // prettier-ignore
 import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
+import PolizaClientes from "@/components/forms/polizas/PolizaClientes.vue";
 import PolizaWidget from "@/components/forms/polizas/PolizaWidget.vue";
 import { defineEmits, ref } from "vue";
 
@@ -12,18 +13,8 @@ const step = ref<any>(0);
 const poliza = ref<any>({});
 const companias = ref<any>(null);
 const claves = ref<any>(null);
-const ramos = ref<any>([
-  { id: 1, nombreCorto: "Autos", estatus: true },
-  { id: 2, nombreCorto: "Vida", estatus: true },
-  { id: 2, nombreCorto: "GMM", estatus: true },
-  { id: 2, nombreCorto: "Salud", estatus: true },
-]);
-const Productos = ref<any>([
-  { id: 1, nombre: "Producto 1", estatus: true, ramoId: 1 },
-  { id: 2, nombre: "Producto 2", estatus: true, ramoId: 1 },
-  { id: 3, nombre: "Producto 3", estatus: true, ramoId: 2 },
-  { id: 4, nombre: "Producto 4", estatus: true, ramoId: 2 },
-]);
+const ramos = ref<any>([]);
+const Productos = ref<any>([]);
 const Agentes = ref<any>([
   { id: 1, nombre: "Agente 1", estatus: true, clave: 131 },
   { id: 2, nombre: "Agente 2", estatus: true, clave: 151 },
@@ -69,7 +60,6 @@ async function fetchData() {
       });
       const data = response.data.data;
       companias.value = data.companias;
-      claves.value = data.claves;
     }
   } catch (error) {
     console.error("Error al obtener los datos:", error);
@@ -78,11 +68,13 @@ async function fetchData() {
 
 function handleSelectCompania(compania: any) {
   step.value = 1;
+  ramos.value = compania.ramos;
   poliza.value.compania = compania;
 }
 
 function handleSelectRamo(ramo: any) {
   step.value = 2;
+  Productos.value = ramo.productos;
   poliza.value.ramo = ramo;
 }
 
@@ -97,8 +89,20 @@ function handleSelectCliente(cliente: any) {
 }
 
 function handleSelectSubAgente(Subagente: any) {
-  step.value = 5;
   poliza.value.subAgente = Subagente;
+  poliza.value = {
+    compania: poliza.value.compania.nombreCorto,
+    compania_id: poliza.value.compania.id,
+    ramo: poliza.value.ramo.label,
+    ramo_id: poliza.value.ramo.id,
+    producto: poliza.value.producto.nombre,
+    producto_id: poliza.value.producto.id,
+    cliente: poliza.value.cliente.nombre,
+    cliente_id: poliza.value.cliente.id,
+    subagente: poliza.value.subAgente.nombre,
+    subagente_id: poliza.value.subAgente.id,
+  };
+  step.value = 5;
 }
 
 function handleCancel() {
@@ -161,7 +165,7 @@ onMounted(() => {
               :key="index"
               @click="handleSelectRamo(item)"
             >
-              <span>{{ item.nombreCorto }}</span>
+              <span>{{ item.label }}</span>
             </div>
           </div>
         </div>
@@ -182,16 +186,7 @@ onMounted(() => {
         <!-- Cliente -->
         <div class="mb-4" v-if="step == 3">
           <h1 class="w-full text-center mb-5">Selecciona un cliente:</h1>
-          <div class="cardsWrapper">
-            <div
-              class="cardItem"
-              v-for="(item, index) in Productos"
-              :key="index"
-              @click="handleSelectCliente(item)"
-            >
-              <span>{{ item.nombre }}</span>
-            </div>
-          </div>
+          <PolizaClientes @actionSeleccionar="handleSelectCliente" />
         </div>
         <!-- Subagente -->
         <div class="mb-4" v-if="step == 4">
@@ -207,13 +202,11 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div>
-          <div class="d-flex justify-start align-center">
-            <VBtn color="secondary" variant="outlined" @click="handleCancel">
-              <VIcon start icon="tabler-alert-circle" />
-              Cancelar
-            </VBtn>
-          </div>
+        <div class="d-flex justify-start align-center">
+          <VBtn color="secondary" variant="outlined" @click="handleCancel">
+            <VIcon start icon="tabler-alert-circle" />
+            Cancelar
+          </VBtn>
         </div>
       </div>
       <div v-if="step == 5">

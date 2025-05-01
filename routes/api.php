@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CompaniaController;
 use App\Http\Controllers\CompaniaRepresentantesController;
 use App\Http\Controllers\PolizasController;
@@ -39,10 +40,21 @@ Route::post('companias/get',                    [CompaniaController::class, 'get
 Route::post('companias/create',                 [CompaniaController::class, 'create'])->name('companias.create');
 Route::post('companias/update',                 [CompaniaController::class, 'update'])->name('companias.update');
 Route::post('companias/delete',                 [CompaniaController::class, 'delete'])->name('companias.delete');
+Route::post('companias/ramos',                  [CompaniaController::class, 'getRamos'])->name('companias.getRamos');
+Route::post('companias/ramos/update',           [CompaniaController::class, 'updateRamos'])->name('companias.updateRamos');
+Route::post('companias/productos/get',          [CompaniaController::class, 'getCompaniaProductos'])->name('companias.getProductos');
+Route::post('companias/productos',              [CompaniaController::class, 'createOrUpdateCompaniaProductos'])->name('companias.updateProductos');
+Route::post('companias/productos/delete',       [CompaniaController::class, 'deleteCompaniaProductos'])->name('companias.deleteCompaniaProductos');
 // companias-representantes
 Route::post('companias/representantes/get',     [CompaniaRepresentantesController::class, 'getAll'])->name('companias.getAll');
 Route::post('companias/representantes',         [CompaniaRepresentantesController::class, 'createOrUpdate'])->name('companias.update');
 Route::post('companias/representantes/delete',  [CompaniaRepresentantesController::class, 'delete'])->name('companias.delete');
+
+// clientes
+Route::post('clientes/get',                     [ClienteController::class, 'getAll'])->name('clientes.getAll');
+Route::post('clientes/create',                  [ClienteController::class, 'createOrUpdate'])->name('clientes.create');
+Route::post('clientes/update',                  [ClienteController::class, 'createOrUpdate'])->name('clientes.update');
+Route::post('clientes/delete',                  [ClienteController::class, 'delete'])->name('clientes.delete');
 
 // usuarios
 Route::post('usuarios/get',                     [UsuarioController::class, 'getAll'])->name('usuarios.getAll');
@@ -70,9 +82,12 @@ Route::post('catalogos/tipos-usuarios',         function (Request $request) { re
 Route::post('catalogos/formas-pagos',           function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'formas-pago');         })->name('catalogos.getCatalogo.formas-pagos');
 Route::post('catalogos/tipo-vencimiento',       function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-vencimiento');   })->name('catalogos.getCatalogo.tipo-vencimiento');
 Route::post('catalogos/metodos-pago',           function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'metodos-pago');        })->name('catalogos.getCatalogo.metodos-pago');
-Route::post('catalogos/moneda',                 function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'monedas');              })->name('catalogos.getCatalogo.monedas');
+Route::post('catalogos/moneda',                 function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'monedas');             })->name('catalogos.getCatalogo.monedas');
+Route::post('catalogos/ramos',                  function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'ramos');               })->name('catalogos.getCatalogo.ramos');
+Route::post('catalogos/ramosByCompania',        function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'ramosByCompania');     })->name('catalogos.getCatalogo.ramosByCompania');
 Route::post('catalogos/estatus-polizas',        function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'estatus-poliza');      })->name('catalogos.getCatalogo.estatus-poliza');
 Route::post('catalogos/companias',              function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'companias');           })->name('catalogos.getCatalogo.companias');
+Route::post('catalogos/estados',                function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'estados');           })->name('catalogos.getCatalogo.estados');
 
 
 // @formatter:on

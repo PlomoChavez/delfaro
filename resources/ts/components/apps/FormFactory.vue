@@ -147,6 +147,7 @@ function handleNumberInput(event: Event, field: any) {
     sufijo: "",
     precision: 2,
   };
+
   config = {
     ...config,
     ...(field?.config || {}),
@@ -249,7 +250,9 @@ onMounted(async () => {
         }
       }
     }
-    field.classElement = field.classElement || "wDefault";
+    field.classElement = props.isDialogVisible
+      ? "wModal"
+      : field.classElement || "wDefault";
   });
   schemaLocal.value = tmp;
   setTimeout(() => {}, 500);
@@ -263,6 +266,11 @@ onMounted(async () => {
 }
 .wDefault {
   width: 25% !important;
+  padding: 10px;
+}
+
+.wModal {
+  width: 100% !important;
   padding: 10px;
 }
 .formWrapper {

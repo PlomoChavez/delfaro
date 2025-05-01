@@ -21,7 +21,7 @@ p {
     <!-- prettier-ignore -->
     <p v-if="props.data.compania"><strong>Compañia: </strong>{{ props.data.compania.nombre }}</p>
     <!-- prettier-ignore -->
-    <p v-if="props.data.ramo"><strong>Ramo: </strong>{{ props.data.ramo.nombreCorto }}</p>
+    <p v-if="props.data.ramo"><strong>Ramo: </strong>{{ props.data.ramo.label }}</p>
     <!-- prettier-ignore -->
     <p v-if="props.data.producto"><strong>Producto: </strong>{{ props.data.producto.nombre }}</p>
     <!-- prettier-ignore -->

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-import ManagerUsuario from "@/components/managers/ManagerUsuario.vue";
+import { defineEmits, ref } from "vue";
+const emit = defineEmits<{
+  (event: "actionSeleccionar", item: any): void;
+}>();
 // prettier-ignore
 const formSchema = [
   { label: "Nombre",              type: "text",   model: "nombre",          },
@@ -46,21 +49,30 @@ const handleActionsEdit = (dataRow: any) => {
 const handleCancelar = () => {
   showFormEdit.value = false;
 };
+const handleCustomAction = (data: any) => {
+  let { action, item } = data;
+  switch (action) {
+    case "Seleccionar":
+      emit("actionSeleccionar", item);
+      break;
+    default:
+      console.log("Acción no reconocida");
+  }
+};
 </script>
 
 <template>
-  <!-- prettier-ignore -->
-  <ManagerUsuario v-if="showFormEdit" :data="data" @cancelar="handleCancelar" />
-  <div v-else>
-    <h1>Clientes</h1>
+  <div>
     <!-- prettier-ignore -->
     <CrudManager
-      title="Cliente"
-      :emitEdit="true"
+      title="Clientes"
       :show-title="false"
+      :customAction="true"
       :formSchema="formSchema"
       :tableHeaders="tableHeaders"
       :apiEndpoints="apiEndpoints"
+      :configTable="configTable"
+      @customAction="handleCustomAction"
       @customEdit="handleActionsEdit"
     />
   </div>

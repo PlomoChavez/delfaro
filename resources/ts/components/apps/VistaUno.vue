@@ -23,6 +23,7 @@ interface TableHeader {
 }
 
 const emit = defineEmits<{
+  (event: "customAction", item: any): void;
   (event: "customEdit", item: any): void;
   (event: "customCreate", item: any): void;
   (event: "customDelete", item: any): void;
@@ -34,6 +35,7 @@ const props = withDefaults(
     formSchema: FormSchemaField[]; // Esquema del formulario
     tableHeaders: TableHeader[]; // Esquema de la tabla
     formModal?: boolean; // Indica si el formulario será un modal
+    customAction?: boolean; // Indica si el formulario será un modal
     emitCreate?: boolean; // Indica si el formulario será un modal
     emitEdit?: boolean; // Indica si el formulario será un modal
     emitDelete?: boolean; // Indica si el formulario será un modal
@@ -41,6 +43,7 @@ const props = withDefaults(
     showTitle?: boolean; // Indica si se debe mostrar el título
     filtroAgrupador?: string | null; // Indica si se debe mostrar el título
     filtroAgrupadorInicial?: string | null; // Indica si se debe mostrar el título
+    configTable?: any; // Configuración de la tabla
     apiEndpoints?: {
       fetch?: string; // Endpoint para obtener datos
       create?: string; // Endpoint para crear un elemento
@@ -49,10 +52,12 @@ const props = withDefaults(
     };
   }>(),
   {
+    configTable: { actions: ["Editar", "Eliminar"] },
     filtroAgrupadorInicial: null,
     filtroAgrupador: null,
     payloadDefault: null, // Valor predeterminado
     showTitle: true, // Valor predeterminado
+    customAction: false, // Valor predeterminado
   }
 );
 
@@ -245,25 +250,29 @@ function formatToAmPm(dateString: string): string {
 }
 
 function handleActionClick({ action, item }: { action: string; item: any }) {
-  if (action === "Eliminar") {
-    showDeleteItem({
-      title: "¿Estás seguro de eliminar este registro?",
-      message: "Esta acción no se puede deshacer.",
-      confirmText: "Sí, eliminar",
-      cancelText: "Cancelar",
-      onConfirm: () => {
-        handleDeleteItem(item);
-      },
-      onCancel: () => {},
-    });
-  } else if (action === "Editar") {
-    if (props.emitEdit) {
-      emit("customEdit", item); // Emite el evento personalizado con la información del elemento
-    } else {
-      // Comportamiento predeterminado
-      let tmp = { ...item };
-      tmp.estatus = tmp.estatus === "Activo" ? true : false;
-      handleShowForm(tmp);
+  if (props.customAction) {
+    emit("customAction", { action, item }); // Emite el evento personalizado con la información del elemento
+  } else {
+    if (action === "Eliminar") {
+      showDeleteItem({
+        title: "¿Estás seguro de eliminar este registro?",
+        message: "Esta acción no se puede deshacer.",
+        confirmText: "Sí, eliminar",
+        cancelText: "Cancelar",
+        onConfirm: () => {
+          handleDeleteItem(item);
+        },
+        onCancel: () => {},
+      });
+    } else if (action === "Editar") {
+      if (props.emitEdit) {
+        emit("customEdit", item); // Emite el evento personalizado con la información del elemento
+      } else {
+        // Comportamiento predeterminado
+        let tmp = { ...item };
+        tmp.estatus = tmp.estatus === "Activo" ? true : false;
+        handleShowForm(tmp);
+      }
     }
   }
 }
@@ -338,7 +347,7 @@ onBeforeMount(() => {
         <DataTable
           :headers="tableHeaders"
           :data="tableData"
-          :config="{ actions: ['Editar', 'Eliminar'] }"
+          :config="props.configTable"
           @action="handleActionClick"
         />
       </div>
