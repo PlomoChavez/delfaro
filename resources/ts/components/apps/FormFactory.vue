@@ -59,26 +59,26 @@ watch(
   }
 );
 
-watch(
-  () => formLocal, // Observa directamente el objeto reactivo
-  (newValue) => {
-    schemaLocal.value.forEach((field: any) => {
-      if (field?.type === "rangeDate") {
-        if (newValue[field.minModel]) {
-          showForm.value = false;
-          field.maxConfig.minDate = newValue[field.minModel];
-        }
-        if (newValue[field.maxModel]) {
-          showForm.value = false;
-          field.minConfig.maxDate = newValue[field.maxModel];
-        }
-      }
-    });
-    // prettier-ignore
-    setTimeout(() => { showForm.value = true; }, 0.5);
-  },
-  { deep: true } // Habilita la observación profunda
-);
+// watch(
+//   () => formLocal, // Observa directamente el objeto reactivo
+//   (newValue) => {
+//     schemaLocal.value.forEach((field: any) => {
+//       if (field?.type === "rangeDate") {
+//         if (newValue[field.minModel]) {
+//           showForm.value = false;
+//           field.maxConfig.minDate = newValue[field.minModel];
+//         }
+//         if (newValue[field.maxModel]) {
+//           showForm.value = false;
+//           field.minConfig.maxDate = newValue[field.maxModel];
+//         }
+//       }
+//     });
+//     // prettier-ignore
+//     setTimeout(() => { showForm.value = true; }, 0.5);
+//   },
+//   { deep: true } // Habilita la observación profunda
+// );
 
 // Maneja los cambios en los inputs
 function handleInputChange(field: string, value: any) {
@@ -187,6 +187,21 @@ function handleNumberInput(event: Event, field: any) {
   const newCursorPosition =
     formattedValue.length - (rawValue.length - cursorPosition);
   input.setSelectionRange(newCursorPosition, newCursorPosition);
+}
+
+function handleRangeDateChange(field: any, modelKey: "minModel" | "maxModel") {
+  // showForm.value = false;
+  if (modelKey === "minModel" && formLocal[field.minModel]) {
+    field.maxConfig.minDate = formLocal[field.minModel];
+  }
+  if (modelKey === "maxModel" && formLocal[field.maxModel]) {
+    field.minConfig.maxDate = formLocal[field.maxModel];
+  }
+  field.refreshKey = Date.now(); // Genera un valor único
+  // showForm.value = false;
+
+  // // prettier-ignore
+  // setTimeout(() => { showForm.value = true; }, 0.5);
 }
 
 // Lógica para cargar catálogos dinámicos
@@ -356,21 +371,23 @@ onMounted(async () => {
               <label :for="field.minModel"> {{ field.minLabel }} </label>
               <!-- prettier-ignore -->
               <AppDateTimePicker
-                :key="`${field.minModel}`"
+                :key="field.refreshKey" 
                 v-model="formLocal[field.minModel]"
                 :placeholder="field?.minPlaceholder ?? 'Ingresa un fecha'"
+                @change="handleRangeDateChange(field, 'minModel')"
                 :config="field.minConfig"
                 :disabled="field.minDisable"
                 clearable
               />
             </div>
             <div :class="field.classElement">
-              <label :for="field.minModel"> {{ field.maxLabel }} </label>
+              <label :for="field.maxModel"> {{ field.maxLabel }} </label>
               <!-- prettier-ignore -->
               <AppDateTimePicker
-                :key="`${field.maxModel}`"
+              :key="field.refreshKey" 
                 v-model="formLocal[field.maxModel]"
                 :placeholder="field?.maxPlaceholder ?? 'Ingresa un fecha'"
+                @change="handleRangeDateChange(field, 'maxModel')"
                 :config="field.maxConfig"
                 :disabled="field.maxDisable"
                 clearable
