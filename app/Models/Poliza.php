@@ -104,4 +104,22 @@ class Poliza extends Model
     {
         return $this->belongsTo(CompaniaProducto::class, 'producto_id');
     }
+
+    /**
+     * Relación con el modelo PolizaAsegurados.
+     * Una póliza puede tener muchos asegurados.
+     */
+    public function asegurados()
+    {
+        return $this->hasMany(PolizaAsegurados::class, 'poliza_id');
+    }
+
+    /**
+     * Relación con el modelo PolizaRecibo.
+     * Una póliza puede tener muchos recibos.
+     */
+    public function recibos()
+    {
+        return $this->hasMany(PolizaRecibo::class, 'poliza_id');
+    }
 }

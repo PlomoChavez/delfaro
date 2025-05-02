@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\UsuarioClave;
 use App\Models\Compania;
 use App\Models\Poliza;
+use App\Models\PolizaRecibo;
+use App\Models\PolizaHistorial;
+use Carbon\Carbon;
 
 class PolizasController extends Controller
 {
@@ -136,7 +140,11 @@ class PolizasController extends Controller
                 'pagoSubsecuente' => 'required|numeric|min:0',
             ]);
 
+            Log::info('Pruebas');
             $poliza = Poliza::create($data);
+            $data['poliza_id'] = $poliza->id;
+            $this->newAccionHistorial('Creación de póliza', $poliza->id);
+            $this->createRecibos($data);
 
             return response()->json([
                 'result' => true,
@@ -147,6 +155,82 @@ class PolizasController extends Controller
             return response()->json([
                 'result' => false,
                 'message' => 'Error al crear la póliza: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function createRecibos($data)
+    {
+        try {
+            Log::info('Datos recibidos', $data);
+
+            $tipoVencimiento = $data['formaPago_id'] ?? null;
+            $recibosPorPeriodo = 0;
+
+            // Determinar la cantidad de recibos por período según el tipo de vencimiento
+            if ($tipoVencimiento == 1) { // Anual
+                $recibosPorPeriodo = 1;
+            } elseif ($tipoVencimiento == 2) { // Mensual
+                $recibosPorPeriodo = 12;
+            } elseif ($tipoVencimiento == 3) { // Quincenal
+                $recibosPorPeriodo = 24;
+            } elseif ($tipoVencimiento == 4) { // Semestral
+                $recibosPorPeriodo = 2;
+            } elseif ($tipoVencimiento == 5) { // Trimestral
+                $recibosPorPeriodo = 4;
+            } else {
+                throw new \Exception('Tipo de vencimiento no válido');
+            }
+
+            // Convertir las fechas de inicio y fin de vigencia a objetos Carbon
+            $fechaInicio = Carbon::parse($data['inicioVigencia']);
+            $fechaFin = Carbon::parse($data['finVigencia']);
+
+            // Calcular la cantidad total de períodos entre las fechas
+            $diferenciaEnMeses = $fechaInicio->diffInMonths($fechaFin);
+            $recibosTotal = ceil($diferenciaEnMeses / (12 / $recibosPorPeriodo)); // Total de recibos
+
+            $poliza = $data['poliza_id'] ?? 3;
+
+            // Crear los recibos
+            for ($i = 0; $i < $recibosTotal; $i++) {
+                $recibo = new PolizaRecibo();
+                $recibo->poliza_id = $poliza;
+                $recibo->numeroRecibo = 'REC-' . $poliza . "-" . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
+
+                // Calcular la fecha de vencimiento según el tipo de vencimiento
+                $vencimiento = $fechaInicio->copy(); // Clonar la fecha de inicio para no modificarla
+                if ($tipoVencimiento == 1) { // Anual
+                    $vencimiento->addYears($i);
+                } elseif ($tipoVencimiento == 2) { // Mensual
+                    $vencimiento->addMonths($i);
+                } elseif ($tipoVencimiento == 3) { // Quincenal
+                    $vencimiento->addDays($i * 15);
+                } elseif ($tipoVencimiento == 4) { // Semestral
+                    $vencimiento->addMonths($i * 6);
+                } elseif ($tipoVencimiento == 5) { // Trimestral
+                    $vencimiento->addMonths($i * 3);
+                }
+
+                $recibo->vencimiento = $vencimiento->format('Y-m-d'); // Formatear la fecha de vencimiento
+                $recibo->importe = $i == 0 ? $data['pagoInicial'] : $data['pagoSubsecuente'];
+                $recibo->estatus = 'Pendiente';
+                $recibo->save();
+            }
+            $this->newAccionHistorial('Creación de recibos, se crearon ' . $recibosTotal . ' de recibos', $poliza);
+
+            Log::info('Recibos creados: ' . $recibosTotal);
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Recibos creados con éxito',
+                'data' => $recibosTotal,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al crear los recibos: ' . $e->getMessage());
+            return response()->json([
+                'result' => false,
+                'message' => 'Error al crear los recibos: ' . $e->getMessage(),
             ]);
         }
     }
@@ -215,6 +299,10 @@ class PolizasController extends Controller
 
             $poliza = Poliza::findOrFail($id);
             $poliza->delete();
+            $recibos = PolizaRecibo::where('poliza_id', $id)->get();
+            foreach ($recibos as $recibo) {
+                $recibo->delete();
+            }
 
             return response()->json([
                 'result' => true,
@@ -225,6 +313,83 @@ class PolizasController extends Controller
                 'result' => false,
                 'message' => 'Error al eliminar la póliza: ' . $e->getMessage(),
             ]);
+        }
+    }
+
+    public function getRecibos(Request $request)
+    {
+        try {
+            $id = $request->input('poliza_id');
+
+            if (!$id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Error al obtener los recibos: No se ha proporcionado el ID de la póliza',
+                ]);
+            }
+
+            $recibos = PolizaRecibo::where('poliza_id', $id)->get();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Recibos obtenidos con éxito',
+                'data' => $recibos,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Error al obtener los recibos: ' . $e->getMessage(),
+            ]);
+        }
+    }
+    public function gethistorial(Request $request)
+    {
+        try {
+            $id = $request->input('poliza_id');
+
+            if (!$id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Error al obtener los historial: No se ha proporcionado el ID de la póliza',
+                ]);
+            }
+
+            $data = PolizaHistorial::where('poliza_id', $id)->get();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Historial obtenido con éxito',
+                'data' => $data,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Error al obtener el historial: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function newAccionHistorial($acccion, $poliza_id = null)
+    {
+        try {
+
+            if (!$poliza_id) {
+                return false;
+            }
+            Log::info('acccion: ' . $acccion);
+            Log::info('poliza_id: ' . $poliza_id);
+
+
+            $tmp = PolizaHistorial::create([
+                'accion' => $acccion,
+                'poliza_id' => $poliza_id,
+            ]);
+            Log::info('Historial creado: ' . $tmp);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::info('Historial creado: ' . $e->getMessage());
+            return false;
         }
     }
 }

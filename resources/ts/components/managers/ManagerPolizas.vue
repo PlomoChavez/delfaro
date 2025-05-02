@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import PolizaAsegurados from "@/components/forms/polizas/PolizaAsegurados.vue";
-import UsuarioSubagentesV1 from "@/components/forms/usuarios/UsuarioSubagentesV1.vue";
-import UsuariosAsistentesV1 from "@/components/forms/usuarios/UsuariosAsistentesV1.vue";
-import { defineProps, ref } from "vue";
+import PolizaHistorial from "@/components/forms/polizas/PolizaHistorial.vue";
+import PolizaRecibos from "@/components/forms/polizas/PolizaRecibos.vue";
+import { defineEmits, defineProps, ref } from "vue";
 
 const currentTab = ref("item1");
 const modalContrasenia = ref(false);
 const formDisabled = ref(true);
 const dataContrasenia = ref({});
+const recibos: any = ref({});
+const historial: any = ref([]);
 
 // prettier-ignore
 const props = withDefaults(
@@ -44,10 +46,87 @@ const handleShowModalContrasenia = () => {
   modalContrasenia.value = true;
 };
 
+async function getRecibos() {
+  let url = "/api/polizas/recibos";
+  let payload = { poliza_id: props.data.id };
+  let response = await customRequest({
+    url: url,
+    method: "POST",
+    data: payload,
+  });
+  if (response.data.result) {
+    recibos.value = response.data.data;
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: response.data.message,
+    });
+  }
+}
+async function getHistorial() {
+  let url = "/api/polizas/historial";
+  let payload = { poliza_id: props.data.id };
+  let response = await customRequest({
+    url: url,
+    method: "POST",
+    data: payload,
+  });
+  if (response.data.result) {
+    historial.value = response.data.data;
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: response.data.message,
+    });
+  }
+}
+
 // prettier-ignore
 const handleEditForm = () => { formDisabled.value = !formDisabled.value; };
 // prettier-ignore
 const handleBack = () => { emit("cancelar"); };
+
+watch(
+  () => currentTab.value,
+  (newValue) => {
+    console.log("currentTab", newValue);
+    if (currentTab.value == "2") {
+      // getRecibos();
+      recibos.value = [
+        {
+          id: 25,
+          poliza_id: 29,
+          numeroRecibo: "REC-29-0001",
+          vencimiento: "2025-01-23",
+          importe: "6650.61",
+          estatus: "Pendiente",
+          fechaPago: null,
+          fechaCancelado: null,
+          evidencia: null,
+          created_at: "2025-05-02T17:36:29.000000Z",
+          updated_at: "2025-05-02T17:36:29.000000Z",
+        },
+        {
+          id: 26,
+          poliza_id: 29,
+          numeroRecibo: "REC-29-0002",
+          vencimiento: "2025-07-23",
+          importe: "5954.63",
+          estatus: "Pagado",
+          fechaPago: null,
+          fechaCancelado: null,
+          evidencia: null,
+          created_at: "2025-05-02T17:36:29.000000Z",
+          updated_at: "2025-05-02T17:36:29.000000Z",
+        },
+      ];
+    }
+    if (currentTab.value == "3") {
+      getHistorial();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -83,24 +162,9 @@ const handleBack = () => { emit("cancelar"); };
             :modelValue="props.data"
             @cancel="formDisabled = true"
           />
-          <ModuladorFormFactory
-            :title="'Cambiar contraseña'"
-            :isDialogVisible="modalContrasenia"
-            :schema="formSchemaContrasenia"
-            :showTitle="false"
-            :formModal="true"
-            :modelValue="dataContrasenia"
-            @update:isDialogVisible="modalContrasenia = false"
-            @cancel="modalContrasenia = false"
-          />
 
           <div v-if="formDisabled" class="d-flex justify-end gap-3 mt-4">
             <!-- prettier-ignore -->
-            <VBtn color="secondary" @click="handleShowModalContrasenia">
-              <VIcon start icon="tabler-key" />
-              Cambiar contraseña
-            </VBtn>
-
             <VBtn color="warning" @click="handleEditForm">
               <VIcon start icon="tabler-edit" />
               Editar
@@ -112,10 +176,10 @@ const handleBack = () => { emit("cancelar"); };
           <PolizaAsegurados :data="props.data" />
         </VWindowItem>
         <VWindowItem :value="`item3`">
-          <UsuarioSubagentesV1 :data="props.data" />
+          <PolizaRecibos :recibos="recibos" />
         </VWindowItem>
         <VWindowItem :value="`item4`">
-          <UsuariosAsistentesV1 :data="props.data" />
+          <PolizaHistorial :data="historial" />
         </VWindowItem>
       </VWindow>
     </VCardText>

@@ -18,6 +18,7 @@ declare global {
   const avatarText: typeof import('./resources/ts/@core/utils/formatters')['avatarText']
   const axiosInstance: typeof import('./resources/ts/utils/axiosInstance')['axiosInstance']
   const betweenValidator: typeof import('./resources/ts/@core/utils/validators')['betweenValidator']
+  const calcularDiferenciaTiempo: typeof import('./resources/ts/utils/helper')['calcularDiferenciaTiempo']
   const computed: typeof import('vue')['computed']
   const computedAsync: typeof import('@vueuse/core')['computedAsync']
   const computedEager: typeof import('@vueuse/core')['computedEager']
@@ -55,6 +56,7 @@ declare global {
   const extendRef: typeof import('@vueuse/core')['extendRef']
   const formatDate: typeof import('./resources/ts/@core/utils/formatters')['formatDate']
   const formatDateToMonthShort: typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']
+  const formatearFechaHumana: typeof import('./resources/ts/utils/helper')['formatearFechaHumana']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
@@ -389,6 +391,7 @@ declare module 'vue' {
     readonly avatarText: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['avatarText']>
     readonly axiosInstance: UnwrapRef<typeof import('./resources/ts/utils/axiosInstance')['axiosInstance']>
     readonly betweenValidator: UnwrapRef<typeof import('./resources/ts/@core/utils/validators')['betweenValidator']>
+    readonly calcularDiferenciaTiempo: UnwrapRef<typeof import('./resources/ts/utils/helper')['calcularDiferenciaTiempo']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly computedAsync: UnwrapRef<typeof import('@vueuse/core')['computedAsync']>
     readonly computedEager: UnwrapRef<typeof import('@vueuse/core')['computedEager']>
@@ -424,6 +427,7 @@ declare module 'vue' {
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly formatDate: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDate']>
     readonly formatDateToMonthShort: UnwrapRef<typeof import('./resources/ts/@core/utils/formatters')['formatDateToMonthShort']>
+    readonly formatearFechaHumana: UnwrapRef<typeof import('./resources/ts/utils/helper')['formatearFechaHumana']>
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>

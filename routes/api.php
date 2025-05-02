@@ -88,6 +88,12 @@ Route::post('polizas/asegurados',               [PolizaAseguradosController::cla
 Route::post('polizas/asegurados/cliente',       [PolizaAseguradosController::class, 'createOfCliente'])->name('Asegurados.create');
 Route::post('polizas/asegurados/delete',        [PolizaAseguradosController::class, 'delete'])->name('Asegurados.delete');
 
+// polizas-recibos
+Route::post('polizas/recibos',                  [PolizasController::class, 'getRecibos'])->name('poliza.recibos.get');
+
+// polizas-historial
+Route::post('polizas/historial',                  [PolizasController::class, 'gethistorial'])->name('poliza.historial.get');
+
 // Catalogos
 Route::post('catalogos/tipos-usuarios',         function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-usuarios');      })->name('catalogos.getCatalogo.tipos-usuarios');
 Route::post('catalogos/formas-pagos',           function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'formas-pagos');         })->name('catalogos.getCatalogo.formas-pagos');
