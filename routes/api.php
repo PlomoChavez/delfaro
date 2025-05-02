@@ -7,8 +7,9 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CompaniaController;
 use App\Http\Controllers\CompaniaRepresentantesController;
-use App\Http\Controllers\PolizasController;
 use App\Http\Controllers\CatalogosController;
+use App\Http\Controllers\PolizasController;
+use App\Http\Controllers\PolizaAseguradosController;
 // @formatter:off
 // Actividades
 Route::post('catalogo/actividades/get',         function (Request $request) { return app(CatalogoController::class)->getAll($request, 'actividades'); })->name('catalogo.actividades.getAll');
@@ -76,13 +77,20 @@ Route::post('usuario/team/delete',              [UsuarioController::class, 'dele
 
 // polizas
 Route::post('polizas/wizard',                   [PolizasController::class, 'getRecursosWizard'])->name('polizas.wizard');
+Route::post('polizas/get',                      [PolizasController::class, 'getAll'])->name('polizas.getAll');
 Route::post('polizas/create',                   [PolizasController::class, 'create'])->name('polizas.create');
 Route::post('polizas/update',                   [PolizasController::class, 'update'])->name('polizas.update');
 Route::post('polizas/delete',                   [PolizasController::class, 'delete'])->name('polizas.delete');
 
+// polizas-asegurados
+Route::post('polizas/asegurados/get',           [PolizaAseguradosController::class, 'getAll'])->name('Asegurados.getAll');
+Route::post('polizas/asegurados',               [PolizaAseguradosController::class, 'createOrUpdate'])->name('Asegurados.create');
+Route::post('polizas/asegurados/cliente',       [PolizaAseguradosController::class, 'createOfCliente'])->name('Asegurados.create');
+Route::post('polizas/asegurados/delete',        [PolizaAseguradosController::class, 'delete'])->name('Asegurados.delete');
+
 // Catalogos
 Route::post('catalogos/tipos-usuarios',         function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-usuarios');      })->name('catalogos.getCatalogo.tipos-usuarios');
-Route::post('catalogos/formas-pagos',           function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'formas-pago');         })->name('catalogos.getCatalogo.formas-pagos');
+Route::post('catalogos/formas-pagos',           function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'formas-pagos');         })->name('catalogos.getCatalogo.formas-pagos');
 Route::post('catalogos/tipo-vencimiento',       function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-vencimiento');   })->name('catalogos.getCatalogo.tipo-vencimiento');
 Route::post('catalogos/metodos-pago',           function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'metodos-pago');        })->name('catalogos.getCatalogo.metodos-pago');
 Route::post('catalogos/moneda',                 function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'monedas');             })->name('catalogos.getCatalogo.monedas');

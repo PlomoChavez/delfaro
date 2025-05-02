@@ -1,9 +1,27 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
 import { defineEmits, ref } from "vue";
+
+const props = withDefaults(
+  defineProps<{
+    titulo?: any;
+    subtitulos?: any;
+    payloadDefault?: any;
+    exportSubmit?: any;
+  }>(),
+  {
+    titulo: "Clientes",
+    subtitulos: null,
+    payloadDefault: null,
+    exportSubmit: false,
+  }
+);
+
 const emit = defineEmits<{
   (event: "actionSeleccionar", item: any): void;
+  (event: "cancelar"): void;
 }>();
+
 // prettier-ignore
 const formSchema = [
   { label: "Nombre",              type: "text",   model: "nombre",          },
@@ -59,21 +77,28 @@ const handleCustomAction = (data: any) => {
       console.log("Acción no reconocida");
   }
 };
+
+const handleExportSubmit = (data: any) => {
+  emit("cancelar");
+};
 </script>
 
 <template>
   <div>
     <!-- prettier-ignore -->
     <CrudManager
-      title="Clientes"
+      :title="props.titulo"
       :show-title="false"
       :customAction="true"
+      :subtitulos="props.subtitulos"
+      :exportSubmit="props.exportSubmit"
       :formSchema="formSchema"
       :tableHeaders="tableHeaders"
       :apiEndpoints="apiEndpoints"
       :configTable="configTable"
       @customAction="handleCustomAction"
       @customEdit="handleActionsEdit"
+      @exportSubmit="handleExportSubmit"
     />
   </div>
 </template>

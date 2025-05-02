@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TipoDeVencimiento extends Model
+class Moneda extends Model
 {
-    use HasFactory, SoftDeletes;
-    protected $table = 'tipos_de_vencimiento';
+    use HasFactory;
+
+    protected $table = 'monedas';
 
     protected $fillable = [
         'label',
         'estatus',
     ];
+
+    public $timestamps = true; // Para manejar `created_at` y `updated_at`
 }

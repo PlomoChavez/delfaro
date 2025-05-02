@@ -23,6 +23,7 @@ interface TableHeader {
 }
 
 const emit = defineEmits<{
+  (event: "exportSubmit", item: any): void;
   (event: "customAction", item: any): void;
   (event: "customEdit", item: any): void;
   (event: "customCreate", item: any): void;
@@ -34,15 +35,19 @@ const props = withDefaults(
     title: string; // Título del módulo
     formSchema: FormSchemaField[]; // Esquema del formulario
     tableHeaders: TableHeader[]; // Esquema de la tabla
+    showBtnNuevo?: boolean; // Indica si el formulario será un modal
     formModal?: boolean; // Indica si el formulario será un modal
     customAction?: boolean; // Indica si el formulario será un modal
+    emitNew?: boolean; // Indica si el formulario será un modal
     emitCreate?: boolean; // Indica si el formulario será un modal
     emitEdit?: boolean; // Indica si el formulario será un modal
+    exportSubmit?: boolean; // Indica si el formulario será un modal
     emitDelete?: boolean; // Indica si el formulario será un modal
     payloadDefault?: any; // Indica si se debe mostrar el título
     showTitle?: boolean; // Indica si se debe mostrar el título
     filtroAgrupador?: string | null; // Indica si se debe mostrar el título
     filtroAgrupadorInicial?: string | null; // Indica si se debe mostrar el título
+    subtitulos?: any; // Configuración de la tabla
     configTable?: any; // Configuración de la tabla
     apiEndpoints?: {
       fetch?: string; // Endpoint para obtener datos
@@ -54,10 +59,14 @@ const props = withDefaults(
   {
     configTable: { actions: ["Editar", "Eliminar"] },
     filtroAgrupadorInicial: null,
+    subtitulos: null,
     filtroAgrupador: null,
     payloadDefault: null, // Valor predeterminado
     showTitle: true, // Valor predeterminado
     customAction: false, // Valor predeterminado
+    exportSubmit: false, // Valor predeterminado
+    showBtnNuevo: true, // Valor predeterminado
+    emitDelete: false, // Valor predeterminado
   }
 );
 
@@ -117,6 +126,9 @@ async function handleFormSubmit(data: Record<string, any>) {
         data: payload,
       });
       if (response.data.result) {
+        if (props.exportSubmit) {
+          emit("exportSubmit", { ...data });
+        }
         // await handleCancelarForm();
         await fetchTableData();
         showSuccessMessage({
@@ -137,7 +149,7 @@ async function handleFormSubmit(data: Record<string, any>) {
 
 async function handleDeleteItem(item: any) {
   try {
-    if (props.emitCreate) {
+    if (props.emitDelete) {
       // Emitir evento personalizado para manejar la eliminación
       emit("customDelete", item);
     } else {
@@ -178,27 +190,10 @@ function handleCancelarForm() {
 }
 
 function handleNewItem() {
-  if (props.emitCreate) {
+  if (props.emitNew) {
     emit("customCreate", {});
   } else {
-    handleShowForm({
-      nombre: "fr",
-      rfc: "fr",
-      fechaNacimiento: "2025-05-02",
-      direccion: "fr",
-      colonia: "fr",
-      codigoPostal: "fr",
-      estado: {
-        label: "Baja California",
-        id: 2,
-      },
-      ciudad: "fr",
-      correo: "fr@gmsail.com",
-      telefono: "fr",
-      celular: "fr",
-      oficina: "fr",
-      casa: "fr",
-    });
+    handleShowForm({});
   }
 }
 
@@ -334,9 +329,13 @@ onBeforeMount(() => {
       </div>
       <div v-if="showForm == false || props.formModal">
         <div
-          class="d-flex justify-end align-center"
+          v-if="showBtnNuevo"
+          class="divBtnWrapper"
           :class="props.filtroAgrupador ? '' : ' mb-5 '"
         >
+          <div>
+            <p>{{ props.subtitulos }}</p>
+          </div>
           <VBtn @click="handleNewItem">
             <VIcon start icon="tabler-checkbox" />
             Nuevo
@@ -373,6 +372,24 @@ onBeforeMount(() => {
 </template>
 
 <style scoped>
+.w-full {
+  width: 100%;
+}
+.divBtnWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.divBtnWrapper p {
+  /* font-size: 0.8125rem; */
+  line-height: 1.25rem;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+}
+.bgRed {
+  background-color: #ff0000;
+}
 .textFiltroRapido {
   font-size: 0.8125rem;
   line-height: 1.25rem;

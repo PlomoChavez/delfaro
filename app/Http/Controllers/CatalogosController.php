@@ -22,8 +22,9 @@ class CatalogosController extends Controller
                 case 'estatus-clientes':
                     $tabla = 'estatus_cliente';
                     break;
-                case 'formas-pago':
-                    $tabla = 'metodos_de_pago';
+                case 'formas-pagos':
+                    $tabla = 'formas_de_pago';
+                    break;
                 case 'metodos-pago':
                     $tabla = 'metodos_de_pago';
                     break;
@@ -40,25 +41,10 @@ class CatalogosController extends Controller
                     $tabla = 'compania';
                     break;
                 case 'monedas':
-                    $tabla = [
-                        ["id" => 1, "label" => "MXN - Peso Mexicano"],
-                        ["id" => 2, "label" => "USD - Dólar Americano"],
-                        ["id" => 3, "label" => "EUR - Euro"],
-                        ["id" => 4, "label" => "GBP - Libra Esterlina"],
-                        ["id" => 5, "label" => "JPY - Yen Japonés"],
-                        ["id" => 6, "label" => "CNY - Yuan Chino"],
-                        ["id" => 7, "label" => "INR - Rupia India"],
-                        ["id" => 8, "label" => "BRL - Real Brasileño"],
-                    ];
+                    $tabla = 'monedas';
                     break;
                 case 'estatus-poliza':
-                    $tabla = [
-                        ["id" => 1, "label" => "Vigente"],
-                        ["id" => 2, "label" => "Cancelada"],
-                        ["id" => 3, "label" => "Suspendida"],
-                        ["id" => 4, "label" => "En Proceso"],
-                        ["id" => 5, "label" => "No Vigente"],
-                    ];
+                    $tabla = 'estatus_polizas';
                     break;
                 case 'ramosByCompania':
                     $companiaId = $request->input('compania_id');

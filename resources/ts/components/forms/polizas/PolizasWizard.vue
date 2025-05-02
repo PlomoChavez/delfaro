@@ -1,8 +1,12 @@
 <script lang="ts" setup>
 // prettier-ignore
 import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
-import PolizaClientes from "@/components/forms/polizas/PolizaClientes.vue";
+import {
+  showErrorMessage,
+  showSuccessMessage,
+} from "@/components/apps/sweetAlerts/SweetAlets";
 import PolizaWidget from "@/components/forms/polizas/PolizaWidget.vue";
+import PolizaClientes from "@/components/forms/polizas/PolizaWizardClientes.vue";
 import { defineEmits, ref } from "vue";
 
 const emit = defineEmits<{
@@ -24,18 +28,20 @@ const Agentes = ref<any>([
 
 // prettier-ignore
 const formSchema = [
-  { label: "Compañia",                  type: "text",       model: "compania",       },
-  { label: "Ramo",                      type: "text",       model: "ramo",           },
-  { label: "Producto",                  type: "text",       model: "producto",       },
-  { label: "Cliente",                   type: "text",       model: "cliente",        },
-  { label: "Subagente",                 type: "text",       model: "subagente",      },
-  { label: "Agente",                    type: "text",       model: "agnete",         },
-  { label: "Forma de pago",             type: "select",     model: "formPago",        catalogo: "formas-pagos"},
+  { label: "Numero de poliza",          type: "text",       model: "numeroPoliza",   },
+  { label: "Numero de cliente",         type: "text",       model: "numeroCliente",  },
+  { label: "Compañia",                  type: "text",       model: "compania",       disabled: true },
+  { label: "Ramo",                      type: "text",       model: "ramo",           disabled: true},
+  { label: "Producto",                  type: "text",       model: "producto",       disabled: true},
+  { label: "Cliente",                   type: "text",       model: "cliente",        disabled: true},
+  { label: "Subagente",                 type: "text",       model: "subagente",      disabled: true},
+  { label: "Agente",                    type: "text",       model: "agnete",         disabled: true},
+  { label: "Forma de pago",             type: "select",     model: "formaPago",       catalogo: "formas-pagos"},
   { ref: "vigencia",                    type: "rangeDate",  minModel: "inicioVigencia", minLabel: "Inicio de vigencia",maxModel: "finVigencia",maxLabel: "Fin de vigencia",        },
   { label: "Antiguedad",                type: "text",       model: "antiguedad",     },
   { label: "Tipo de vencimiento",       type: "select",     model: "tipoVencimiento", catalogo: "tipo-vencimiento"},
   { label: "Metodo de pago",            type: "select",     model: "metodoPago",      catalogo: "metodos-pago"},
-  { label: "Prima neta anual",          type: "number",     model: "prinaNetaAnual",  config:{ prefix:'$ '} },
+  { label: "Prima neta anual",          type: "number",     model: "primaNeta",  config:{ prefix:'$ '} },
   { label: "Finaciamiento",             type: "text",       model: "financiamiento", },
   { label: "PCT COMI (%)",              type: "text",       model: "comision",       },
   { label: "Prima total",               type: "text",       model: "primaTotal",     },
@@ -108,8 +114,26 @@ function handleSelectSubAgente(Subagente: any) {
 function handleCancel() {
   emit("cancel");
 }
-function handleSubmit() {
-  emit("cancel");
+async function handleSubmit() {
+  let url = "/api/polizas/create";
+  let payload = { ...poliza.value };
+  let response = await customRequest({
+    url: url,
+    method: "POST",
+    data: payload,
+  });
+  if (response.data.result) {
+    showSuccessMessage({
+      title: "Guardado",
+      message: response.data.message,
+    });
+    emit("cancel");
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: response.data.message,
+    });
+  }
 }
 
 onMounted(() => {

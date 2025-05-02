@@ -25,11 +25,83 @@ class Poliza extends Model
         'primaNeta',
         'financiamiento',
         'primaTotal',
-        'estatus',
+        'estatus_id',
         'comisionAgente',
         'moneda_id',
         'producto_id',
         'pagoInicial',
         'pagoSubsecuente',
     ];
+
+    /**
+     * Relación con el modelo Cliente.
+     */
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class, 'cliente_id');
+    }
+
+    /**
+     * Relación con el modelo TipoVencimiento.
+     */
+    public function tipoVencimiento()
+    {
+        return $this->belongsTo(TipoDeVencimiento::class, 'tipoVencimiento_id');
+    }
+
+    /**
+     * Relación con el modelo Compania.
+     */
+    public function compania()
+    {
+        return $this->belongsTo(Compania::class, 'compania_id');
+    }
+
+    /**
+     * Relación con el modelo Usuario (SubAgente).
+     */
+    public function subAgente()
+    {
+        return $this->belongsTo(Usuario::class, 'subAgente_id');
+    }
+
+    /**
+     * Relación con el modelo Ramo.
+     */
+    public function ramo()
+    {
+        return $this->belongsTo(Ramo::class, 'ramo_id');
+    }
+
+    /**
+     * Relación con el modelo MetodoPago.
+     */
+    public function metodoPago()
+    {
+        return $this->belongsTo(MetodoDePago::class, 'metodoPago_id');
+    }
+
+    /**
+     * Relación con el modelo Estatus.
+     */
+    public function estatus()
+    {
+        return $this->belongsTo(EstatusPoliza::class, 'estatus_id');
+    }
+
+    /**
+     * Relación con el modelo Moneda.
+     */
+    public function moneda()
+    {
+        return $this->belongsTo(Moneda::class, 'moneda_id');
+    }
+
+    /**
+     * Relación con el modelo Producto.
+     */
+    public function producto()
+    {
+        return $this->belongsTo(CompaniaProducto::class, 'producto_id');
+    }
 }
