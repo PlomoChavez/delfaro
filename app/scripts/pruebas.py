@@ -77,7 +77,8 @@ def main(data):
 
         if not data["personas"]:
             click_element(driver, "button.go-to-cotizar", By.CSS_SELECTOR)
-
+        
+        time.sleep(1)
         plan_name_element = driver.find_element(By.CSS_SELECTOR, "span.plan-name")
         plan_name_text = plan_name_element.text.strip()
 
@@ -85,17 +86,111 @@ def main(data):
             plan_container = plan_name_element.find_element(By.XPATH, "./ancestor::div[contains(@class, 'card')]")
             personaliza_button = plan_container.find_element(By.CSS_SELECTOR, "h6.borderless-button")
             personaliza_button.click()
+
+        # Variable que contiene el valor a buscar
+        sectionGoTo = "Parámetros flexibles"
+
+        # Buscar todas las secciones con la clase específica
+        sections = driver.find_elements(By.CSS_SELECTOR, "section.card.m-3.add-params-form.closed")
+
+        # Iterar sobre las secciones para encontrar la que contiene el texto en <h6>
+        for section in sections:
+            try:
+                # Buscar el elemento <h6> dentro de la sección
+                h6_element = section.find_element(By.CSS_SELECTOR, "div.param-info.col-9.add h6")
+                h6_text = h6_element.text.strip()  # Obtener el texto y eliminar espacios en blanco
+
+                # Verificar si el texto coincide con sectionGoTo
+                if h6_text == sectionGoTo:
+                    print(f"Se encontró la sección con el texto: {h6_text}")
+                    
+                    # Realizar alguna acción dentro de la sección (por ejemplo, hacer clic en el botón de edición)
+                    edit_button = section.find_element(By.CSS_SELECTOR, "div.edit-param img")
+                    edit_button.click()
+                    print("Se hizo clic en el botón de edición")
+                    break
+            except Exception as e:
+                print(f"No se encontró el texto en esta sección: {e}")
     finally:
         time.sleep(5)
         driver.quit()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script para automatizar Selenium con datos dinámicos.")
-    parser.add_argument("--data", type=str, required=True, help="Objeto JSON con los datos necesarios.")
-    args = parser.parse_args()
 
     # Convertir el argumento JSON a un diccionario de Python
-    data = json.loads(args.data)
+    # Objeto con la información
+    data = {
+        "titular": {
+            "nombre": "Jesus ramon",
+            "sexo": {
+                "label": "Hombre",
+                "id": "Hombre"
+            },
+            "fechaNacimiento": "2025-05-02",
+            "localidad": {
+                "label": "Aguascalientes",
+                "id": 1
+            }
+        },
+        "personas": [],
+        "inicio": "03/05/2025",
+        "fin": "03/05/2026",
+        "plan": {
+            "label": "Plan Seguro Óptimo Plus"
+        },
+        "parametrosFlexibles": {
+            "sumaAsegurada": {
+                "label": "1000 UMAM",
+                "id": "1000 UMAM"
+            },
+            "topeMaximo": {
+                "label": "$40,000",
+                "id": "$40,000"
+            },
+            "deducible": {
+                "label": "4 UMAM",
+                "id": "4 UMAM"
+            },
+            "nivelHospitalario": {
+                "label": "Serie 300",
+                "id": "Serie 300"
+            },
+            "frecuenciaPago": {
+                "label": "Trimestral",
+                "id": "Trimestral"
+            },
+            "coaseguro": {
+                "label": "0 %",
+                "id": "0 %"
+            },
+            "thq": {
+                "label": "36",
+                "id": "36"
+            }
+        },
+        "proteccionAdicional": {
+            "emergenciaExtranjero": True,
+            "atencionDental": True,
+            "indemnizacionDiariaSelect": {
+                "label": "500.00 por dia",
+                "id": "500.00 por dia"
+            },
+            "reduccionCoaseguro": True,
+            "sumaAsegurada": {
+                "label": "S.A. 50,000 dls",
+                "id": "S.A. 50,000 dls"
+            },
+            "atencionDentalSelect": {
+                "label": "Atención Dental Total",
+                "id": "Atención Dental Total"
+            },
+            "coberturaExtranjero": True,
+            "indemnizacionDiaria": True,
+            "eliminacionDeducible": True
+        }
+    }
+
 
     # Ejecutar el script principal con los datos proporcionados
     main(data)
