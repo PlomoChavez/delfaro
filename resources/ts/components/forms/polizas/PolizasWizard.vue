@@ -35,21 +35,20 @@ const formSchema = [
   { label: "Producto",                  type: "text",       model: "producto",       disabled: true},
   { label: "Cliente",                   type: "text",       model: "cliente",        disabled: true},
   { label: "Subagente",                 type: "text",       model: "subagente",      disabled: true},
-  { label: "Agente",                    type: "text",       model: "agnete",         disabled: true},
+  { label: "Agente",                    type: "text",       model: "agente",         disabled: true},
   { label: "Forma de pago",             type: "select",     model: "formaPago",       catalogo: "formas-pagos"},
   { ref: "vigencia",                    type: "rangeDate",  minModel: "inicioVigencia", minLabel: "Inicio de vigencia",maxModel: "finVigencia",maxLabel: "Fin de vigencia",        },
   { label: "Antiguedad",                type: "text",       model: "antiguedad",     },
   { label: "Tipo de vencimiento",       type: "select",     model: "tipoVencimiento", catalogo: "tipo-vencimiento"},
   { label: "Metodo de pago",            type: "select",     model: "metodoPago",      catalogo: "metodos-pago"},
-  { label: "Prima neta anual",          type: "number",     model: "primaNeta",  config:{ prefix:'$ '} },
+  { label: "Prima neta anual",          type: "number",     model: "primaNeta",       config:{ prefix:'$ '} },
   { label: "Finaciamiento",             type: "text",       model: "financiamiento", },
-  { label: "PCT COMI (%)",              type: "text",       model: "comision",       },
+  { label: "PCT COMI (%)",              type: "text",       model: "comisionAgente",  },
   { label: "Prima total",               type: "text",       model: "primaTotal",     },
   { label: "Moneda",                    type: "select",     model: "moneda",          catalogo: "moneda"},
   { label: "Importe pago inicial",      type: "text",       model: "pagoInicial",    },
   { label: "Importe pago subsecuente",  type: "text",       model: "pagoSubsecuente",},
   { label: "Estatus",                   type: "select",     model: "estatus",         catalogo: "estatus-polizas"},
-
 ];
 
 async function fetchData() {

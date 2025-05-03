@@ -36,7 +36,17 @@ const apiEndpoints = {
 };
 
 const handleActionsEdit = (dataRow: any) => {
-  data.value = { ...dataRow };
+  data.value = {
+    ...dataRow,
+    metodoPago: dataRow["metodo_pago"],
+    formaPago: dataRow["forma_pago"],
+    tipoVencimiento: dataRow["tipo_vencimiento"],
+    cliente: {
+      ...dataRow["cliente"],
+      label: dataRow["cliente"]["nombre"],
+    },
+    subAgente: dataRow["sub_agente"],
+  };
   console.log("dataRow", dataRow);
   showFormEdit.value = true;
 };

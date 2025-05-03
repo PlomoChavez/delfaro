@@ -76,6 +76,7 @@ class PolizasController extends Controller
         try {
             $polizas = Poliza::with([
                 'cliente',
+                'formaPago',
                 'tipoVencimiento',
                 'compania',
                 'subAgente',

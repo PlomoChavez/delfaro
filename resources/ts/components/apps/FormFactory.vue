@@ -135,6 +135,16 @@ function handleCancel() {
   emit("update:isDialogVisible", false); // Cerrar el modal
 }
 
+function obtenerPropiedad(obj: any, ruta: string): any {
+  console.log("ruta", ruta);
+  if (!ruta) {
+    return ""; // Si la ruta está vacía, devuelve undefined
+  }
+  return ruta.split(".").reduce((acumulador, clave) => {
+    return acumulador ? acumulador[clave] : undefined;
+  }, obj);
+}
+
 function handleNumberInput(event: Event, field: any) {
   const input = event.target as HTMLInputElement;
   const model = field.model;
@@ -323,6 +333,11 @@ onMounted(async () => {
         <template v-for="field in schemaLocal" :key="field.model">
           <!-- Campo de texto -->
           <!-- prettier-ignore -->
+          <div v-if="field.type === 'label'" :class="field.classElement">
+            <label> {{ field.label }} </label>
+            <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
+            <p class="ml-3"> {{ obtenerPropiedad(formLocal, field.model) || '' }} </p>
+          </div>
           <div v-if="field.type === 'text'" :class="field.classElement">
             <label :for="field.model"> {{ field.label }} </label>
             <VTextField
@@ -340,6 +355,7 @@ onMounted(async () => {
             <label :for="field.model"> {{ field.label }} </label>
             <VTextField
               @input="handleNumberInput($event, field)"
+              :disabled="props.isDisabled || field.disabled"
               :placeholder="field.placeholder || `Introduce el dato requerido`"
               v-model="formLocal[field.model]"
               class="form-control"
@@ -376,7 +392,7 @@ onMounted(async () => {
                 :placeholder="field?.minPlaceholder ?? 'Ingresa un fecha'"
                 @change="handleRangeDateChange(field, 'minModel')"
                 :config="field.minConfig"
-                :disabled="field.minDisable"
+                :disabled="props.isDisabled || field.minDisable"
                 clearable
               />
             </div>
@@ -389,7 +405,7 @@ onMounted(async () => {
                 :placeholder="field?.maxPlaceholder ?? 'Ingresa un fecha'"
                 @change="handleRangeDateChange(field, 'maxModel')"
                 :config="field.maxConfig"
-                :disabled="field.maxDisable"
+                :disabled="props.isDisabled || field.maxDisable"
                 clearable
               />
             </div>

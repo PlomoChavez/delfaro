@@ -21,30 +21,31 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "cancelar"): void;
 }>();
-// prettier-ignore
-const formSchema = [
-  { label: "Nombre",              type: "text",   model: "nombre",    placeholder: "Ingresa el nombre" },
-  { label: "Correo electronico",  type: "text",   model: "correo",    placeholder: "Ingresa el nombre" },
-  { label: "Contraseña",          type: "text",   model: "password",  placeholder: "Ingresa el nombre" },
-  { label: "Tipo de usuario",     type: "select", model: "tipo",      placeholder: "Selecciona el tipo de usuario", catalogo: "tipos-usuarios"},
-  { label: "Estatus",             type: "switch", model: "estatus" },
-];
-// prettier-ignore
-const formSchemaContrasenia = [
-  { label: "Nombre",              type: "text", model: "nombre",   placeholder: "Ingresa el nombre", disabled:true},
-  { label: "Tipo de usuario",     type: "text", model: "tipo",     placeholder: "Ingresa el nombre", disabled:true},
-  { label: "Correo electronico",  type: "text", model: "correo",   placeholder: "Ingresa el nombre", disabled:true},
-  { label: "Contraseña",          type: "text", model: "password", placeholder: "Ingresa el nombre" },
-];
 
-const handleShowModalContrasenia = () => {
-  dataContrasenia.value = {
-    ...props.data,
-    tipo: props.data.tipo.label,
-    password: "",
-  };
-  modalContrasenia.value = true;
-};
+// prettier-ignore
+const formSchema : any = [
+  { label: "Numero de poliza",          type: "label",      model: "numeroPoliza",    },
+  { label: "Numero de cliente",         type: "label",      model: "numeroCliente",   },
+  { label: "Compañia",                  type: "label",      model: "compania.nombre"  },
+  { label: "Ramo",                      type: "label",      model: "ramo.label"       },
+  { label: "Producto",                  type: "label",      model: "producto.nombre"   },
+  { label: "Cliente",                   type: "label",      model: "cliente.nombre"   },
+  { label: "Subagente",                 type: "label",      model: "subagente"        },
+  { label: "Agente",                    type: "label",      model: "agente"           },
+  { label: "Forma de pago",             type: "label",      model: "formaPago.label",       },
+  { ref: "vigencia",                    type: "label",      minModel: "inicioVigencia", minLabel: "Inicio de vigencia",maxModel: "finVigencia",maxLabel: "Fin de vigencia",        },
+  { label: "Antiguedad",                type: "label",      model: "antiguedad",      },
+  { label: "Tipo de vencimiento",       type: "label",      model: "tipoVencimiento.label", },
+  { label: "Metodo de pago",            type: "label",      model: "metodoPago.label",      },
+  { label: "Prima neta anual",          type: "label",      model: "primaNeta",  config:{ prefix:'$ '} },
+  { label: "Finaciamiento",             type: "label",      model: "financiamiento",  },
+  { label: "PCT COMI (%)",              type: "label",      model: "comision",        },
+  { label: "Prima total",               type: "label",      model: "primaTotal",      },
+  { label: "Moneda",                    type: "label",      model: "moneda.label",          },
+  { label: "Importe pago inicial",      type: "label",      model: "pagoInicial",     },
+  { label: "Importe pago subsecuente",  type: "label",      model: "pagoSubsecuente", },
+  { label: "Estatus",                   type: "label",      model: "estatus",         },
+];
 
 async function getRecibos() {
   let url = "/api/polizas/recibos";
@@ -170,6 +171,7 @@ watch(
               Editar
             </VBtn>
           </div>
+          <pre>{{ props.data }}</pre>
           <!-- @submit="handleFormSubmit" -->
         </VWindowItem>
         <VWindowItem :value="`item2`">

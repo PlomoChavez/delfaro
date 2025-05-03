@@ -40,6 +40,10 @@ class Poliza extends Model
     {
         return $this->belongsTo(Cliente::class, 'cliente_id');
     }
+    public function formaPago()
+    {
+        return $this->belongsTo(FormaPago::class, 'formaPago_id');
+    }
 
     /**
      * Relación con el modelo TipoVencimiento.
