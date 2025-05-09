@@ -70,4 +70,9 @@ export default [
     to: { name: "agenda" },
     icon: { icon: "tabler-calendar" },
   },
+  {
+    title: "Cotizaciones",
+    to: { name: "cotizaciones" },
+    icon: { icon: "tabler-calendar" },
+  },
 ];

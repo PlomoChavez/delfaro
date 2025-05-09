@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { customRequest } from "@/utils/axiosInstance";
+import Multicotizaciones from "@/components/forms/cotizaciones/multicotizaciones.vue";
 async function fetchTableData() {
   try {
     const payload = {
@@ -87,10 +88,6 @@ async function fetchTableData() {
 
 <template>
   <div class="divBtnWrapper">
-    <cotizacionPlanSeguro />
-    <VBtn @click="fetchTableData">
-      <VIcon start icon="tabler-checkbox" />
-      Nuevo
-    </VBtn>
+    <Multicotizaciones />
   </div>
 </template>
