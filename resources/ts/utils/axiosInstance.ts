@@ -6,7 +6,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000, // Tiempo de espera predeterminado
+  timeout: 600000, // Tiempo de espera predeterminado
 });
 
 // Función para manejar configuraciones personalizadas
@@ -25,7 +25,7 @@ function customRequest(
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 10000, // Tiempo de espera predeterminado
+      timeout: 600000, // Tiempo de espera predeterminado
       ...additionalConfig, // Configuración adicional
     };
   } else {

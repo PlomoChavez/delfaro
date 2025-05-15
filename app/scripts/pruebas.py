@@ -5,6 +5,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
+from bs4 import BeautifulSoup
+import sys
+
 import time
 
 def set_input_value(driver, locator, value, by=By.ID):
@@ -25,18 +28,138 @@ def click_element(driver, locator, by=By.LINK_TEXT):
     element.click()
 
 def select_mat_option(driver, select_locator, option_text, by=By.ID):
-    """
-    Cambia el valor de un mat-select en Angular Material.
-    """
-    mat_select = driver.find_element(by, select_locator)
-    mat_select.click()
+    try:
+        # Localizar y abrir el mat-select
+        mat_select = driver.find_element(by, select_locator)
+        mat_select.click()
 
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, f"//span[text()='{option_text}']"))
-    )
+        # Esperar a que el mat-option con el texto deseado esté presente
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, f"//mat-option[.//span[normalize-space(text())='{option_text.strip()}']]"))
+        )
+        # Localizar el mat-option correspondiente
+        option = driver.find_element(By.XPATH, f"//mat-option[.//span[normalize-space(text())='{option_text.strip()}']]")
 
-    option = driver.find_element(By.XPATH, f"//span[text()='{option_text}']")
-    option.click()
+        option.click()
+    except Exception as e:
+        print(f"Error al seleccionar la opción '{option_text.strip()}'")
+
+def customParametrosFlexibles(driver, data):
+    # print("Suma aseclearclear
+    select_mat_option(driver, "sumaaseguradaId", data["parametrosFlexibles"]["sumaAsegurada"]["label"], By.NAME)
+    time.sleep(1)
+    select_mat_option(driver, "deducibleId", data["parametrosFlexibles"]["deducible"]["label"], By.NAME)
+    time.sleep(1)
+    select_mat_option(driver, "coaseguroId", data["parametrosFlexibles"]["coaseguro"]["label"], By.NAME)
+    time.sleep(1)
+    select_mat_option(driver, "topeDropdown", data["parametrosFlexibles"]["topeMaximo"]["label"], By.NAME)
+    time.sleep(1)
+    select_mat_option(driver, "basehospitalariaId", data["parametrosFlexibles"]["nivelHospitalario"]["label"], By.NAME)
+    time.sleep(1)
+    select_mat_option(driver, "honorariosquirurgicosId", data["parametrosFlexibles"]["thq"]["label"], By.NAME)
+    time.sleep(1)
+    select_mat_option(driver, "pago", data["parametrosFlexibles"]["frecuenciaPago"]["label"], By.NAME)
+    time.sleep(1)
+
+def customParametrosProteccion(driver, data):
+    # Emergencia Extranjero
+    if data["proteccionAdicional"]["emergenciaExtranjero"]:
+        click_element(driver, "emergenciaExtranjero", By.ID)
+        time.sleep(1)
+        select_mat_option(driver, "emergenciaExtranjeroFactor", data["proteccionAdicional"]["sumaAsegurada"]["label"], By.NAME)
+        time.sleep(1)
+
+    # Cobertura en el Extranjero (CE)
+    if data["proteccionAdicional"]["coberturaExtranjero"]:
+        click_element(driver, "coberturaExtranjero", By.ID)
+        time.sleep(1)
+        # select_mat_option(driver, "coberturaExtranjeroFactor", data["proteccionAdicional"]["sumaAsegurada"]["label"], By.NAME)
+        # time.sleep(1)
+
+    # Atencion dental
+    if data["proteccionAdicional"]["atencionDental"]:
+        click_element(driver, "primaCoberturaDentalBool", By.ID)
+        time.sleep(1)
+        select_mat_option(driver, "primaCoberturaDentalTarifa", data["proteccionAdicional"]["atencionDentalSelect"]["label"], By.NAME)
+        time.sleep(1)
+
+    # Indemnización Diaria por Hospitalización por Accidente (IDHA)
+    if data["proteccionAdicional"]["indemnizacionDiaria"]:
+        click_element(driver, "indemnizacionDiariaHospitalizacion", By.NAME)
+        time.sleep(1)
+        select_mat_option(driver, "indemnizacionDiariaFactor", data["proteccionAdicional"]["indemnizacionDiariaSelect"]["label"], By.NAME)
+        time.sleep(1)
+
+    # Reducción de coaseguro por Padecimiento de Nariz en caso de Accidente.
+    if data["proteccionAdicional"]["reduccionCoaseguro"]:
+        click_element(driver, "reduccionCoaseguroNarizAccidente", By.ID)
+        time.sleep(1)
+        
+    # Eliminación de Deducible por Accidente
+    if data["proteccionAdicional"]["eliminacionDeducible"]:
+        click_element(driver, "eliminacionDeducibleAccidente", By.ID)
+        time.sleep(1)
+        
+def extraer_etiquetas_y_valores(contenedor):
+    resultados = []
+    filas = contenedor.find_elements(By.XPATH, ".//div[contains(@class, 'row')]")
+    for fila in filas:
+        # Busca el span (etiqueta)
+        spans = fila.find_elements(By.TAG_NAME, "span")
+        if not spans:
+            continue  # Si no hay etiqueta, ignora la fila
+
+        etiqueta = spans[0].text.strip()
+
+        # Busca el div con clase numbers
+        numbers_divs = fila.find_elements(By.CLASS_NAME, "numbers")
+        if not numbers_divs:
+            continue  # Si no hay valor, ignora la fila
+
+        numbers_div = numbers_divs[0]
+        # Caso especial: <h6> anidados (ejemplo: Suma Asegurada)
+        h6s = numbers_div.find_elements(By.TAG_NAME, "h6")
+        if h6s:
+            valor = " ".join([h6.text.strip() for h6 in h6s if h6.text.strip()])
+        else:
+            valor = numbers_div.text.strip()
+        resultados.append(f"{etiqueta} {valor}")
+    return resultados  
+
+
+def extraer_etiquetas_y_valores2(html):
+    soup = BeautifulSoup(html, "html.parser")
+    bloque = soup.find("div", class_="params")
+    resultado = []
+    actual = ""
+    concepto_pendiente = None
+
+    for elem in bloque.children:
+        if getattr(elem, "name", None) == "h5":
+            # Si hay un bloque pendiente, lo agregamos
+            if actual:
+                resultado.append(actual)
+            actual = elem.get_text(strip=True)
+            concepto_pendiente = None
+        elif getattr(elem, "name", None) == "div" and "col-6" in elem.get("class", []):
+            span = elem.find("span")
+            h6 = elem.find("h6")
+            if span:
+                concepto_pendiente = span.get_text(strip=True)
+            if h6:
+                if concepto_pendiente:
+                    actual += f": {concepto_pendiente}: {h6.get_text(strip=True)}"
+                    concepto_pendiente = None
+                else:
+                    actual += f": {h6.get_text(strip=True)}"
+        elif getattr(elem, "name", None) == "hr":
+            if actual:
+                resultado.append(actual)
+                actual = ""
+                concepto_pendiente = None
+    if actual:
+        resultado.append(actual)
+    return resultado
 
 def main(data):
     # Configurar el controlador del navegador (Chrome en este caso)
@@ -87,32 +210,62 @@ def main(data):
             personaliza_button = plan_container.find_element(By.CSS_SELECTOR, "h6.borderless-button")
             personaliza_button.click()
 
-        # Variable que contiene el valor a buscar
-        sectionGoTo = "Parámetros flexibles"
+            # Lista de pasos a realizar
+            # steps = ["Protección con costo adicional", "Reconocimiento de Antigüedad"]
+            steps = ["Parámetros flexibles", "Protección con costo adicional", "Reconocimiento de Antigüedad"]
+            for index, step in enumerate(steps):
+                # Esperar a que el elemento <section> con el texto correspondiente esté presente
+                section = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, f"//section[contains(@class, 'card') and .//h6[text()='{step}']]"))
+                )
+                time.sleep(2)
 
-        # Buscar todas las secciones con la clase específica
-        sections = driver.find_elements(By.CSS_SELECTOR, "section.card.m-3.add-params-form.closed")
+                # Dentro de esa sección, localizar el botón (imagen) y hacer clic
+                edit_button = section.find_element(By.CSS_SELECTOR, "div.edit-param img")
+                driver.execute_script("arguments[0].click();", edit_button)
+                # Switch basado en la posición del array
+                match index:
+                    case 0:
+                    #     print("Acción para 'Parámetros flexibles'")
+                        customParametrosFlexibles(driver, data)
+                    case 1:
+                        customParametrosProteccion(driver, data)
 
-        # Iterar sobre las secciones para encontrar la que contiene el texto en <h6>
-        for section in sections:
-            try:
-                # Buscar el elemento <h6> dentro de la sección
-                h6_element = section.find_element(By.CSS_SELECTOR, "div.param-info.col-9.add h6")
-                h6_text = h6_element.text.strip()  # Obtener el texto y eliminar espacios en blanco
+                click_element(driver, "//button[normalize-space(text())='Actualizar costo']", By.XPATH)
+                WebDriverWait(driver, 50).until( EC.presence_of_element_located((By.XPATH, "//button[normalize-space(text())='Ver Resumen']")) )
+            click_element(driver, "//button[normalize-space(text())='Ver Resumen']", By.XPATH)
 
-                # Verificar si el texto coincide con sectionGoTo
-                if h6_text == sectionGoTo:
-                    print(f"Se encontró la sección con el texto: {h6_text}")
-                    
-                    # Realizar alguna acción dentro de la sección (por ejemplo, hacer clic en el botón de edición)
-                    edit_button = section.find_element(By.CSS_SELECTOR, "div.edit-param img")
-                    edit_button.click()
-                    print("Se hizo clic en el botón de edición")
-                    break
-            except Exception as e:
-                print(f"No se encontró el texto en esta sección: {e}")
+        # Definir datos como un diccionario
+        datos = {}
+        # Espera hasta 10 segundos a que aparezca el div con clase 'payment'
+        resumen = WebDriverWait(driver, 50).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "payment"))
+        )
+        # 1. Resumen de Cotización
+        # resumen = driver.find_element(By.CLASS_NAME, "payment")
+        resumen_info = extraer_etiquetas_y_valores(resumen)
+        params_flex = driver.find_element(By.XPATH, "//div[contains(@class, 'basic-params') and .//h3[contains(text(),'Parámetros flexibles')]]//div[contains(@class, 'params')]")
+        params_costo = driver.find_element(By.XPATH, "//div[contains(@class, 'basic-params') and .//h3[contains(text(),'Protección con costo')]]//div[contains(@class, 'params')]")
+        resumen_info = extraer_etiquetas_y_valores(resumen)
+        params_flex_info = extraer_etiquetas_y_valores(params_flex)
+        params_costo_html = params_costo.get_attribute("outerHTML")
+        params_costo_info = extraer_etiquetas_y_valores2(params_costo_html)
+
+        # Junta todo en un diccionario
+        resultado = {
+            "resumen": resumen_info,
+            "parametros_flexibles": params_flex_info,
+            "proteccion_con_costo": params_costo_info
+        }
+
+        # Imprime el JSON (esto es lo que shell_exec captura)
+        try:
+            print(json.dumps(resultado, ensure_ascii=False))
+        except Exception as e:
+            print(json.dumps({"error": str(e)}))
+            sys.exit(1)
+        
     finally:
-        time.sleep(5)
         driver.quit()
 
 if __name__ == "__main__":
@@ -127,7 +280,7 @@ if __name__ == "__main__":
                 "label": "Hombre",
                 "id": "Hombre"
             },
-            "fechaNacimiento": "2025-05-02",
+            "fechaNacimiento": "1994-05-02",
             "localidad": {
                 "label": "Aguascalientes",
                 "id": 1
@@ -141,16 +294,16 @@ if __name__ == "__main__":
         },
         "parametrosFlexibles": {
             "sumaAsegurada": {
-                "label": "1000 UMAM",
-                "id": "1000 UMAM"
+                "label": " 3000 UMAM ",
+                "id": " 3000 UMAM "
             },
             "topeMaximo": {
                 "label": "$40,000",
                 "id": "$40,000"
             },
             "deducible": {
-                "label": "4 UMAM",
-                "id": "4 UMAM"
+                "label": " 7 UMAM",
+                "id": "7 UMAM"
             },
             "nivelHospitalario": {
                 "label": "Serie 300",
@@ -161,8 +314,8 @@ if __name__ == "__main__":
                 "id": "Trimestral"
             },
             "coaseguro": {
-                "label": "0 %",
-                "id": "0 %"
+                "label": "0%",
+                "id": "0%"
             },
             "thq": {
                 "label": "36",
@@ -173,13 +326,13 @@ if __name__ == "__main__":
             "emergenciaExtranjero": True,
             "atencionDental": True,
             "indemnizacionDiariaSelect": {
-                "label": "500.00 por dia",
-                "id": "500.00 por dia"
+                "label": "500.00 por día",
+                "id": "500.00 por día"
             },
             "reduccionCoaseguro": True,
             "sumaAsegurada": {
-                "label": "S.A. 50,000 dls",
-                "id": "S.A. 50,000 dls"
+                "label": "SA 50,000 dlls",
+                "id": "SA 50,000 dlls"
             },
             "atencionDentalSelect": {
                 "label": "Atención Dental Total",

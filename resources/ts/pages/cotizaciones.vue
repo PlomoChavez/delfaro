@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { customRequest } from "@/utils/axiosInstance";
-import Multicotizaciones from "@/components/forms/cotizaciones/multicotizaciones.vue";
+// import Multicotizaciones from "@/components/forms/cotizaciones/multicotizaciones.vue";
 async function fetchTableData() {
   try {
     const payload = {
@@ -84,10 +84,35 @@ async function fetchTableData() {
     console.error("Error al obtener los datos:", error);
   }
 }
+async function sendCotizacion() {
+  try {
+    const payload = {};
+
+    const response = await customRequest({
+      url: "/api/robot",
+      method: "POST",
+      data: payload,
+    });
+    console.log("Response:", response.data);
+  } catch (error) {
+    console.error("Error al obtener los datos:", error);
+  }
+}
 </script>
 
 <template>
+  <!--
   <div class="divBtnWrapper">
     <Multicotizaciones />
+  </div> 
+  -->
+
+  <div>
+    <div class="d-flex justify-center w-full">
+      <VBtn @click="sendCotizacion">
+        Enviar Cotización
+        <VIcon start icon="tabler-checkbox" />
+      </VBtn>
+    </div>
   </div>
 </template>

@@ -10,6 +10,7 @@ use App\Http\Controllers\CompaniaRepresentantesController;
 use App\Http\Controllers\CatalogosController;
 use App\Http\Controllers\PolizasController;
 use App\Http\Controllers\PolizaAseguradosController;
+use App\Http\Controllers\RobotController;
 // @formatter:off
 // Actividades
 Route::post('catalogo/actividades/get',         function (Request $request) { return app(CatalogoController::class)->getAll($request, 'actividades'); })->name('catalogo.actividades.getAll');
@@ -92,7 +93,10 @@ Route::post('polizas/asegurados/delete',        [PolizaAseguradosController::cla
 Route::post('polizas/recibos',                  [PolizasController::class, 'getRecibos'])->name('poliza.recibos.get');
 
 // polizas-historial
-Route::post('polizas/historial',                  [PolizasController::class, 'gethistorial'])->name('poliza.historial.get');
+Route::post('polizas/historial',                [PolizasController::class, 'gethistorial'])->name('poliza.historial.get');
+
+// polizas-historial
+Route::post('robot',                            [RobotController::class, 'startRobot'])->name('procesos');
 
 // Catalogos
 Route::post('catalogos/tipos-usuarios',         function (Request $request) { return app(CatalogosController::class)->getCatalogo($request, 'tipos-usuarios');      })->name('catalogos.getCatalogo.tipos-usuarios');

@@ -13,3 +13,9 @@ SCRIPT
 
 CSS
 /* prettier-ignore */
+
+
+# Activar el entorno virtual
+source .venv/bin/activate
+
+
