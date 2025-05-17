@@ -1,11 +1,13 @@
 {
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "prisma": "^6.8.2"
   },
   "name": "delfaro",
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "@prisma/client": "^6.8.2",
     "ansi-regex": "^5.0.1",
     "ansi-styles": "^4.3.0",
     "axios": "^1.9.0",
