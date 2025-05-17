@@ -5,7 +5,7 @@ const port = 3000;
 app.use(express.json());
 
 // Importa las rutas
-const procesosAutomatizadosRoutes = require('./routes/procesosAutomatizados');
+const procesosAutomatizadosRoutes = require('./routes/procesosAutomatizadosRoutes');
 // const usuariosRoutes = require('./routes/usuarios');
 // const polizasRoutes = require('./routes/polizas');
 
