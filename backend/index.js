@@ -1,7 +1,11 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:5173', // o usa '*' para permitir todos los orígenes (solo para desarrollo)
+  credentials: true
+}));
 app.use(express.json());
 
 // Importa las rutas
