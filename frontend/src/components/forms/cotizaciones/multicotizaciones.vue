@@ -3,103 +3,110 @@ import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 
 import CotizacionPlanSeguro from "@/components/forms/cotizaciones/cotizacionPlanSeguro.vue";
 import { customRequest } from "@/utils/axiosInstance";
+
+const emit = defineEmits(["cotizar"]);
+
 const companias: any = ref([]); // Referencia al componente FormFactory
 const productos: any = ref([]); // Referencia al componente FormFactory
+const productoSeleccionado: any = ref(null);
 const ramos: any = ref(null); // Referencia al componente FormFactory
-const step: any = ref(4); // Referencia al componente FormFactory
-const configuracion: any = ref({
-  ramo: {
-    id: "2",
-    label: "GMM",
-    estatus: true,
-    created_at: "2025-04-20T00:39:13.000Z",
-    updated_at: "2025-04-20T00:39:13.000Z",
-    deleted_at: null,
-  },
-  compania: [
-    {
-      id: "2",
-      rfc: "PSS970203FI6",
-      nombre: "PLAN SEGURO S.A. DE C.V.",
-      nombreCorto: "PLAN SEGURO",
-      direccion: "",
-      estado: null,
-      codigoPostal: "",
-      ciudad: "",
-      limitePrimerPago: "0",
-      limitePrimerSubsecuente: "0",
-      estatus: false,
-      colonia: null,
-      created_at: "2025-04-24T00:22:11.000Z",
-      updated_at: "2025-04-24T00:22:11.000Z",
-      companias_productos: [
-        {
-          id: "2",
-          compania_id: "2",
-          ramo_id: "2",
-          nombre: "Plan Seguro Óptimo Plus",
-          created_at: "2025-04-29T04:07:12.000Z",
-          updated_at: "2025-04-29T04:09:31.000Z",
-          estatus: true,
-        },
-      ],
-    },
-    {
-      id: "1",
-      rfc: "SAF980202D99",
-      nombre: "SEGUROS AFIRME S.A. DE C.V.",
-      nombreCorto: "AFIRME",
-      direccion: "dedede",
-      estado: "ddddd",
-      codigoPostal: "dede",
-      ciudad: "dede",
-      limitePrimerPago: "3",
-      limitePrimerSubsecuente: "4",
-      estatus: false,
-      colonia: "dede",
-      created_at: "2025-04-20T21:51:55.000Z",
-      updated_at: "2025-04-21T17:48:27.000Z",
-      companias_productos: [
-        {
-          id: "1",
-          compania_id: "1",
-          ramo_id: "2",
-          nombre: "GMM Firme",
-          created_at: "2025-04-29T04:07:12.000Z",
-          updated_at: "2025-05-17T02:48:21.000Z",
-          estatus: true,
-        },
-      ],
-    },
-  ],
-  productos: [
-    {
-      id: "1",
-      compania_id: "1",
-      ramo_id: "2",
-      nombre: "GMM Firme",
-      created_at: "2025-04-29T04:07:12.000Z",
-      updated_at: "2025-05-17T02:48:21.000Z",
-      estatus: true,
-      selected: true,
-    },
-    {
-      id: "2",
-      compania_id: "2",
-      ramo_id: "2",
-      nombre: "Plan Seguro Óptimo Plus",
-      created_at: "2025-04-29T04:07:12.000Z",
-      updated_at: "2025-04-29T04:09:31.000Z",
-      estatus: true,
-      selected: true,
-    },
-  ],
-}); // Referencia al componente FormFactory
+const step: any = ref(1); // Referencia al componente FormFactory
+const configuracionDefault: any = ref({
+  ramo: null,
+  companias: [],
+  productos: [],
+});
 // const configuracion: any = ref({
-//   ramo: null,
-//   companias: [],
-// productos: [],
-// }); // Referencia al componente FormFactory
+//   ramo: {
+//     id: "2",
+//     label: "GMM",
+//     estatus: true,
+//     created_at: "2025-04-20T00:39:13.000Z",
+//     updated_at: "2025-04-20T00:39:13.000Z",
+//     deleted_at: null,
+//   },
+//   compania: [
+//     {
+//       id: "2",
+//       rfc: "PSS970203FI6",
+//       nombre: "PLAN SEGURO S.A. DE C.V.",
+//       nombreCorto: "PLAN SEGURO",
+//       direccion: "",
+//       estado: null,
+//       codigoPostal: "",
+//       ciudad: "",
+//       limitePrimerPago: "0",
+//       limitePrimerSubsecuente: "0",
+//       estatus: false,
+//       colonia: null,
+//       created_at: "2025-04-24T00:22:11.000Z",
+//       updated_at: "2025-04-24T00:22:11.000Z",
+//       companias_productos: [
+//         {
+//           id: "2",
+//           compania_id: "2",
+//           ramo_id: "2",
+//           nombre: "Plan Seguro Óptimo Plus",
+//           created_at: "2025-04-29T04:07:12.000Z",
+//           updated_at: "2025-04-29T04:09:31.000Z",
+//           estatus: true,
+//         },
+//       ],
+//     },
+//     {
+//       id: "1",
+//       rfc: "SAF980202D99",
+//       nombre: "SEGUROS AFIRME S.A. DE C.V.",
+//       nombreCorto: "AFIRME",
+//       direccion: "dedede",
+//       estado: "ddddd",
+//       codigoPostal: "dede",
+//       ciudad: "dede",
+//       limitePrimerPago: "3",
+//       limitePrimerSubsecuente: "4",
+//       estatus: false,
+//       colonia: "dede",
+//       created_at: "2025-04-20T21:51:55.000Z",
+//       updated_at: "2025-04-21T17:48:27.000Z",
+//       companias_productos: [
+//         {
+//           id: "1",
+//           compania_id: "1",
+//           ramo_id: "2",
+//           nombre: "GMM Firme",
+//           created_at: "2025-04-29T04:07:12.000Z",
+//           updated_at: "2025-05-17T02:48:21.000Z",
+//           estatus: true,
+//         },
+//       ],
+//     },
+//   ],
+//   productos: [
+//     {
+//       id: "1",
+//       compania_id: "1",
+//       ramo_id: "2",
+//       nombre: "GMM Firme",
+//       created_at: "2025-04-29T04:07:12.000Z",
+//       updated_at: "2025-05-17T02:48:21.000Z",
+//       estatus: true,
+//       selected: true,
+//     },
+//     {
+//       id: "2",
+//       compania_id: "2",
+//       ramo_id: "2",
+//       nombre: "Plan Seguro Óptimo Plus",
+//       created_at: "2025-04-29T04:07:12.000Z",
+//       updated_at: "2025-04-29T04:09:31.000Z",
+//       estatus: true,
+//       selected: true,
+//     },
+//   ],
+// });
+
+//  Referencia al componente FormFactory
+const configuracion: any = ref({ ...configuracionDefault.value }); // Referencia al componente FormFactory
 
 async function getRamos() {
   let url = "/api/catalogos/ramos";
@@ -159,7 +166,21 @@ function goToSeleccionarProducto() {
 }
 
 function isCompaniaSelected(compania: any) {
-  return configuracion.value.compania.some((c: any) => c.id === compania.id);
+  return configuracion.value.companias.some((c: any) => c.id === compania.id);
+}
+
+function isProductoSeleccionado(producto: any) {
+  return (
+    productoSeleccionado.value && productoSeleccionado.value.id === producto.id
+  );
+}
+function nextStep() {
+  step.value = step.value + 1;
+  console.log("step.value", step.value);
+}
+
+function sendToCotizar() {
+  emit("cotizar", configuracion.value);
 }
 
 function selectCompania(compania: any) {
@@ -180,6 +201,7 @@ function resetCotizacion() {
   configuracion.value = {
     ramo: null,
     companias: [],
+    productos: [],
   };
   step.value = 1;
 }
@@ -203,6 +225,22 @@ onMounted(() => {
   margin-left: auto !important;
   margin-right: auto !important;
 }
+.divRows {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: fit-content;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.divColumns {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: fit-content;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
 .w-fit {
   width: fit-content;
 }
@@ -213,6 +251,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
+  margin-top: 15px !important ;
 }
 
 .divPlanItem {
@@ -271,17 +310,28 @@ onMounted(() => {
 .cardActive {
   border: 2px solid rgb(var(--v-theme-primary));
 }
+.cardProductos {
+  width: 400px !important;
+}
 .card {
   padding: 16px !important;
   border-radius: 10px !important;
   background-color: white !important;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1) !important;
-  width: 400px !important;
+  width: fit-content !important;
+}
+.p0 {
+  padding: 0 !important;
+}
+.m0 {
+  margin: 0 !important;
+}
+.fontBold {
+  font-weight: bolder !important;
 }
 </style>
 
 <template>
-  <pre>{{ configuracion.productos }}</pre>
   <!-- Selector de Ramo -->
   <div v-if="step == 1">
     <h2 class="w-full text-center mb-5">Selecciona un ramo:</h2>
@@ -289,7 +339,7 @@ onMounted(() => {
       <div
         class="divPlanItem"
         v-for="(ramo, index) in ramos"
-        @click="selectRamo(ramo)"
+        @click="() => selectRamo(ramo)"
       >
         <h4 class="">{{ ramo.label }}</h4>
       </div>
@@ -308,7 +358,7 @@ onMounted(() => {
         v-for="(item, index) in companias"
         @click="() => selectCompania(item)"
       >
-        <h4 class="">{{ item.nombre }}</h4>
+        <h4 class="titleSeparator">{{ item.nombre }}</h4>
 
         <span v-if="item.companias_productos.length" class="badge">
           {{ item.companias_productos.length }}
@@ -318,22 +368,18 @@ onMounted(() => {
     <div v-else>
       <h4 class="text-center">No hay compañias disponibles</h4>
     </div>
+    <!-- prettier-ignore -->
     <div class="divButtons">
-      <VBtn variant="outlined" color="secondary" @click="resetCotizacion">
-        Cancelar
-      </VBtn>
-      <VBtn
-        :disabled="!configuracion.compania.length"
-        @click="goToSeleccionarProducto"
-        >Continuar</VBtn
-      >
+      <VBtn variant="outlined" color="secondary" @click="resetCotizacion"> Cancelar </VBtn>
+      <VBtn :disabled="!configuracion.companias.length" @click="goToSeleccionarProducto" >Continuar</VBtn>
     </div>
   </div>
   <!-- Selector de productos -->
   <div v-if="step == 3">
     <h2 class="w-full text-center mb-5">Selecciona uno o varios productos:</h2>
     <div class="divItems">
-      <div class="card" v-for="(compania, index) in configuracion.compania">
+      <!-- prettier-ignore -->
+      <div class="card cardProductos" v-for="(compania, index) in configuracion.companias">
         <p class="titleSeparator">{{ compania.nombreCorto }}</p>
         <template v-for="(item, i) in compania.companias_productos">
           <!-- v-model="" -->
@@ -348,29 +394,36 @@ onMounted(() => {
         </template>
       </div>
     </div>
+    <!-- prettier-ignore -->
     <div class="divButtons">
-      <VBtn variant="outlined" color="secondary" @click="resetCotizacion">
-        Cancelar
-      </VBtn>
-      <VBtn :disabled="!configuracion.productos.length">Continuar</VBtn>
+      <VBtn variant="outlined" color="secondary" @click="resetCotizacion" >Cancelar</VBtn>
+      <VBtn :disabled="!configuracion.productos.length" @click="nextStep" >Continuar</VBtn>
     </div>
   </div>
   <!-- Selector de entrevistas -->
   <div v-if="step == 4">
     <h2 class="w-full text-center mb-5">Entrevista de cotizacion:</h2>
-    <div class="divItems">
-      <div v-for="(item, index) in configuracion.productos">
-        <p class="titleSeparator">{{ item.nombre }}</p>
-      </div>
-      <div class="card" v-for="() in configuracion.compania">
-        <CotizacionPlanSeguro />
+    <div class="divRows">
+      <div
+        v-for="(item, index) in configuracion.productos"
+        :key="item.id"
+        class="mb-5 card"
+        @click="() => (productoSeleccionado = item)"
+        :class="[isProductoSeleccionado(item) ? 'cardActive' : '']"
+      >
+        <p class="p0 m0 fontBold">{{ item.nombre }}</p>
       </div>
     </div>
+    <div class="divRows">
+      <div class="card" v-if="productoSeleccionado">
+        <h5 class="titleSeparator">{{ productoSeleccionado.nombre }}</h5>
+        <CotizacionPlanSeguro class="wFull" />
+      </div>
+    </div>
+    <!-- prettier-ignore -->
     <div class="divButtons">
-      <VBtn variant="outlined" color="secondary" @click="resetCotizacion">
-        Cancelar
-      </VBtn>
-      <VBtn :disabled="!configuracion.productos.length">Continuar</VBtn>
+      <VBtn variant="outlined" color="secondary" @click="resetCotizacion"> Cancelar</VBtn>
+      <VBtn :disabled="!configuracion.productos.length" @click="sendToCotizar">Continuar</VBtn>
     </div>
   </div>
 </template>

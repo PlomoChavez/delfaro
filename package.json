@@ -17,6 +17,7 @@
     "color-name": "^1.1.4",
     "emoji-regex": "^8.0.0",
     "escalade": "^3.2.0",
+    "flatpickr": "^4.6.13",
     "get-caller-file": "^2.0.5",
     "has-flag": "^4.0.0",
     "is-fullwidth-code-point": "^3.0.0",

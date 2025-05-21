@@ -292,9 +292,6 @@ async function sendCotizacion() {
 
 <template>
   <div>
-    <pre>Paso: {{ step }}</pre>
-    <pre>{{ cotizacion }}</pre>
-    <pre>{{ formTmp ?? "null" }}</pre>
     <div v-if="step == 1">
       <ModuladorFormFactory
         title="Titular"

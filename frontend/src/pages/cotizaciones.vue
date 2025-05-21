@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const isCotizar = ref(true);
 const cotizaciones: any = ref({
   cotizacion1: {
     compania: {
@@ -112,12 +113,15 @@ const cotizaciones: any = ref({
     },
   },
 });
+function handleSendToCotizar(configuiracion: any) {
+  isCotizar.value = false;
+}
 </script>
 
 <template>
   <div class="divBtnWrapper">
-    <Multicotizaciones />
-    <!-- <SelectorCotizacion :cotizaciones="cotizaciones" /> -->
+    <Multicotizaciones v-if="isCotizar" @cotizar="handleSendToCotizar" />
+    <SelectorCotizacion v-else :cotizaciones="cotizaciones" />
   </div>
 </template>
 
