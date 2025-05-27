@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { customRequest } from "@/utils/axiosInstance";
-import { defineProps, ref } from "vue";
+import { ref } from "vue";
 
 const props = withDefaults(
   defineProps<{

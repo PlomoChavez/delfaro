@@ -1,20 +1,6 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-import PolizaVincularAsegurados from "@/components/forms/polizas/PolizaVincularAsegurados.vue";
-import { ref } from "vue";
-const emit = defineEmits<{
-  (event: "actionSeleccionar", item: any): void;
-}>();
-
-const props = withDefaults(
-  defineProps<{
-    data?: any;
-  }>(),
-  {
-    data: {},
-  }
-);
-
+import ManagerUsuario from "@/components/managers/ManagerUsuario.vue";
 // prettier-ignore
 const formSchema = [
   { label: "Nombre",              type: "text",   model: "nombre",          },
@@ -31,9 +17,26 @@ const formSchema = [
   { label: "Oficina",             type: "text", model: "oficina",           },
   { label: "Casa",                type: "text", model: "casa",              },
 ];
-const showForm = ref(false); // Referencia al componente FormFactory
-const data = ref(null); // Referencia al componente FormFactory
-const configTable = ref({ actions: ["Editar", "Eliminar"] });
+const showFormEdit = ref(false); // Referencia al componente FormFactory
+const data = ref({
+  nombre: "fr",
+  rfc: "fr",
+  fechaNacimiento: "2025-05-02",
+  direccion: "fr",
+  colonia: "fr",
+  codigoPostal: "fr",
+  estado: {
+    label: "Baja California",
+    id: 2,
+  },
+  ciudad: "fr",
+  correo: "fr",
+  telefono: "fr",
+  celular: "fr",
+  oficina: "fr",
+  casa: "fr",
+}); // Referencia al componente FormFactory
+const configTable = ref({ actions: ["Seleccionar"] });
 
 const tableHeaders = [
   { title: "ID", key: "id" },
@@ -47,49 +50,35 @@ const tableHeaders = [
 
 const apiEndpoints = {
   // fetch: "/api/test", // Endpoint para obtener datos
-  fetch: "/api/polizas/asegurados/get", // Endpoint para obtener datos
-  create: "/api/polizas/asegurados", // Endpoint para crear un elemento
-  update: "/api/polizas/asegurados", // Endpoint para actualizar un elemento
-  delete: "/api/polizas/asegurados/delete", // Endpoint para eliminar un elemento
+  fetch: "/api/clientes/get", // Endpoint para obtener datos
+  create: "/api/clientes/create", // Endpoint para crear un elemento
+  update: "/api/clientes/update", // Endpoint para actualizar un elemento
+  delete: "/api/clientes/delete", // Endpoint para eliminar un elemento
 };
-const handleCreate = (data: any) => {
-  showForm.value = true;
-  console.log("actionCreate", data);
+
+const handleActionsEdit = (dataRow: any) => {
+  data.value = { ...dataRow };
+  showFormEdit.value = true;
 };
-const handleCreateOfCliente = (data: any) => {
-  handleCreateOfCliente(data);
-};
-const handleCustomAction = (data: any) => {
-  let { action, item } = data;
-  switch (action) {
-    case "Seleccionar":
-      handleCreateOfCliente(item);
-      break;
-    default:
-      console.log("Acción no reconocida");
-  }
+const handleCancelar = () => {
+  showFormEdit.value = false;
 };
 </script>
 
 <template>
-  <div>
-    <PolizaVincularAsegurados
-      v-if="showForm"
-      :data="props.data"
-      @cancelar="showForm = false"
-    />
+  <!-- prettier-ignore -->
+  <ManagerUsuario v-if="showFormEdit" :data="data" @cancelar="handleCancelar" />
+  <div v-else>
+    <h1>Clientes</h1>
     <!-- prettier-ignore -->
     <CrudManager
-      v-else
-      title="Asegurados"
+      title="Cliente"
+      :emitEdit="true"
       :show-title="false"
-      :emitNew="true"
       :formSchema="formSchema"
       :tableHeaders="tableHeaders"
       :apiEndpoints="apiEndpoints"
-      :payloadDefault="{ poliza_id: props.data.id }"
-      :configTable="configTable"
-      @customCreate="handleCreate"
+      @customEdit="handleActionsEdit"
     />
   </div>
 </template>

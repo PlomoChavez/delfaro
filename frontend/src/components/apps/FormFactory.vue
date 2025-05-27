@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCatalogo } from "@/hooks/useCatalogo";
 import { VMoney } from "v-money3";
-import { defineEmits, defineProps, getCurrentInstance, watch } from "vue";
+import { getCurrentInstance, watch } from "vue";
 
 // Registrar la directiva manualmente
 const instance = getCurrentInstance();

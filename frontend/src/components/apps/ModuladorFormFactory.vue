@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import FormFactory from "@/components/apps/FormFactory.vue";
 // prettier-ignore
-import { defineEmits, defineProps } from "vue";
-// prettier-ignore
 import { VCard, VCardText, VDialog } from "vuetify/components";
 
 interface Field {

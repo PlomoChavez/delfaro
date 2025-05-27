@@ -3,7 +3,7 @@ import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
 import UsuarioClavesV1 from "@/components/forms/usuarios/UsuarioClavesV1.vue";
 import UsuarioSubagentesV1 from "@/components/forms/usuarios/UsuarioSubagentesV1.vue";
 import UsuariosAsistentesV1 from "@/components/forms/usuarios/UsuariosAsistentesV1.vue";
-import { defineProps, ref } from "vue";
+import { ref } from "vue";
 
 const currentTab = ref("item1");
 const modalContrasenia = ref(false);

@@ -1,5 +1,10 @@
 <script setup lang="ts">
+import Multicotizaciones from "@/components/forms/cotizaciones/multicotizaciones.vue";
+import SelectorCotizacion from "@/components/forms/cotizaciones/selectorCotizacion.vue";
+import { ref } from "vue";
+
 const isCotizar = ref(true);
+
 const cotizaciones: any = ref({
   cotizacion1: {
     compania: {
@@ -113,6 +118,7 @@ const cotizaciones: any = ref({
     },
   },
 });
+
 function handleSendToCotizar(configuiracion: any) {
   isCotizar.value = false;
 }

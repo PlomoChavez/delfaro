@@ -1,14 +1,27 @@
 const { PrismaClient } = require("@prisma/client");
+const { exportData, getAllFrom, deleteById } = require("./controller");
 const prisma = new PrismaClient();
+
+exports.getDataByCatalogo = async (req, res, tabla, campo, valor) => {
+  try {
+    const filtros = { [campo]: valor };
+    let result = await getAllFrom(tabla, filtros);
+    result.data = exportData(result.data);
+    res.json(result);
+  } catch (e) {
+    res.json({
+      result: false,
+      message: "Error al obtener los registros filtrados: " + e.message,
+    });
+  }
+};
 
 exports.getAll = async (req, res, tabla) => {
   try {
-    const datos = await prisma[tabla].findMany();
-    res.json({
-      result: true,
-      message: "Registros obtenidos con éxito",
-      data: datos,
-    });
+    const filtros = req.body || {};
+    let result = await getAllFrom(tabla, filtros);
+    result.data = exportData(result.data);
+    res.json(result);
   } catch (e) {
     res.json({
       result: false,
@@ -16,6 +29,12 @@ exports.getAll = async (req, res, tabla) => {
       data: [],
     });
   }
+};
+
+exports.delete = async (req, res, tabla) => {
+  const id = req.body.id;
+  const result = await deleteById(tabla, id);
+  res.json(result);
 };
 
 exports.createOrUpdate = async (req, res, tabla) => {
@@ -46,7 +65,6 @@ exports.createOrUpdate = async (req, res, tabla) => {
       res.json({
         result: true,
         message: "Registro actualizado con éxito",
-        data,
       });
     } else {
       // Crear si no existe un ID
@@ -54,50 +72,12 @@ exports.createOrUpdate = async (req, res, tabla) => {
       res.json({
         result: true,
         message: "Registro creado con éxito",
-        data: nuevo,
       });
     }
   } catch (e) {
     res.json({
       result: false,
       message: "Error al crear o actualizar el registro: " + e.message,
-      data: [],
-    });
-  }
-};
-
-exports.delete = async (req, res, tabla) => {
-  try {
-    const id = req.body.id;
-    await prisma[tabla].delete({ where: { id } });
-    res.json({
-      result: true,
-      message: "Registro eliminado con éxito",
-      data: { id },
-    });
-  } catch (e) {
-    res.json({
-      result: false,
-      message: "Error al eliminar el registro: " + e.message,
-      data: [],
-    });
-  }
-};
-
-exports.getDataByCatalogo = async (req, res, tabla, campo, valor) => {
-  try {
-    const datos = await prisma[tabla].findMany({
-      where: { [campo]: valor },
-    });
-    res.json({
-      result: true,
-      message: "Registros filtrados obtenidos con éxito",
-      data: datos,
-    });
-  } catch (e) {
-    res.json({
-      result: false,
-      message: "Error al obtener los registros filtrados: " + e.message,
       data: [],
     });
   }

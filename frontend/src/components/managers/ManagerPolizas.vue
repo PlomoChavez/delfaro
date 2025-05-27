@@ -3,7 +3,7 @@ import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import PolizaAsegurados from "@/components/forms/polizas/PolizaAsegurados.vue";
 import PolizaHistorial from "@/components/forms/polizas/PolizaHistorial.vue";
 import PolizaRecibos from "@/components/forms/polizas/PolizaRecibos.vue";
-import { defineEmits, defineProps, ref } from "vue";
+import { ref } from "vue";
 
 const currentTab = ref("item1");
 const modalContrasenia = ref(false);

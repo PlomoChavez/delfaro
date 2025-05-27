@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { themes } from "@/plugins/vuetify/theme";
-import { computed, defineEmits, defineProps, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 const colors = ref(themes.light.colors); // Accede a los colores del tema
 
 const selected: any = ref([]);

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import UsuarioCompanias from "@/components/forms/usuarios/UsuarioCompanias.vue";
-import { defineProps, ref } from "vue";
+import { ref } from "vue";
 
 const currentTab = ref("item1");
 const modalContrasenia = ref(false);

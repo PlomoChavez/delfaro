@@ -3,7 +3,7 @@ import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
 import { showSuccessMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import PolizaClientes from "@/components/forms/polizas/PolizaWizardClientes.vue";
 import { customRequest } from "@/utils/axiosInstance";
-import { defineEmits, ref } from "vue";
+import { ref } from "vue";
 
 const props = withDefaults(
   defineProps<{

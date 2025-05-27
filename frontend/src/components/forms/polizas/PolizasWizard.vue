@@ -7,7 +7,7 @@ import {
 } from "@/components/apps/sweetAlerts/SweetAlets";
 import PolizaWidget from "@/components/forms/polizas/PolizaWidget.vue";
 import PolizaClientes from "@/components/forms/polizas/PolizaWizardClientes.vue";
-import { defineEmits, ref } from "vue";
+import { ref } from "vue";
 
 const emit = defineEmits<{
   (event: "cancel"): void;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
 // prettier-ignore
-import { defineProps, ref } from "vue";
+import { ref } from "vue";
 
 const props = withDefaults(
   defineProps<{

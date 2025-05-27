@@ -6,7 +6,7 @@ import CompaniasRepresentantes from "@/components/forms/companias/CompaniasRepre
 import { showSuccessMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
 // prettier-ignore
-import { defineEmits, defineProps, ref, watch } from "vue";
+import { ref, watch } from "vue";
 const props = withDefaults(
   defineProps<{
     data: any;

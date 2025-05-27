@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-import { defineEmits, ref } from "vue";
+import { ref } from "vue";
 
 const props = withDefaults(
   defineProps<{
