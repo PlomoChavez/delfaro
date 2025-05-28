@@ -1,16 +1,14 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 const port = 3000;
-const cors = require('cors');
-app.use(cors({
-  origin: 'http://localhost:5173', // o usa '*' para permitir todos los orígenes (solo para desarrollo)
-  credentials: true
-}));
+const cors = require("cors");
+app.use(cors());
+
 app.use(express.json());
 
 // Importa las rutas
-const procesosAutomatizadosRoutes = require('./routes/procesosAutomatizadosRoutes');
-const apisRoutes = require('./routes/apisRoutes');
+const procesosAutomatizadosRoutes = require("./routes/procesosAutomatizadosRoutes");
+const apisRoutes = require("./routes/apisRoutes");
 // const usuariosRoutes = require('./routes/usuarios');
 // const polizasRoutes = require('./routes/polizas');
 
