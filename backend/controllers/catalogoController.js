@@ -49,12 +49,12 @@ exports.createOrUpdate = async (req, res, tabla) => {
     if (data.estatus !== undefined) {
       data.estatus =
         data.estatus === "Activo" ||
-        data.estatus === true ||
-        data.estatus === "true"
-          ? 1
-          : 0;
+        data.estatus === 1 ||
+        data.estatus === "true" ||
+        data.estatus === true
+          ? true
+          : false;
     }
-
     if (data.id) {
       // Actualizar si existe un ID
       await prisma[tabla].update({

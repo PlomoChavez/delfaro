@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 const baseURL = import.meta.env.VITE_API_URL; // Usa VITE_API_URL en tu .env
-
+console.log("Base URL for Axios:", baseURL);
 const axiosInstance = axios.create({
   baseURL, // No agregues "http://" ni el puerto si ya está en la variable
   headers: {

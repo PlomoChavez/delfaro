@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import CrudManager from "@/components/apps/VistaUno.vue";
-
 // prettier-ignore
 const formSchema = [
   { label: "Nombre", type: "text", model: "label", placeholder: "Ingresa el nombre" },
@@ -27,7 +26,6 @@ const apiEndpoints = {
   <CrudManager
     title="Tipos de usuario"
     :formModal="true"
-    ;emitEdit="true"
     :formSchema="formSchema"
     :tableHeaders="tableHeaders"
     :apiEndpoints="apiEndpoints"
