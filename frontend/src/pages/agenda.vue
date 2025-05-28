@@ -134,7 +134,7 @@ const jumpToDateFn = (date: string) => {
 </template>
 
 <style lang="scss">
-@use "@core/template/libs/full-calendar";
+// @use "@core/template/libs/full-calendar";
 
 .calendars-checkbox {
   .v-label {
