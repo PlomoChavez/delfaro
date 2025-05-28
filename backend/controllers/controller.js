@@ -6,6 +6,7 @@ function replacerBigInt(key, value) {
 }
 
 exports.exportData = async (data) => {
+  console.log("Exportando datos... ", typeof data);
   return JSON.parse(JSON.stringify(data, replacerBigInt));
 };
 
@@ -63,10 +64,19 @@ exports.getAllFrom = async (modelo, filtros = {}, include = undefined) => {
     if (include) {
       query.include = include;
     }
+    console.log(
+      "Obteniendo registros de modelo:",
+      modelo,
+      "con filtros:",
+      filtros
+    );
+    console.log("Query:", JSON.stringify(query, null, 2));
 
     let registros = await prisma[modelo].findMany(query);
 
     registros = await exports.exportData(registros);
+
+    console.log(`Registros obtenidos de ${modelo}:`, registros);
 
     return {
       result: true,

@@ -20,7 +20,6 @@ exports.getAll = async (req, res, tabla) => {
   try {
     const filtros = req.body || {};
     let result = await getAllFrom(tabla, filtros);
-    result.data = exportData(result.data);
     res.json(result);
   } catch (e) {
     res.json({
