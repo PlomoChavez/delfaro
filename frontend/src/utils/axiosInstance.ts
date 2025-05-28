@@ -1,12 +1,12 @@
 import axios, { AxiosRequestConfig } from "axios";
+const baseURL = import.meta.env.VITE_API_URL; // Usa VITE_API_URL en tu .env
 
-// Crear una instancia única de Axios
 const axiosInstance = axios.create({
-  baseURL: "http://34.227.20.29:3000", // Cambia esto por la URL base de tu API
+  baseURL, // No agregues "http://" ni el puerto si ya está en la variable
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 600000, // Tiempo de espera predeterminado
+  timeout: 600000,
 });
 
 // Función para manejar configuraciones personalizadas

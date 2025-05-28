@@ -41,7 +41,7 @@
     "yargs-parser": "^21.1.1"
   },
   "scripts": {
-    "push": "cd frontend && pnpm run build && cd .. && git add . && git commit -m \"Avances\" && git push",
+    "push": "cd frontend && pnpm run build && cd .. && git add . && git commit -m \"Compilado\" && git push",
     "dev": "concurrently \"pnpm --prefix backend start\" \"pnpm --prefix frontend run dev\""
   },
   "keywords": [],
