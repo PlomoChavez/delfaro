@@ -1,27 +1,36 @@
 <script setup lang="ts">
-import FullCalendar from '@fullcalendar/vue3'
-import { blankEvent, useCalendar } from '@/components/apps/calendar/useCalendar'
-import { useCalendarStore } from '@/components/apps/calendar/useCalendarStore'
+import {
+  blankEvent,
+  useCalendar,
+} from "@/components/apps/calendar/useCalendar";
+import { useCalendarStore } from "@/components/apps/calendar/useCalendarStore";
+import FullCalendar from "@fullcalendar/vue3";
 
 // components
-import CalendarEventHandler from '@/components/apps/calendar/CalendarEventHandler.vue'
+import CalendarEventHandler from "@/components/apps/calendar/CalendarEventHandler.vue";
 
 // 👉 Store
-const store = useCalendarStore()
+const store = useCalendarStore();
 
 // 👉 Event
-const event = ref(structuredClone(blankEvent))
-const isEventHandlerSidebarActive = ref(false)
+const event = ref(structuredClone(blankEvent));
+const isEventHandlerSidebarActive = ref(false);
 
-watch(isEventHandlerSidebarActive, val => {
-  if (!val)
-    event.value = structuredClone(blankEvent)
-})
+watch(isEventHandlerSidebarActive, (val) => {
+  if (!val) event.value = structuredClone(blankEvent);
+});
 
-const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
+const { isLeftSidebarOpen } = useResponsiveLeftSidebar();
 
 // 👉 useCalendar
-const { refCalendar, calendarOptions, addEvent, updateEvent, removeEvent, jumpToDate } = useCalendar(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
+const {
+  refCalendar,
+  calendarOptions,
+  addEvent,
+  updateEvent,
+  removeEvent,
+  jumpToDate,
+} = useCalendar(event, isEventHandlerSidebarActive, isLeftSidebarOpen);
 
 // SECTION Sidebar
 // 👉 Check all
@@ -32,26 +41,25 @@ const checkAll = computed({
           Else if => all filters are selected (by checking length of both array) => Empty Selected array  => Deselect All
   */
   get: () => store.selectedCalendars.length === store.availableCalendars.length,
-  set: val => {
+  set: (val) => {
     if (val)
-      store.selectedCalendars = store.availableCalendars.map(i => i.label)
-
+      store.selectedCalendars = store.availableCalendars.map((i) => i.label);
     else if (store.selectedCalendars.length === store.availableCalendars.length)
-      store.selectedCalendars = []
+      store.selectedCalendars = [];
   },
-})
+});
 // !SECTION
 
 const jumpToDateFn = (date: string) => {
-  jumpToDate(date)
-}
+  jumpToDate(date);
+};
 </script>
 
 <template>
   <div>
     <VCard>
       <!-- `z-index: 0` Allows overlapping vertical nav on calendar -->
-      <VLayout style="z-index: 0;">
+      <VLayout style="z-index: 0">
         <!-- 👉 Navigation drawer -->
         <VNavigationDrawer
           v-model="isLeftSidebarOpen"
@@ -63,7 +71,7 @@ const jumpToDateFn = (date: string) => {
           class="calendar-add-event-drawer"
           :temporary="$vuetify.display.mdAndDown"
         >
-          <div style="margin: 1.5rem;">
+          <div style="margin: 1.5rem">
             <VBtn
               block
               prepend-icon="tabler-plus"
@@ -87,9 +95,7 @@ const jumpToDateFn = (date: string) => {
 
           <VDivider />
           <div class="pa-6">
-            <h6 class="text-lg font-weight-medium mb-4">
-              Event Filters
-            </h6>
+            <h6 class="text-lg font-weight-medium mb-4">Event Filters</h6>
 
             <div class="d-flex flex-column calendars-checkbox">
               <VCheckbox
@@ -112,10 +118,7 @@ const jumpToDateFn = (date: string) => {
 
         <VMain>
           <VCard flat>
-            <FullCalendar
-              ref="refCalendar"
-              :options="calendarOptions"
-            />
+            <FullCalendar ref="refCalendar" :options="calendarOptions" />
           </VCard>
         </VMain>
       </VLayout>
@@ -131,7 +134,7 @@ const jumpToDateFn = (date: string) => {
 </template>
 
 <style lang="scss">
-@use "@core-scss/template/libs/full-calendar";
+@use "@core/template/libs/full-calendar";
 
 .calendars-checkbox {
   .v-label {
@@ -154,8 +157,8 @@ const jumpToDateFn = (date: string) => {
 .calendar-date-picker {
   display: none;
 
-  +.flatpickr-input {
-    +.flatpickr-calendar.inline {
+  + .flatpickr-input {
+    + .flatpickr-calendar.inline {
       border: none;
       box-shadow: none;
 

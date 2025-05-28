@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import AuthProvider from "@/views/pages/authentication/AuthProvider.vue";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
 import authV2LoginIllustrationBorderedDark from "@images/pages/auth-v2-login-illustration-bordered-dark.png";
 import authV2LoginIllustrationBorderedLight from "@images/pages/auth-v2-login-illustration-bordered-light.png";
@@ -7,12 +6,9 @@ import authV2LoginIllustrationDark from "@images/pages/auth-v2-login-illustratio
 import authV2LoginIllustrationLight from "@images/pages/auth-v2-login-illustration-light.png";
 import authV2MaskDark from "@images/pages/misc-mask-dark.png";
 import authV2MaskLight from "@images/pages/misc-mask-light.png";
-import { VNodeRenderer } from "@layouts/components/VNodeRenderer";
-import { themeConfig } from "@themeConfig";
 
-import logoDelFaro from "@images/delfaro/logo.png";
-import iconoDelFaro from "@images/delfaro/icono.png";
 import loginDelFaro from "@images/delfaro/avatars/login.png";
+import iconoDelFaro from "@images/delfaro/icono.png";
 definePage({
   meta: {
     layout: "blank",
@@ -167,5 +163,5 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
 </template>
 
 <style lang="scss">
-@use "@core-scss/template/pages/page-auth";
+@use "@core/template/pages/page-auth";
 </style>
