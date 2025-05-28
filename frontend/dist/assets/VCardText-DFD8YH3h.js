@@ -1,1 +1,0 @@
-import{a7 as s,a8 as r,a9 as o,b as c,aa as n,ab as m}from"./index-BEYR6r14.js";const p=r({opacity:[Number,String],...m(),...n()},"VCardText"),x=s()({name:"VCardText",props:p(),setup(a,e){let{slots:t}=e;return o(()=>c(a.tag,{class:["v-card-text",a.class],style:[{"--v-card-text-opacity":a.opacity},a.style]},t)),{}}});export{x as V};

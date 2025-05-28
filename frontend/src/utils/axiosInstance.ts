@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 
 // Crear una instancia única de Axios
 const axiosInstance = axios.create({
-  baseURL: "http://34.227.20.29:3000", // Cambia esto por la URL base de tu API
+  baseURL: "http://172.31.84.7:3000", // Cambia esto por la URL base de tu API
   headers: {
     "Content-Type": "application/json",
   },
