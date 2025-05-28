@@ -1,0 +1,37 @@
+sudo chown -R ec2-user:nginx /home/ec2-user/delfaro/dist
+sudo chmod -R 755 /home/ec2-user/delfaro/dist
+
+
+ls /home/ec2-user/delfaro/dist/index.html
+
+
+
+sudo truncate -s 0 /var/log/nginx/error.log
+sudo tail -n 50 /var/log/nginx/error.log
+
+
+# Elimina archivos y carpetas no rastreados por git
+git clean -fd
+
+# Restaura cualquier archivo modificado a su estado original
+git restore .
+
+
+Eliminar lar carpeta dentro de una :
+rm -rf /home/ec2-user/delfaro/*/
+
+
+
+
+sudo chmod 644 /home/ec2-user/delfaro/frontend/dist/index.html
+
+# revisar el log de backend
+journalctl -u delfaro-backend.service -b --no-pager --since "5 minutes ago"
+
+sudo systemctl daemon-reload
+sudo systemctl restart delfaro-backend
+sudo systemctl status delfaro-backend
+
+
+sudo systemctl stop delfaro-backend
+sudo systemctl status delfaro-backend
