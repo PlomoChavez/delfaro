@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://desar257_dev:z4thMUpEeGrC@mx66.hostgator.mx:3306/desar257_DelFaro"
 }
 
 model actividades {
