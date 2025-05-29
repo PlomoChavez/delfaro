@@ -3,7 +3,6 @@ import CryptoJS from "crypto-js";
 import { jwtDecode } from "jwt-decode";
 
 export function handleLogOut(redirect = true) {
-  console.log("Cerrar sesión");
   localStorage.removeItem("token");
   localStorage.removeItem("userData");
   if (redirect) {
@@ -31,8 +30,6 @@ function getKey256(key: string): CryptoJS.lib.WordArray {
 
 export function decryptToken(encrypted: string): string {
   try {
-    console.log("Desencriptando token:", ENCRYPTION_KEY);
-    console.log("Desencriptando token:", ENCRYPTION_KEY.length);
     if (!encrypted || !encrypted.includes(":")) return "";
     const [ivHex, encryptedHex] = encrypted.split(":");
     if (!ivHex || !encryptedHex) return "";

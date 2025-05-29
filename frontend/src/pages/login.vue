@@ -13,6 +13,7 @@ import authV2LoginIllustrationDark from "@images/pages/auth-v2-login-illustratio
 import authV2LoginIllustrationLight from "@images/pages/auth-v2-login-illustration-light.png";
 import authV2MaskDark from "@images/pages/misc-mask-dark.png";
 import authV2MaskLight from "@images/pages/misc-mask-light.png";
+const { showTokenExpiringModal } = useTokenExpiringModal();
 
 definePage({
   meta: {
@@ -44,7 +45,7 @@ async function handleLogin() {
       console.log("startTokenTimer");
       startTokenTimer(() => {
         console.log("¡Token expirado o inválido!");
-        useTokenExpiringModal(); // Muestra el modal si el token es inválido o expiró
+        showTokenExpiringModal(); // Esto sí muestra el modal
       });
       router.push({ name: "root" });
     } else {

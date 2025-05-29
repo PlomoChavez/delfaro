@@ -27,7 +27,6 @@ function getRequiresAuth(item: any): any {
 
 async function verificarToken() {
   let token = localStorage.getItem("token") || "";
-  console.log("Token from localStorage:", token);
   if (token != "") {
     let response: any = await customRequest({
       url: "/api/verificar",
