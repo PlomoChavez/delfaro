@@ -1,31 +1,78 @@
 <script setup lang="ts">
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { useTokenExpiringModal } from "@/composables/useTokenExpiringModal";
 import { handleLogOut } from "@/utils/authHelper";
-import { ref } from "vue";
-const { showModal, hideTokenExpiringModal } = useTokenExpiringModal();
+import { ref, watch } from "vue";
+
+const { showModal, hideTokenExpiringModal, showTokenExpiringModal } =
+  useTokenExpiringModal();
 
 const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-const email = ref(userData.correo || "");
+const email = ref("");
 const password = ref("");
 const isPasswordVisible = ref(false);
 const loginError = ref("");
 
-const handleLogin = () => {
+// Cada vez que el modal se abre, toma el correo actualizado de localStorage
+watch(
+  () => showModal,
+  (newValue) => {
+    console.log("Modal visibility changed:", newValue);
+    if (newValue) {
+      email.value = userData.correo || "";
+      password.value = "";
+      loginError.value = "";
+    }
+  }
+);
+
+const handleMakelogin = () => {
   loginError.value = "";
   if (!email.value || !password.value) {
     loginError.value = "Debes ingresar correo y contraseña.";
     return;
   }
-  // Aquí puedes manejar el inicio de sesión, por ejemplo, enviando los datos a tu API
-  console.log("Iniciar sesión con:", {
-    email: email.value,
-    password: password.value,
-  });
+  handleLogin();
 };
+
 const handleCerrar = () => {
   hideTokenExpiringModal();
   handleLogOut();
 };
+
+async function handleLogin() {
+  let response: any = await customRequest({
+    url: "/api/login",
+    method: "POST",
+    data: {
+      email: email.value,
+      password: password.value,
+    },
+  });
+  if (response.data.result) {
+    const userData = response.data.data.userData;
+    const token = response.data.data.token;
+
+    if (userData && token) {
+      localStorage.setItem("userData", JSON.stringify(userData));
+      localStorage.setItem("token", token);
+      startTokenTimer(() => {
+        showTokenExpiringModal();
+      });
+      hideTokenExpiringModal();
+    } else {
+      showErrorMessage({
+        title: "Error",
+        message: "No se recibió información de usuario o token válida.",
+      });
+    }
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: response.data.message,
+    });
+  }
+}
 </script>
 
 <template>
@@ -49,11 +96,13 @@ const handleCerrar = () => {
         >
           {{ loginError }}
         </VAlert>
-        <VForm @submit.prevent="handleLogin">
+        <pre>{{ email }}</pre>
+        <pre>{{ password }}</pre>
+        <VForm @submit.prevent="handleMakelogin">
           <VRow>
             <!-- email -->
             <VCol class="colItem" cols="12">
-              <AppTextField
+              <VTextField
                 v-model="email"
                 autofocus
                 label="Correo electrónico"
@@ -64,7 +113,7 @@ const handleCerrar = () => {
 
             <!-- password -->
             <VCol class="colItem" cols="12">
-              <AppTextField
+              <VTextField
                 v-model="password"
                 label="Contraseña"
                 placeholder="············"

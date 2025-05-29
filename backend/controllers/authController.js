@@ -131,7 +131,7 @@ exports.login = async (req, res) => {
       tipo: user.tipo.label,
       tipo_id: user.tipo.id,
     },
-    "20s"
+    "10s"
   );
 
   return res.json({

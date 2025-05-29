@@ -42,7 +42,6 @@ async function handleLogin() {
     if (userData && token) {
       localStorage.setItem("userData", JSON.stringify(userData));
       localStorage.setItem("token", token);
-      console.log("startTokenTimer");
       startTokenTimer(() => {
         console.log("¡Token expirado o inválido!");
         showTokenExpiringModal(); // Esto sí muestra el modal
