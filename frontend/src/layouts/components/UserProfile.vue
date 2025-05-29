@@ -1,12 +1,6 @@
 <script setup lang="ts">
-import { router } from "@/plugins/1.router";
+import { handleLogOut } from "@/utils/authHelper";
 import avatar1 from "@images/avatars/avatar-1.png";
-function handleLogOut() {
-  // Aquí puedes implementar la lógica de cierre de sesión
-  console.log("Cerrar sesión");
-  localStorage.removeItem("token");
-  router.push({ name: "login" });
-}
 </script>
 
 <template>
@@ -90,7 +84,7 @@ function handleLogOut() {
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem @click="handleLogOut">
+          <VListItem @click="handleLogOut(true)">
             <template #prepend>
               <VIcon class="me-2" icon="tabler-logout" size="22" />
             </template>

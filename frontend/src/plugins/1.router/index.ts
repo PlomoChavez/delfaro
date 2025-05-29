@@ -1,4 +1,6 @@
 import navItems from "@/navigation/vertical";
+import { handleLogOut } from "@/utils/authHelper";
+import { customRequest } from "@/utils/axiosInstance";
 import { setupLayouts } from "virtual:generated-layouts";
 import type { App } from "vue";
 import type { RouteRecordRaw } from "vue-router/auto";
@@ -21,6 +23,25 @@ function getRequiresAuth(item: any): any {
   return item.config && typeof item.config.requiresAuth === "boolean"
     ? item.config.requiresAuth
     : null;
+}
+
+async function verificarToken() {
+  let token = localStorage.getItem("token") || "";
+  console.log("Token from localStorage:", token);
+  let response: any = await customRequest({
+    url: "/api/verificar",
+    method: "POST",
+    data: { token },
+  });
+
+  if (!response.data.result) {
+    handleLogOut(false);
+    return false;
+  } else {
+    return true;
+  }
+
+  // Redirige a la página principal o dashboard
 }
 
 function thisHasRequiresAuth(name: string): any {
@@ -57,7 +78,8 @@ const router = createRouter({
 });
 
 // --- AQUÍ VA EL GUARD ---
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  await verificarToken();
   const isAuthenticated = !!localStorage.getItem("token");
   const requiresAuth = thisHasRequiresAuth(to.name);
   // Si es login y ya hay sesión, redirige a home

@@ -15,6 +15,7 @@ const authController = require('../controllers/authController');
 
 // Login
 router.post('/api/login', authController.login);
+router.post('/api/verificar', authController.verificarToken);
 
 
 
