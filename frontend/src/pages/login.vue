@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import { router } from "@/plugins/1.router";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
+import loginDelFaro from "@images/delfaro/avatars/login.png";
+import iconoDelFaro from "@images/delfaro/icono.png";
 import authV2LoginIllustrationBorderedDark from "@images/pages/auth-v2-login-illustration-bordered-dark.png";
 import authV2LoginIllustrationBorderedLight from "@images/pages/auth-v2-login-illustration-bordered-light.png";
 import authV2LoginIllustrationDark from "@images/pages/auth-v2-login-illustration-dark.png";
 import authV2LoginIllustrationLight from "@images/pages/auth-v2-login-illustration-light.png";
 import authV2MaskDark from "@images/pages/misc-mask-dark.png";
 import authV2MaskLight from "@images/pages/misc-mask-light.png";
-
-import loginDelFaro from "@images/delfaro/avatars/login.png";
-import iconoDelFaro from "@images/delfaro/icono.png";
 definePage({
   meta: {
     layout: "blank",
@@ -21,6 +21,14 @@ const form = ref({
   password: "",
   remember: false,
 });
+
+function handleLogin() {
+  // Aquí normalmente validarías usuario/contraseña y pedirías el token al backend
+  // Para ejemplo, solo lo guardamos directamente:
+  localStorage.setItem("token", "valor_de_ejemplo_token");
+  router.push({ name: "root" });
+  // Redirige a la página principal o dashboard
+}
 
 const isPasswordVisible = ref(false);
 
@@ -86,7 +94,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
           </p>
         </VCardText>
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm @submit.prevent="handleLogin">
             <VRow>
               <!-- email -->
               <VCol cols="12">

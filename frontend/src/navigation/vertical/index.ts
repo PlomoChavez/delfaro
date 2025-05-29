@@ -1,5 +1,10 @@
 export default [
   {
+    title: "Login",
+    to: { name: "login" },
+    icon: { icon: "tabler-smart-home" },
+  },
+  {
     title: "Home",
     to: { name: "root" },
     icon: { icon: "tabler-smart-home" },
@@ -12,14 +17,17 @@ export default [
   {
     title: "Administrador",
     icon: { icon: "tabler-settings" },
-
     children: [
       // 2nd level
       {
         title: "Catalogos",
         children: [
           // 3rd level
-          { title: "Actividades", to: { name: "catalogos-actividades" } },
+          {
+            title: "Actividades",
+            to: { name: "catalogos-actividades" },
+            // config: { requiresAuth: true },
+          },
           { title: "Compañias", to: { name: "catalogos-companias" } },
           {
             title: "Estatus de clientes",
@@ -70,5 +78,6 @@ export default [
     title: "Cotizaciones",
     to: { name: "cotizaciones" },
     icon: { icon: "tabler-calendar" },
+    meta: { requiresAuth: true },
   },
 ];

@@ -1,4 +1,11 @@
 <script setup lang="ts">
+definePage({
+  meta: {
+    requiresAuth: true,
+    action: "read",
+    subject: "Dashboard",
+  },
+});
 import CrudManager from "@/components/apps/VistaUno.vue";
 
 // prettier-ignore

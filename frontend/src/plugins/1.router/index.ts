@@ -1,36 +1,71 @@
-import { setupLayouts } from 'virtual:generated-layouts'
-import type { App } from 'vue'
-
-import type { RouteRecordRaw } from 'vue-router/auto'
-
-import { createRouter, createWebHistory } from 'vue-router/auto'
-
+import navItems from "@/navigation/vertical";
+import { setupLayouts } from "virtual:generated-layouts";
+import type { App } from "vue";
+import type { RouteRecordRaw } from "vue-router/auto";
+import { createRouter, createWebHistory } from "vue-router/auto";
+function findNavItemByName(items: any[], name: string): any | undefined {
+  for (const item of items) {
+    if (item.to && item.to.name === name) {
+      return item;
+    }
+    if (item.children && Array.isArray(item.children)) {
+      const found = findNavItemByName(item.children, name);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+function getRequiresAuth(item: any): boolean {
+  return item.config && typeof item.config.requiresAuth === "boolean"
+    ? item.config.requiresAuth
+    : false;
+}
+function thisHasRequiresAuth(name: string): boolean {
+  const item = findNavItemByName(navItems, name);
+  return item ? getRequiresAuth(item) : false;
+}
 function recursiveLayouts(route: RouteRecordRaw): RouteRecordRaw {
   if (route.children) {
     for (let i = 0; i < route.children.length; i++)
-      route.children[i] = recursiveLayouts(route.children[i])
-
-    return route
+      route.children[i] = recursiveLayouts(route.children[i]);
+    return route;
   }
-
-  return setupLayouts([route])[0]
+  return setupLayouts([route])[0];
 }
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(to) {
-    if (to.hash)
-      return { el: to.hash, behavior: 'smooth', top: 60 }
-
-    return { top: 0 }
+    if (to.hash) return { el: to.hash, behavior: "smooth", top: 60 };
+    return { top: 0 };
   },
-  extendRoutes: pages => [
-    ...[...pages].map(route => recursiveLayouts(route)),
+  extendRoutes: (pages) => [
+    {
+      path: "/",
+      redirect: { name: "login" }, // Redirige a la ruta de login
+    },
+    ...[...pages].map((route) => recursiveLayouts(route)),
   ],
-})
+});
 
-export { router }
+// --- AQUÍ VA EL GUARD ---
+router.beforeEach((to, from, next) => {
+  let thisItemsNeedSessionActive: boolean = thisHasRequiresAuth(to.name);
+  const isAuthenticated = !!localStorage.getItem("token");
+  if (to.name === "login") {
+    next();
+  }
+  if (!isAuthenticated) {
+    console.log("No tienes sesión activa, redirigiendo a /");
+    return next({ name: "login" });
+  }
+  // Aquí puedes agregar lógica de permisos por action/subject si la necesitas
+  next();
+});
+// --- FIN GUARD ---
+
+export { router };
 
 export default function (app: App) {
-  app.use(router)
+  app.use(router);
 }

@@ -1,4 +1,11 @@
 <script setup lang="ts">
+definePage({
+  meta: {
+    requiresAuth: true,
+    action: "read",
+    subject: "Dashboard",
+  },
+});
 import Multicotizaciones from "@/components/forms/cotizaciones/multicotizaciones.vue";
 import SelectorCotizacion from "@/components/forms/cotizaciones/selectorCotizacion.vue";
 import { ref } from "vue";
