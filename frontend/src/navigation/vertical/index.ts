@@ -6,8 +6,9 @@ export default [
   },
   {
     title: "Home",
-    to: { name: "home" },
+    to: { name: "root" },
     icon: { icon: "tabler-smart-home" },
+    config: { requiresAuth: true },
   },
   // {
   //   title: "Denegado",

@@ -3,6 +3,7 @@ import { setupLayouts } from "virtual:generated-layouts";
 import type { App } from "vue";
 import type { RouteRecordRaw } from "vue-router/auto";
 import { createRouter, createWebHistory } from "vue-router/auto";
+
 function findNavItemByName(items: any[], name: string): any | undefined {
   for (const item of items) {
     if (item.to && item.to.name === name) {
@@ -15,15 +16,22 @@ function findNavItemByName(items: any[], name: string): any | undefined {
   }
   return undefined;
 }
-function getRequiresAuth(item: any): boolean {
+
+function getRequiresAuth(item: any): any {
   return item.config && typeof item.config.requiresAuth === "boolean"
     ? item.config.requiresAuth
-    : false;
+    : null;
 }
-function thisHasRequiresAuth(name: string): boolean {
+
+function thisHasRequiresAuth(name: string): any {
   const item = findNavItemByName(navItems, name);
-  return item ? getRequiresAuth(item) : false;
+  return item
+    ? getRequiresAuth(item) == null
+      ? true
+      : getRequiresAuth(item)
+    : true;
 }
+
 function recursiveLayouts(route: RouteRecordRaw): RouteRecordRaw {
   if (route.children) {
     for (let i = 0; i < route.children.length; i++)
@@ -52,22 +60,23 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem("token");
   const requiresAuth = thisHasRequiresAuth(to.name);
-  console.log("Ruta a la que se intenta acceder:", to.name);
-  // Si ya está autenticado y va a login, redirige a home
-  if (to.name === "login" && isAuthenticated) {
-    console.log("Tienes sesión activa, redirigiendo a home");
-    return next({ name: "home" });
+  // Si es login y ya hay sesión, redirige a home
+  if (to.name === "login") {
+    if (isAuthenticated) {
+      return next({ name: "root" });
+    } else {
+      return next();
+    }
+  } else {
+    if (!requiresAuth) {
+      return next();
+    } else if (requiresAuth && isAuthenticated) {
+      return next();
+    } else if (requiresAuth && !isAuthenticated) {
+      return next({ name: "login" });
+    }
   }
-
-  // Si la ruta requiere auth y no está autenticado, redirige a login
-  if (requiresAuth && !isAuthenticated) {
-    console.log("No tienes sesión activa, redirigiendo a login");
-    return next({ name: "login" });
-  }
-
-  // Si va a login y no está autenticado, permite el acceso
-  // Si la ruta no requiere auth, permite el acceso
-  return next();
+  // En cualquier otro caso, permite el acceso
 });
 // --- FIN GUARD ---
 
