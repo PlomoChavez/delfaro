@@ -44,6 +44,7 @@ declare global {
   const customRequest: typeof import('./src/utils/axiosInstance')['customRequest']
   const debouncedRef: typeof import('@vueuse/core')['debouncedRef']
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
+  const decryptToken: typeof import('./src/utils/authHelper')['decryptToken']
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
   const defineLoader: typeof import('vue-router/auto')['defineLoader']
@@ -59,6 +60,7 @@ declare global {
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const getTokenRemainingSeconds: typeof import('./src/utils/authHelper')['getTokenRemainingSeconds']
   const h: typeof import('vue')['h']
   const handleLogOut: typeof import('./src/utils/authHelper')['handleLogOut']
   const hexToRgb: typeof import('./src/@core/utils/colorConverter')['hexToRgb']
@@ -143,6 +145,8 @@ declare global {
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
+  const startTokenTimer: typeof import('./src/utils/verifyToken')['startTokenTimer']
+  const stopTokenTimer: typeof import('./src/utils/verifyToken')['stopTokenTimer']
   const storeToRefs: typeof import('pinia')['storeToRefs']
   const syncRef: typeof import('@vueuse/core')['syncRef']
   const syncRefs: typeof import('@vueuse/core')['syncRefs']
@@ -334,6 +338,7 @@ declare global {
   const useToNumber: typeof import('@vueuse/core')['useToNumber']
   const useToString: typeof import('@vueuse/core')['useToString']
   const useToggle: typeof import('@vueuse/core')['useToggle']
+  const useTokenExpiringModal: typeof import('./src/composables/useTokenExpiringModal')['useTokenExpiringModal']
   const useTransition: typeof import('@vueuse/core')['useTransition']
   const useTrunc: typeof import('@vueuse/math')['useTrunc']
   const useUrlSearchParams: typeof import('@vueuse/core')['useUrlSearchParams']
@@ -417,6 +422,7 @@ declare module 'vue' {
     readonly customRequest: UnwrapRef<typeof import('./src/utils/axiosInstance')['customRequest']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
+    readonly decryptToken: UnwrapRef<typeof import('./src/utils/authHelper')['decryptToken']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly definePage: UnwrapRef<typeof import('unplugin-vue-router/runtime')['definePage']>
@@ -431,6 +437,7 @@ declare module 'vue' {
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getTokenRemainingSeconds: UnwrapRef<typeof import('./src/utils/authHelper')['getTokenRemainingSeconds']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly handleLogOut: UnwrapRef<typeof import('./src/utils/authHelper')['handleLogOut']>
     readonly hexToRgb: UnwrapRef<typeof import('./src/@core/utils/colorConverter')['hexToRgb']>
@@ -513,6 +520,8 @@ declare module 'vue' {
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
+    readonly startTokenTimer: UnwrapRef<typeof import('./src/utils/verifyToken')['startTokenTimer']>
+    readonly stopTokenTimer: UnwrapRef<typeof import('./src/utils/verifyToken')['stopTokenTimer']>
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
@@ -699,6 +708,7 @@ declare module 'vue' {
     readonly useToNumber: UnwrapRef<typeof import('@vueuse/core')['useToNumber']>
     readonly useToString: UnwrapRef<typeof import('@vueuse/core')['useToString']>
     readonly useToggle: UnwrapRef<typeof import('@vueuse/core')['useToggle']>
+    readonly useTokenExpiringModal: UnwrapRef<typeof import('./src/composables/useTokenExpiringModal')['useTokenExpiringModal']>
     readonly useTransition: UnwrapRef<typeof import('@vueuse/core')['useTransition']>
     readonly useTrunc: UnwrapRef<typeof import('@vueuse/math')['useTrunc']>
     readonly useUrlSearchParams: UnwrapRef<typeof import('@vueuse/core')['useUrlSearchParams']>

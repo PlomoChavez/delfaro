@@ -28,17 +28,22 @@ function getRequiresAuth(item: any): any {
 async function verificarToken() {
   let token = localStorage.getItem("token") || "";
   console.log("Token from localStorage:", token);
-  let response: any = await customRequest({
-    url: "/api/verificar",
-    method: "POST",
-    data: { token },
-  });
+  if (token != "") {
+    let response: any = await customRequest({
+      url: "/api/verificar",
+      method: "POST",
+      data: { token },
+    });
 
-  if (!response.data.result) {
+    if (!response.data.result) {
+      handleLogOut(false);
+      return false;
+    } else {
+      return true;
+    }
+  } else {
     handleLogOut(false);
     return false;
-  } else {
-    return true;
   }
 
   // Redirige a la página principal o dashboard

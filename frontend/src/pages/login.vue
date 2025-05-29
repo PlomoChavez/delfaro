@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import { useTokenExpiringModal } from "@/composables/useTokenExpiringModal"; // o tu función de modal
 import { router } from "@/plugins/1.router";
 import { customRequest } from "@/utils/axiosInstance";
+import { startTokenTimer } from "@/utils/verifyToken";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
 import loginDelFaro from "@images/delfaro/avatars/login.png";
 import iconoDelFaro from "@images/delfaro/icono.png";
@@ -11,6 +13,7 @@ import authV2LoginIllustrationDark from "@images/pages/auth-v2-login-illustratio
 import authV2LoginIllustrationLight from "@images/pages/auth-v2-login-illustration-light.png";
 import authV2MaskDark from "@images/pages/misc-mask-dark.png";
 import authV2MaskLight from "@images/pages/misc-mask-light.png";
+
 definePage({
   meta: {
     layout: "blank",
@@ -38,6 +41,11 @@ async function handleLogin() {
     if (userData && token) {
       localStorage.setItem("userData", JSON.stringify(userData));
       localStorage.setItem("token", token);
+      console.log("startTokenTimer");
+      startTokenTimer(() => {
+        console.log("¡Token expirado o inválido!");
+        useTokenExpiringModal(); // Muestra el modal si el token es inválido o expiró
+      });
       router.push({ name: "root" });
     } else {
       showErrorMessage({
