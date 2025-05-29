@@ -11,6 +11,12 @@ const polizaAseguradosController = require('../controllers/polizaAseguradosContr
 const robotController = require('../controllers/robotController');
 const catalogosController = require('../controllers/catalogosController');
 const cotizacionesController = require('../controllers/cotizacionesController');
+const authController = require('../controllers/authController');
+
+// Login
+router.post('/api/login', authController.login);
+
+
 
 router.post('/api/catalogos/ramos', (req, res) => catalogosController.getCatalogo(req, res, 'ramos'));
 router.post('/api/wizard/cotizacion/companias', (req, res) => cotizacionesController.getCompniasByRamo(req, res));

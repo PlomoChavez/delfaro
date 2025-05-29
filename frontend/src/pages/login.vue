@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { router } from "@/plugins/1.router";
+import { customRequest } from "@/utils/axiosInstance";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
 import loginDelFaro from "@images/delfaro/avatars/login.png";
 import iconoDelFaro from "@images/delfaro/icono.png";
@@ -17,16 +19,41 @@ definePage({
 });
 
 const form = ref({
-  email: "",
-  password: "",
+  email: "jesus@gmail.com",
+  password: "Demo123",
   remember: false,
 });
 
-function handleLogin() {
-  // Aquí normalmente validarías usuario/contraseña y pedirías el token al backend
-  // Para ejemplo, solo lo guardamos directamente:
-  localStorage.setItem("token", "valor_de_ejemplo_token");
-  router.push({ name: "root" });
+async function handleLogin() {
+  let response: any = await customRequest({
+    url: "/api/login",
+    method: "POST",
+    data: form.value,
+  });
+  console.log("Response from login:", response);
+  if (response.data.result) {
+    const userData = response.data.data.userData;
+    const token = response.data.data.token;
+
+    if (userData && token) {
+      localStorage.setItem("userData", JSON.stringify(userData));
+      localStorage.setItem("token", token);
+      router.push({ name: "root" });
+    } else {
+      showErrorMessage({
+        title: "Error",
+        message: "No se recibió información de usuario o token válida.",
+      });
+    }
+  } else {
+    // Maneja el error de inicio de sesión
+
+    showErrorMessage({
+      title: "Error",
+      message: response.data.message,
+    });
+    console.log("Error al iniciar sesión:", response.data.message);
+  }
   // Redirige a la página principal o dashboard
 }
 

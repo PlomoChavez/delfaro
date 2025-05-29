@@ -6,7 +6,7 @@ export default [
   },
   {
     title: "Home",
-    to: { name: "root" },
+    to: { name: "home" },
     icon: { icon: "tabler-smart-home" },
   },
   // {

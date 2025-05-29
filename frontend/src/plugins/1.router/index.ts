@@ -50,17 +50,24 @@ const router = createRouter({
 
 // --- AQUÍ VA EL GUARD ---
 router.beforeEach((to, from, next) => {
-  let thisItemsNeedSessionActive: boolean = thisHasRequiresAuth(to.name);
   const isAuthenticated = !!localStorage.getItem("token");
-  if (to.name === "login") {
-    next();
+  const requiresAuth = thisHasRequiresAuth(to.name);
+  console.log("Ruta a la que se intenta acceder:", to.name);
+  // Si ya está autenticado y va a login, redirige a home
+  if (to.name === "login" && isAuthenticated) {
+    console.log("Tienes sesión activa, redirigiendo a home");
+    return next({ name: "home" });
   }
-  if (!isAuthenticated) {
-    console.log("No tienes sesión activa, redirigiendo a /");
+
+  // Si la ruta requiere auth y no está autenticado, redirige a login
+  if (requiresAuth && !isAuthenticated) {
+    console.log("No tienes sesión activa, redirigiendo a login");
     return next({ name: "login" });
   }
-  // Aquí puedes agregar lógica de permisos por action/subject si la necesitas
-  next();
+
+  // Si va a login y no está autenticado, permite el acceso
+  // Si la ruta no requiere auth, permite el acceso
+  return next();
 });
 // --- FIN GUARD ---
 
