@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 export function handleLogOut(redirect = true) {
   localStorage.removeItem("token");
   localStorage.removeItem("userData");
+  stopTokenTimer();
   if (redirect) {
     router.push({ name: "login" });
   }

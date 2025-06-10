@@ -48,6 +48,5 @@ export function createEncryptedJWT(payload, expiresIn = "8h") {
 // Descifra y verifica un token JWT
 export function verifyEncryptedJWT(encryptedToken) {
   const token = decrypt(encryptedToken);
-  console.log("Verifying token:", token);
   return jwt.verify(token, JWT_SECRET);
 }

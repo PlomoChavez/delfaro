@@ -2,7 +2,7 @@
 import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { useTokenExpiringModal } from "@/composables/useTokenExpiringModal";
 import { handleLogOut } from "@/utils/authHelper";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 
 const { showModal, hideTokenExpiringModal, showTokenExpiringModal } =
   useTokenExpiringModal();
@@ -13,18 +13,14 @@ const password = ref("");
 const isPasswordVisible = ref(false);
 const loginError = ref("");
 
-// Cada vez que el modal se abre, toma el correo actualizado de localStorage
-watch(
-  () => showModal,
-  (newValue) => {
-    console.log("Modal visibility changed:", newValue);
-    if (newValue) {
-      email.value = userData.correo || "";
-      password.value = "";
-      loginError.value = "";
-    }
+watch(showModal, (newValue) => {
+  if (newValue) {
+    email.value = "";
+    password.value = "";
   }
-);
+});
+
+// Cada vez que el modal se abre, toma el correo actualizado de localStorage
 
 const handleMakelogin = () => {
   loginError.value = "";
@@ -67,10 +63,15 @@ async function handleLogin() {
       });
     }
   } else {
+    hideTokenExpiringModal();
+    showModal.value = false;
     showErrorMessage({
-      title: "Error",
-      message: response.data.message,
+      title: "Credenciales incorrectas",
+      message: "Cerrar sesión por seguridad.",
     });
+    setTimeout(() => {
+      handleLogOut();
+    }, 10);
   }
 }
 </script>

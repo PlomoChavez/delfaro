@@ -36,16 +36,15 @@ exports.verificarToken = async (req, res) => {
   try {
     // Verifica y decodifica el token JWT
     const decoded = verifyEncryptedJWT(token);
-    console.log("Token decodificado:", decoded);
-    if (decoded && decoded.exp) {
-      const now = Math.floor(Date.now() / 1000); // tiempo actual en segundos
-      const segundosRestantes = decoded.exp - now;
-      console.log("Segundos restantes de vida del token:", segundosRestantes); // Ejemplo de uso:
-      const tiempoRestante = segundosAHorasMinutosSegundos(segundosRestantes);
-      console.log(
-        `Tiempo restante: ${tiempoRestante.horas}h ${tiempoRestante.minutos}m ${tiempoRestante.segundos}s`
-      );
-    }
+
+    // if (decoded && decoded.exp) {
+    //   const now = Math.floor(Date.now() / 1000); // tiempo actual en segundos
+    //   const segundosRestantes = decoded.exp - now;
+    //   console.log("Segundos restantes de vida del token:", segundosRestantes); // Ejemplo de uso:
+    //   const tiempoRestante = segundosAHorasMinutosSegundos(segundosRestantes);
+    //   console.log(`Tiempo restante: ${tiempoRestante.horas}h ${tiempoRestante.minutos}m ${tiempoRestante.segundos}s`);
+    // }
+
     if (!decoded) {
       return res.json({
         result: false,
@@ -122,6 +121,7 @@ exports.login = async (req, res) => {
       message: "Usuario o contraseña incorrectos",
     });
   }
+  const expiresIn = process.env.JWT_EXPIRES_IN || "10s"; // Valor por defecto
 
   // Genera y cifra el token JWT
   const encryptedToken = createTokenJWT(
@@ -131,7 +131,7 @@ exports.login = async (req, res) => {
       tipo: user.tipo.label,
       tipo_id: user.tipo.id,
     },
-    "10s"
+    expiresIn
   );
 
   return res.json({
