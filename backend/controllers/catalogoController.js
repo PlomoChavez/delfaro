@@ -1,5 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
-const { exportData, getAllFrom, deleteById } = require("./controller");
+const { exportData } = require("./controller");
+const {
+  getAllFrom,
+  deleteByFilter,
+  deleteById,
+} = require("../db/functionsSQL");
+
 const prisma = new PrismaClient();
 
 exports.getDataByCatalogo = async (req, res, tabla, campo, valor) => {

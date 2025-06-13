@@ -1,7 +1,7 @@
-const { deleteById, getAllFrom } = require("./controller");
-const { PrismaClient } = require("@prisma/client");
-const { exportData } = require("./controller");
-const prisma = new PrismaClient();
+const { deleteById, getAllFrom, exportData } = require("./controller");
+const { findOneUser } = require("../db/customFunctions");
+// const { PrismaClient } = require("@prisma/client");
+// const prisma = new PrismaClient();
 const bcrypt = require("bcryptjs");
 const {
   createTokenJWT,
@@ -37,14 +37,6 @@ exports.verificarToken = async (req, res) => {
     // Verifica y decodifica el token JWT
     const decoded = verifyEncryptedJWT(token);
 
-    // if (decoded && decoded.exp) {
-    //   const now = Math.floor(Date.now() / 1000); // tiempo actual en segundos
-    //   const segundosRestantes = decoded.exp - now;
-    //   console.log("Segundos restantes de vida del token:", segundosRestantes); // Ejemplo de uso:
-    //   const tiempoRestante = segundosAHorasMinutosSegundos(segundosRestantes);
-    //   console.log(`Tiempo restante: ${tiempoRestante.horas}h ${tiempoRestante.minutos}m ${tiempoRestante.segundos}s`);
-    // }
-
     if (!decoded) {
       return res.json({
         result: false,
@@ -53,9 +45,8 @@ exports.verificarToken = async (req, res) => {
     }
 
     // Busca al usuario por ID
-    let user = await prisma.usuarios.findUnique({
-      where: { id: decoded.id },
-      include: { tipo: true }, // Incluye el tipo de usuario
+    let user = await findOneUser({
+      id: decoded.id,
     });
 
     if (!user) {
@@ -95,15 +86,7 @@ exports.login = async (req, res) => {
     });
   }
 
-  let user = await prisma.usuarios.findFirst({
-    where: {
-      correo: params.email,
-      estatus: true, // Solo usuarios activos
-    },
-    include: {
-      tipo: true, // Incluye el tipo de usuario
-    },
-  });
+  let user = await findOneUser({ correo: params.email, estatus: 1 });
 
   if (!user) {
     return res.json({

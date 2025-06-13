@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { deleteById, getAllFrom } = require("./controller");
+const { deleteById, getAllFrom, sanitizeData } = require("./controller");
 const prisma = new PrismaClient();
 const tabla = "compania";
 /**
@@ -78,15 +78,17 @@ exports.create = async (req, res) => {
  */
 exports.update = async (req, res) => {
   try {
-    const data = req.body;
-    const id = data.id;
+    let data = req.body;
+    data = await sanitizeData({ ...data });
+    const id = Number(data.id);
+
     if (!id) {
       return res.json({
         result: false,
         message: "ID de compañía no proporcionado",
-        data: [],
       });
     }
+
     // Validar unicidad de RFC
     if (data.rfc) {
       const existeRFC = await prisma.compania.findFirst({
@@ -95,39 +97,31 @@ exports.update = async (req, res) => {
           NOT: { id: Number(id) },
         },
       });
+
       if (existeRFC) {
         return res.json({
           result: false,
           message: "El RFC ya está en uso por otra compañía",
-          data: [],
         });
       }
     }
-    // Transformar estatus si viene
-    if (data.estatus !== undefined) {
-      data.estatus =
-        data.estatus === "Activo" ||
-        data.estatus === true ||
-        data.estatus === "true"
-          ? 1
-          : 0;
-    }
+
+    console.log("Datos recibidos para actualizar:", data);
     // Actualizar
     const compania = await prisma.compania.update({
       where: { id: Number(id) },
       data,
-      include: { representantes: true },
+      include: { compania_representantes: true },
     });
+
     res.json({
       result: true,
       message: "Compañía actualizada con éxito",
-      data: compania,
     });
   } catch (e) {
     res.json({
       result: false,
       message: "Error al actualizar la compañía: " + e.message,
-      data: [],
     });
   }
 };
