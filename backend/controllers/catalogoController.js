@@ -1,12 +1,8 @@
-const { PrismaClient } = require("@prisma/client");
-const { exportData } = require("./controller");
 const {
   getAllFrom,
-  deleteByFilter,
+  createOrUpdate,
   deleteById,
 } = require("../db/functionsSQL");
-
-const prisma = new PrismaClient();
 
 exports.getDataByCatalogo = async (req, res, tabla, campo, valor) => {
   try {
@@ -43,47 +39,6 @@ exports.delete = async (req, res, tabla) => {
 };
 
 exports.createOrUpdate = async (req, res, tabla) => {
-  try {
-    let data = { ...req.body };
-
-    // Eliminar campos no deseados
-    delete data.created_at;
-    delete data.deleted_at;
-    delete data.updated_at;
-
-    // Validar y transformar el campo 'estatus'
-    if (data.estatus !== undefined) {
-      data.estatus =
-        data.estatus === "Activo" ||
-        data.estatus === 1 ||
-        data.estatus === "true" ||
-        data.estatus === true
-          ? true
-          : false;
-    }
-    if (data.id) {
-      // Actualizar si existe un ID
-      await prisma[tabla].update({
-        where: { id: data.id },
-        data,
-      });
-      res.json({
-        result: true,
-        message: "Registro actualizado con éxito",
-      });
-    } else {
-      // Crear si no existe un ID
-      const nuevo = await prisma[tabla].create({ data });
-      res.json({
-        result: true,
-        message: "Registro creado con éxito",
-      });
-    }
-  } catch (e) {
-    res.json({
-      result: false,
-      message: "Error al crear o actualizar el registro: " + e.message,
-      data: [],
-    });
-  }
+  const result = await createOrUpdate(tabla, { ...req.body });
+  res.json(result);
 };

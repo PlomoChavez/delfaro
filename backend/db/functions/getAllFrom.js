@@ -7,6 +7,7 @@ const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
   try {
     let whereClause = "";
     let params = [];
+
     if (filtros && Object.keys(filtros).length) {
       const conditions = Object.keys(filtros).map((key, idx) => {
         params.push(filtros[key]);
@@ -23,14 +24,8 @@ const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
       });
     }
 
-    const sql = `SELECT * FROM "${modelo}" ${joinClause} ${whereClause}`;
-    console.log("SQL Query:");
-    console.log(sql);
-    console.log("Params:");
-    console.log(params);
-    const { rows } = await pool.query(sql, params);
-    console.log("Rows obtained:", rows.length);
-    console.log(rows);
+    const sql = `SELECT * FROM ${modelo} ${joinClause} ${whereClause}`;
+    const [rows] = await pool.query(sql, params);
 
     // Si tienes una función exportData, úsala aquí. Si no, puedes devolver rows directamente.
     // const data = await exports.exportData(rows);

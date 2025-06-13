@@ -9,12 +9,12 @@ const deleteById = async (modelo, id) => {
       result: false,
       message: "ID no proporcionado",
     };
+    x;
   }
   try {
-    const { rows } = await pool.query(
-      `SELECT * FROM "${modelo}" WHERE id = $1 LIMIT 1`,
-      [Number(id)]
-    );
+    const sql = `SELECT * FROM ${modelo} WHERE id = ${Number(id)} LIMIT 1`;
+    const [rows] = await pool.query(sql);
+
     if (!rows || rows.length === 0) {
       return {
         result: false,
@@ -23,7 +23,8 @@ const deleteById = async (modelo, id) => {
         } no encontrado`,
       };
     }
-    await pool.query(`DELETE FROM "${modelo}" WHERE id = $1`, [Number(id)]);
+
+    await pool.query(`DELETE FROM ${modelo} WHERE id = ${Number(id)}`);
     return {
       result: true,
       message: "Registro eliminado con éxito",
