@@ -4,32 +4,17 @@ const {
   deleteById,
 } = require("../db/functionsSQL");
 
+const { getAllFromCustom } = require("../db/customFunctions");
+
 exports.getDataByCatalogo = async (req, res, tabla, campo, valor) => {
-  try {
-    const filtros = { [campo]: valor };
-    let result = await getAllFrom(tabla, filtros);
-    result.data = exportData(result.data);
-    res.json(result);
-  } catch (e) {
-    res.json({
-      result: false,
-      message: "Error al obtener los registros filtrados: " + e.message,
-    });
-  }
+  const filtros = { [campo]: valor };
+  res.json(getAllFromCustom(tabla, filtros));
 };
 
 exports.getAll = async (req, res, tabla) => {
-  try {
-    const filtros = req.body || {};
-    let result = await getAllFrom(tabla, filtros);
-    res.json(result);
-  } catch (e) {
-    res.json({
-      result: false,
-      message: "Error al obtener los registros: " + e.message,
-      data: [],
-    });
-  }
+  // Puedes recibir filtros por body o query
+  const filtros = req.body || {};
+  res.json(await getAllFromCustom(tabla, filtros));
 };
 
 exports.delete = async (req, res, tabla) => {

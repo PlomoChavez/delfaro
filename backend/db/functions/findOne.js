@@ -11,7 +11,11 @@ async function findOne({ table, filters = {}, include = {} }) {
   let whereClauses = [];
   let values = [];
   for (const [key, value] of Object.entries(filters)) {
-    whereClauses.push(`${table}.${key} = ?`);
+    if (key.startsWith("not_")) {
+      whereClauses.push(`${table}.${key.slice(4)} <> ?`);
+    } else {
+      whereClauses.push(`${table}.${key} = ?`);
+    }
     values.push(value);
   }
   let joins = "";

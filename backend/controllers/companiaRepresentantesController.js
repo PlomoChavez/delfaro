@@ -1,15 +1,23 @@
-const { PrismaClient } = require("@prisma/client");
-const { deleteById, getAllFrom, exportData } = require("./controller");
-const prisma = new PrismaClient();
-const tabla = "companiaRepresentante";
+// const { PrismaClient } = require("@prisma/client");
+// const { deleteById, getAllFrom, exportData } = require("./controller");
+// const prisma = new PrismaClient();
+// const tabla = "companiaRepresentante";
+const { getAllFromCustom } = require("../db/customFunctions");
+
+const {
+  findOne,
+  getAllFrom,
+  deleteById,
+  createOrUpdate,
+} = require("../db/functionsSQL");
+const { sanitizeData } = require("../controllers/controller");
+const tabla = "compania_representantes";
 /**
  * Obtener todos los registros de la tabla clientes.
  */
 exports.getAll = async (req, res) => {
-  // Puedes recibir filtros por body o query
   const filtros = req.body || {};
-  const result = await getAllFrom(tabla, filtros);
-  return res.json(result);
+  res.json(await getAllFromCustom(tabla, filtros));
 };
 
 /**
@@ -26,7 +34,7 @@ exports.delete = async (req, res) => {
  */
 exports.createOrUpdate = async (req, res) => {
   try {
-    const data = req.body;
+    let data = req.body;
 
     // Validación básica
     if (!data.compania_id || !data.nombre) {
@@ -35,32 +43,22 @@ exports.createOrUpdate = async (req, res) => {
         message: "compania_id y nombre son requeridos",
       });
     }
-
-    // Transformar estatus si viene
-    if (data.estatus !== undefined) {
-      data.estatus =
-        data.estatus === "Activo" ||
-        data.estatus === true ||
-        data.estatus === "true"
-          ? 1
-          : 0;
-    }
+    data = await sanitizeData(data);
 
     if (data.id) {
       // Actualizar
-      const representante = await prisma.companiaRepresentante.findUnique({
-        where: { id: Number(data.id) },
+      const respresentante = await findOne({
+        table: tabla,
+        filters: { id: data.id },
       });
-      if (!representante) {
+
+      if (!respresentante) {
         return res.json({
           result: false,
           message: "Registro no encontrado",
         });
       }
-
-      await prisma.companiaRepresentante.update({
-        where: { id: Number(data.id) },
-      });
+      await createOrUpdate(tabla, data);
 
       return res.json({
         result: true,
@@ -68,7 +66,7 @@ exports.createOrUpdate = async (req, res) => {
       });
     } else {
       // Crear
-      await prisma.companiaRepresentante.create({ data });
+      await createOrUpdate(tabla, data);
 
       return res.json({
         result: true,

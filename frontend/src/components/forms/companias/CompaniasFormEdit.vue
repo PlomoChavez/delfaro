@@ -3,7 +3,10 @@ import FormFactory from "@/components/apps/FormFactory.vue";
 import CompaniasProductos from "@/components/forms/companias/CompaniasProductos.vue";
 import CompaniasRepresentantes from "@/components/forms/companias/CompaniasRepresentantesV1.vue";
 
-import { showSuccessMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import {
+  showSuccessMessage,
+  showErrorMessage,
+} from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
 // prettier-ignore
 import { ref, watch } from "vue";
@@ -20,7 +23,7 @@ const emit = defineEmits<{
 
 const ramos: any = ref([]);
 const currentTab = ref("tab1");
-const formDataLocal = ref(props.data);
+const formDataLocal = ref({ ...props.data });
 
 // prettier-ignore
 const formSchema = [
@@ -54,8 +57,12 @@ const handleFormSubmit = async (data: any) => {
     method: "POST",
     data: { ...data },
   });
-  console.log("handleFormSubmit", response);
-  showSuccessMessage({});
+  console.log("handleFormSubmit", response.data);
+  if (response.data.status) {
+    showSuccessMessage({ message: response.data.message });
+  } else {
+    showErrorMessage({ title: "Error", message: response.data.message });
+  }
 };
 
 const getRamos = async () => {

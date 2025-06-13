@@ -1,6 +1,10 @@
-const { PrismaClient } = require("@prisma/client");
-const { deleteById, getAllFrom, sanitizeData } = require("./controller");
-const prisma = new PrismaClient();
+const {
+  findOne,
+  getAllFrom,
+  deleteById,
+  createOrUpdate,
+} = require("../db/functionsSQL");
+const { updateCompania, getAllFromCustom } = require("../db/customFunctions");
 const tabla = "compania";
 /**
  * Obtener todos los registros de la tabla clientes.
@@ -8,8 +12,7 @@ const tabla = "compania";
 exports.getAll = async (req, res) => {
   // Puedes recibir filtros por body o query
   const filtros = req.body || {};
-  const result = await getAllFrom(tabla, filtros);
-  return res.json(result);
+  res.json(await getAllFromCustom(tabla, filtros));
 };
 
 /**
@@ -27,6 +30,7 @@ exports.delete = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const data = req.body;
+
     // Validación básica
     if (!data.rfc || !data.nombre || !data.nombreCorto) {
       return res.json({
@@ -35,10 +39,9 @@ exports.create = async (req, res) => {
         data: [],
       });
     }
-    // Validar unicidad de RFC
-    const existeRFC = await prisma.compania.findFirst({
-      where: { rfc: data.rfc },
-    });
+
+    let existeRFC = await findOne({ table: tabla, filters: { rfc: data.rfc } });
+
     if (existeRFC) {
       return res.json({
         result: false,
@@ -46,20 +49,19 @@ exports.create = async (req, res) => {
         data: [],
       });
     }
-    // Valores por defecto
-    await prisma.compania.create({
-      data: {
-        rfc: data.rfc,
-        nombre: data.nombre,
-        nombreCorto: data.nombreCorto,
-        direccion: "",
-        codigoPostal: "",
-        ciudad: "",
-        limitePrimerPago: 0,
-        limitePrimerSubsecuente: 0,
-      },
-      include: { compania_representantes: true },
-    });
+
+    let dataNuevaCompania = {
+      rfc: data.rfc,
+      nombre: data.nombre,
+      nombreCorto: data.nombreCorto,
+      direccion: "",
+      codigoPostal: "",
+      ciudad: "",
+      limitePrimerPago: 0,
+      limitePrimerSubsecuente: 0,
+    };
+    await createOrUpdate(tabla, dataNuevaCompania);
+
     res.json({
       result: true,
       message: "Compañía creada con éxito",
@@ -77,53 +79,7 @@ exports.create = async (req, res) => {
  * Actualizar una compañía existente.
  */
 exports.update = async (req, res) => {
-  try {
-    let data = req.body;
-    data = await sanitizeData({ ...data });
-    const id = Number(data.id);
-
-    if (!id) {
-      return res.json({
-        result: false,
-        message: "ID de compañía no proporcionado",
-      });
-    }
-
-    // Validar unicidad de RFC
-    if (data.rfc) {
-      const existeRFC = await prisma.compania.findFirst({
-        where: {
-          rfc: data.rfc,
-          NOT: { id: Number(id) },
-        },
-      });
-
-      if (existeRFC) {
-        return res.json({
-          result: false,
-          message: "El RFC ya está en uso por otra compañía",
-        });
-      }
-    }
-
-    console.log("Datos recibidos para actualizar:", data);
-    // Actualizar
-    const compania = await prisma.compania.update({
-      where: { id: Number(id) },
-      data,
-      include: { compania_representantes: true },
-    });
-
-    res.json({
-      result: true,
-      message: "Compañía actualizada con éxito",
-    });
-  } catch (e) {
-    res.json({
-      result: false,
-      message: "Error al actualizar la compañía: " + e.message,
-    });
-  }
+  res.json(await updateCompania({ ...req.body }));
 };
 
 /**
@@ -139,16 +95,19 @@ exports.getRamos = async (req, res) => {
         data: [],
       });
     }
-    const ramos = await prisma.ramo.findMany();
-    const ramosActivos = await prisma.companiaRamo.findMany({
-      where: { compania_id: Number(compania_id), estatus: 1 },
-      select: { ramo_id: true },
+
+    let ramos = await getAllFrom("ramos", {});
+    let ramosActivos = await getAllFrom("companias_ramos", {
+      compania_id: Number(compania_id),
+      estatus: 1,
     });
+
     const activosIds = ramosActivos.map((r) => r.ramo_id);
     const result = ramos.map((ramo) => ({
       ...ramo,
       isActivo: activosIds.includes(ramo.id),
     }));
+
     res.json({
       result: true,
       message: "Ramos obtenidos con éxito",
@@ -177,26 +136,22 @@ exports.updateRamos = async (req, res) => {
       });
     }
     for (const ramo of ramos) {
-      const existente = await prisma.companiaRamo.findFirst({
-        where: {
+      // Buscar si ya existe la relación
+      const existente = await findOne({
+        table: "companias_ramos",
+        filters: {
           compania_id: Number(compania_id),
           ramo_id: ramo.id,
         },
       });
-      if (existente) {
-        await prisma.companiaRamo.update({
-          where: { id: existente.id },
-          data: { estatus: ramo.isActivo ? 1 : 0 },
-        });
-      } else {
-        await prisma.companiaRamo.create({
-          data: {
-            compania_id: Number(compania_id),
-            ramo_id: ramo.id,
-            estatus: ramo.isActivo ? 1 : 0,
-          },
-        });
-      }
+
+      // Usar createOrUpdate para actualizar o crear el registro
+      await createOrUpdate("companias_ramos", {
+        compania_id: Number(compania_id),
+        ramo_id: ramo.id,
+        estatus: ramo.isActivo ? 1 : 0,
+        id: existente ? existente.id : undefined, // Si existe, actualiza; si no, crea
+      });
     }
     res.json({
       result: true,

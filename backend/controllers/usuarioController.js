@@ -15,8 +15,7 @@ const tabla = "cliente";
 exports.getAll = async (req, res) => {
   // Puedes recibir filtros por body o query
   const filtros = req.body || {};
-  const result = await getAllFrom(tabla, filtros);
-  return res.json(result);
+  return res.json(getAllFromCustom(tabla, filtros));
 };
 
 /**
@@ -151,8 +150,7 @@ exports.getAllClaves = async (req, res) => {
   // Puedes recibir filtros por body o query
   let include = { compania: true };
   const filtros = req.body || {};
-  const result = await getAllFrom(tabla, filtros, include);
-  return res.json(result);
+  return res.json(await getAllFrom(tabla, filtros, include));
 };
 
 /**
@@ -217,9 +215,7 @@ exports.getAllTeam = async (req, res) => {
       filtros.tipo_id = tipo.id;
     }
 
-    const result = await getAllFrom("usuarioTeam", filtros);
-
-    return res.json(result);
+    return res.json(await getAllFrom("usuarioTeam", filtros));
   } catch (e) {
     res.json({
       result: false,

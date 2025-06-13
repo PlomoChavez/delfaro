@@ -50,39 +50,6 @@ exports.deleteById = async (modelo, id) => {
 };
 
 /**
- * Obtener todos los registros de una tabla.
- * @param {string} modelo - Nombre del modelo Prisma (ej: 'cliente')
- * @returns {Promise<{result: boolean, message: string, data: any[]}>}
- */
-exports.getAllFrom = async (modelo, filtros = {}, include = undefined) => {
-  try {
-    const query = {
-      where: Object.keys(filtros).length ? filtros : undefined,
-    };
-
-    if (include) {
-      query.include = include;
-    }
-
-    let registros = await prisma[modelo].findMany(query);
-
-    registros = await exports.exportData(registros);
-
-    return {
-      result: true,
-      message: "Registros obtenidos con éxito",
-      data: registros,
-    };
-  } catch (e) {
-    return {
-      result: false,
-      message: "Error al obtener los registros: " + e.message,
-      data: [],
-    };
-  }
-};
-
-/**
  * Elimina un registro de cualquier tabla por filtro.
  * @param {string} modelo - Nombre del modelo Prisma (ej: 'companiaRepresentante')
  * @param {object} filtro - Objeto con los campos a filtrar (ej: { correo: "correo@ejemplo.com" })

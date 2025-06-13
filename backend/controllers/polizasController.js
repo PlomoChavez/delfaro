@@ -18,8 +18,7 @@ exports.getAll = async (req, res) => {
     moneda: true,
     producto: true,
   };
-  const result = await getAllFrom(tabla, {}, include);
-  return res.json(result);
+  res.json(getAllFromCustom(tabla, {}, include));
 };
 
 /**

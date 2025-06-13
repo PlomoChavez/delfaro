@@ -7,8 +7,7 @@ const tabla = "polizaAsegurados";
 exports.getAll = async (req, res) => {
   // Puedes recibir filtros por body o query
   const filtros = req.body || {};
-  const result = await getAllFrom(tabla, filtros);
-  return res.json(result);
+  res.json(getAllFromCustom(tabla, filtros));
 };
 
 /**

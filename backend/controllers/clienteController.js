@@ -7,8 +7,7 @@ const { deleteById, getAllFrom } = require("./controller");
 exports.getAll = async (req, res) => {
   // Puedes recibir filtros por body o query
   const filtros = req.body || {};
-  const result = await getAllFrom("cliente", filtros);
-  return res.json(result);
+  res.json(getAllFromCustom("cliente", filtros));
 };
 
 /**
