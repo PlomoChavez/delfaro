@@ -61,7 +61,7 @@ const filteredData = computed(() => {
 });
 
 function exportData() {
-  console.log("Exportar datos:", props.data);
+  // console.log("Exportar datos:", props.data);
   // Aquí puedes implementar la lógica para exportar los datos (CSV, Excel, etc.)
 }
 

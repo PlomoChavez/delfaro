@@ -47,7 +47,6 @@ const handleActionsEdit = (dataRow: any) => {
     },
     subAgente: dataRow["sub_agente"],
   };
-  console.log("dataRow", dataRow);
   showFormEdit.value = true;
 };
 const handleCancelar = () => {

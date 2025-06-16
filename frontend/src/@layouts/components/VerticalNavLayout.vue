@@ -45,7 +45,7 @@ function printLastDeepestNavItem(item: any) {
     printLastDeepestNavItem(item.children[item.children.length - 1]);
   } else {
     // Imprime solo el último nodo profundo de la rama
-    console.log("Último nav item profundo:", toRaw(item));
+    // console.log("Último nav item profundo:", toRaw(item));
   }
 }
 // ℹ️ Hide overlay if user open overlay nav in <md and increase the window width without closing overlay nav
