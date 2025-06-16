@@ -1,5 +1,10 @@
 <script setup lang="ts">
+import {
+  showErrorMessage,
+  showSuccessMessage,
+} from "@/components/apps/sweetAlerts/SweetAlets";
 import CrudManager from "@/components/apps/VistaUno.vue";
+import { customRequest } from "@/utils/axiosInstance";
 // prettier-ignore
 import { ref } from "vue";
 
@@ -13,6 +18,7 @@ const props = withDefaults(
 const title = ref("Productos"); // Referencia al componente FormFactory
 const showFormEdit = ref(false); // Referencia al componente FormFactory
 const data = ref(null); // Referencia al componente FormFactory
+const refreshTable = ref(false); // Referencia al componente FormFactory
 const payloadDefault = ref({
   compania_id: props.data.id,
 }); // Referencia al componente FormFactory
@@ -45,27 +51,55 @@ const handleActionsEdit = (dataRow: any) => {
   showFormEdit.value = true;
 };
 
-const handleActionCreate = (dataRow: any) => {
-  console.log("handleActionCreate ", dataRow);
+const handleActionCreate = async (dataRow: any) => {
+  let tmp = {
+    ...payloadDefault.value,
+    ...dataRow,
+  };
+
+  if (tmp.ramo) {
+    tmp.ramo_id = tmp.ramo.id;
+    delete tmp.ramo;
+  }
+
+  const response = await customRequest({
+    url: "/api/companias/productos",
+    method: "POST",
+    data: tmp,
+  });
+  const dataResponse = response.data;
+
+  if (dataResponse.result) {
+    showSuccessMessage({
+      title: "Guardado",
+      message: dataResponse.message,
+    });
+    refreshTable.value = true; // Refresh the table after successful creation
+    setTimeout(() => {
+      showFormEdit.value = false; // Close the form after successful creation
+    }, 10);
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: dataResponse.message,
+    });
+  }
 };
 
-const handleActionDelete = (dataRow: any) => {
-  console.log("handleActionDelete", dataRow);
-};
-
-const handleAtras = () => {
-  showFormEdit.value = false;
-};
+const handleActionDelete = (dataRow: any) => {};
 </script>
 
 <template>
+  <!-- :configTable="configTable" -->
   <CrudManager
     :title="title"
     :formModal="true"
+    :emitCreate="true"
     :formSchema="formSchema"
-    :payloadDefault="payloadDefault"
+    :refreshTable="refreshTable"
     :tableHeaders="tableHeaders"
     :apiEndpoints="apiEndpoints"
+    :payloadDefault="payloadDefault"
     @customCreate="handleActionCreate"
     @customEdit="handleActionsEdit"
     @customDelete="handleActionDelete"

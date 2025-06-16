@@ -34,7 +34,6 @@ async function handleLogin() {
     method: "POST",
     data: form.value,
   });
-  console.log("Response from login:", response);
   if (response.data.result) {
     const userData = response.data.data.userData;
     const token = response.data.data.token;
@@ -43,7 +42,6 @@ async function handleLogin() {
       localStorage.setItem("userData", JSON.stringify(userData));
       localStorage.setItem("token", token);
       startTokenTimer(() => {
-        console.log("¡Token expirado o inválido!");
         showTokenExpiringModal(); // Esto sí muestra el modal
       });
       router.push({ name: "root" });
@@ -60,7 +58,6 @@ async function handleLogin() {
       title: "Error",
       message: response.data.message,
     });
-    console.log("Error al iniciar sesión:", response.data.message);
   }
   // Redirige a la página principal o dashboard
 }

@@ -1,5 +1,12 @@
 const { PrismaClient } = require("@prisma/client");
 const { exportData } = require("./controller");
+const {
+  findOne,
+  getAllFrom,
+  deleteById,
+  createOrUpdate,
+} = require("../db/functionsSQL");
+
 const prisma = new PrismaClient();
 
 let tablaMap = {
@@ -29,37 +36,33 @@ exports.getCatalogo = async (req, res, tabla) => {
           data: [],
         });
       }
-      // Ajusta el include según tu modelo Prisma
-      let rows = await prisma.companiaRamo.findMany({
-        where: {
-          compania_id: companiaId,
-          estatus: 1,
-        },
-        include: {
-          ramo: true,
-        },
-      });
 
-      // Mezcla los datos de companiaRamo y ramo
-      let datosRamos = rows.map((item) => ({
-        ...item,
-        ...item.ramo,
-        compania_id: item.compania_id,
-        estatus: item.estatus,
-      }));
-
-      const objSinBigInt = JSON.parse(
-        JSON.stringify(resultado, replacerBigInt)
+      let rows = await getAllFrom(
+        "companias_ramos",
+        { compania_id: companiaId, estatus: 1 },
+        [
+          {
+            tabla: "ramos",
+            foreignKey: "ramo_id", // campo en companias_ramos
+            localKey: "id", // campo en ramos
+            labelKey: "ramo", // cómo quieres llamar al objeto relacionado en el resultado (opcional)
+            tipo: "one", // tipo de relación (por defecto "one")
+            integrado: false,
+            customName: false, // o false, o "relacion_"
+          },
+        ]
       );
+
       return res.json({
         result: true,
         message: "Registros obtenidos con éxito",
-        data: objSinBigInt,
+        data: rows,
       });
     }
 
     // Mapear tabla si es necesario
     let tablaReal = tablaMap[tabla];
+
     if (!tablaReal) {
       return res.json({
         result: false,
@@ -68,17 +71,8 @@ exports.getCatalogo = async (req, res, tabla) => {
       });
     }
 
-    // Construir condiciones where si hay filtros
-    let where = {};
-    Object.entries(filtros).forEach(([key, value]) => {
-      where[key] = value;
-    });
+    let resultado = await getAllFrom(tablaReal, filtros);
 
-    // Consultar la tabla
-    let resultado = await prisma[tablaReal].findMany({
-      where: Object.keys(where).length ? where : undefined,
-    });
-    resultado = exportData(resultado);
     return res.json({
       result: true,
       message: "Registros obtenidos con éxito",

@@ -136,7 +136,6 @@ function handleCancel() {
 }
 
 function obtenerPropiedad(obj: any, ruta: string): any {
-  console.log("ruta", ruta);
   if (!ruta) {
     return ""; // Si la ruta está vacía, devuelve undefined
   }

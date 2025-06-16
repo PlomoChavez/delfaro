@@ -54,7 +54,6 @@ const apiEndpoints = {
 };
 const handleCreate = (data: any) => {
   showForm.value = true;
-  console.log("actionCreate", data);
 };
 const handleCreateOfCliente = (data: any) => {
   handleCreateOfCliente(data);
@@ -66,7 +65,7 @@ const handleCustomAction = (data: any) => {
       handleCreateOfCliente(item);
       break;
     default:
-      console.log("Acción no reconocida");
+      break;
   }
 };
 </script>

@@ -7,7 +7,7 @@ import {
   showSuccessMessage,
 } from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 
 interface FormSchemaField {
   label: string;
@@ -34,6 +34,7 @@ const props = withDefaults(
   defineProps<{
     title: string; // Título del módulo
     formSchema: FormSchemaField[]; // Esquema del formulario
+    refreshTable?: boolean; // Indica si se debe refrescar la tabla
     tableHeaders: TableHeader[]; // Esquema de la tabla
     showBtnNuevo?: boolean; // Indica si el formulario será un modal
     formModal?: boolean; // Indica si el formulario será un modal
@@ -63,13 +64,13 @@ const props = withDefaults(
     filtroAgrupador: null,
     payloadDefault: null, // Valor predeterminado
     showTitle: true, // Valor predeterminado
+    refreshTable: false, // Valor predeterminado
     customAction: false, // Valor predeterminado
     exportSubmit: false, // Valor predeterminado
     showBtnNuevo: true, // Valor predeterminado
     emitDelete: false, // Valor predeterminado
   }
 );
-
 const showForm = ref(false); // Referencia al componente FormFactory
 const formData = ref<Record<string, any>>({});
 const tableData = ref<any[]>([]);
@@ -279,6 +280,8 @@ function handleActionClick({ action, item }: { action: string; item: any }) {
     } else if (action === "Editar") {
       if (props.emitEdit) {
         emit("customEdit", item); // Emite el evento personalizado con la información del elemento
+      } else if (props.emitEdit) {
+        emit("customEdit", item); // Emite el evento personalizado con la información del elemento
       } else {
         // Comportamiento predeterminado
         let tmp = { ...item };
@@ -310,6 +313,16 @@ const countRegistros = computed(() => {
 onBeforeMount(() => {
   fetchTableData();
 });
+
+// --- Agrega este watch ---
+watch(
+  () => props.refreshTable,
+  (nuevoValor) => {
+    if (nuevoValor) {
+      fetchTableData();
+    }
+  }
+);
 </script>
 
 <template>

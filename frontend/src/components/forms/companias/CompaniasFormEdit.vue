@@ -4,8 +4,8 @@ import CompaniasProductos from "@/components/forms/companias/CompaniasProductos.
 import CompaniasRepresentantes from "@/components/forms/companias/CompaniasRepresentantesV1.vue";
 
 import {
-  showSuccessMessage,
   showErrorMessage,
+  showSuccessMessage,
 } from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
 // prettier-ignore
@@ -45,10 +45,8 @@ const handleAtras = () => {
 };
 
 const handleSelectRamo = (item: any) => {
-  console.log("handleSelectRamo", item);
   item.isActivo = !item.isActivo;
   ramos.value = [...ramos.value];
-  console.log("handleSelectRamo", ramos.value);
 };
 
 const handleFormSubmit = async (data: any) => {
@@ -57,7 +55,6 @@ const handleFormSubmit = async (data: any) => {
     method: "POST",
     data: { ...data },
   });
-  console.log("handleFormSubmit", response.data);
   if (response.data.status) {
     showSuccessMessage({ message: response.data.message });
   } else {
@@ -71,7 +68,6 @@ const getRamos = async () => {
     method: "POST",
     data: { compania_id: formDataLocal.value.id },
   });
-  console.log("getRamos", response);
   ramos.value = response.data.data;
 };
 
@@ -84,14 +80,12 @@ const handleUpdateRamos = async () => {
       ramos: ramos.value,
     },
   });
-  console.log("getRamos", response);
 };
 
 // prettier-ignore
 watch(() => props.data , (newValue) => { formDataLocal.value = newValue } );
 onMounted(() => {
   getRamos();
-  console.log("onMounted", props.data);
 });
 </script>
 

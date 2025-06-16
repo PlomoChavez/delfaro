@@ -180,10 +180,20 @@ exports.getCompaniaProductos = async (req, res) => {
         data: [],
       });
     }
-    const productos = await prisma.companiaProducto.findMany({
-      where: { compania_id: Number(compania_id) },
-      include: { ramo: true },
-    });
+
+    let productos = await getAllFrom(
+      "companias_productos",
+      { compania_id: compania_id },
+      [
+        {
+          tabla: "ramos",
+          foreignKey: "ramo_id", // campo en companias_ramos
+          localKey: "id", // campo en ramos
+          labelKey: "ramo", // cómo quieres llamar al objeto relacionado en el resultado (opcional)
+          tipo: "one", // tipo de relación (por defecto "one")
+        },
+      ]
+    );
     res.json({
       result: true,
       message: "Productos obtenidos con éxito",
@@ -212,55 +222,27 @@ exports.createOrUpdateCompaniaProductos = async (req, res) => {
         data: [],
       });
     }
-    // Eliminar campos no deseados
-    delete data.created_at;
-    delete data.deleted_at;
-    delete data.updated_at;
 
-    // Validar y transformar el campo 'estatus'
-    if (data.estatus !== undefined) {
-      data.estatus =
-        data.estatus === "Activo" ||
-        data.estatus === true ||
-        data.estatus === "true"
-          ? 1
-          : 0;
-    }
-    data.ramo_id = data.ramo?.id;
-    delete data.ramo;
+    const response = await createOrUpdate("companias_productos", data, true, {
+      compania_id: data.compania_id,
+      ramo_id: data.ramo_id,
+      nombre: data.nombre,
+    });
 
-    if (data.id) {
-      // Actualizar si existe un ID
-      const producto = await prisma.companiaProducto.findUnique({
-        where: { id: data.id },
-      });
-      if (producto) {
-        await prisma.companiaProducto.update({
-          where: { id: data.id },
-          data,
-        });
-        return res.json({
-          result: true,
-          message: "Registro actualizado con éxito",
-        });
-      } else {
-        return res.json({
-          result: false,
-          message: "El producto no existe",
-        });
-      }
-    } else {
-      // Crear si no existe un ID
-      await prisma.companiaProducto.create({ data });
-      return res.json({
-        result: true,
-        message: "Registro creado con éxito",
-      });
-    }
+    return res.json(response);
   } catch (e) {
     res.json({
       result: false,
       message: "Error al actualizar los productos: " + e.message,
     });
   }
+};
+
+/**
+ * Eliminar un registro específico de la tabla clientes.
+ */
+exports.deleteCompaniaProductos = async (req, res) => {
+  const { id } = req.body;
+  const result = await deleteById("companias_productos", id);
+  return res.json(result);
 };

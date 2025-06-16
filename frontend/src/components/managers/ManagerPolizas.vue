@@ -90,7 +90,6 @@ const handleBack = () => { emit("cancelar"); };
 watch(
   () => currentTab.value,
   (newValue) => {
-    console.log("currentTab", newValue);
     if (currentTab.value == "2") {
       // getRecibos();
       recibos.value = [

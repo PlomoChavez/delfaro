@@ -209,14 +209,11 @@ async function handleFormSubmitPersona(data: any) {
   handleNextStep();
 }
 async function handleSubmit(data: any) {
-  console.log("data", data);
-  console.log("formTmp.value", formTmp.value);
   cotizacion.value[formTmp.value] = data;
   formTmp.value = null;
 }
 
 async function handleFormPersonalizacion(tipo: string) {
-  console.log("tipo", tipo);
   switch (tipo) {
     case "parametrosFlexibles":
       formTmpSchema.value = [...formSchemaPersonalizacion1];
@@ -248,7 +245,6 @@ async function sendCotizacion() {
       method: "POST",
       data: payload,
     });
-    console.log("Response:", response.data);
   } catch (error) {
     console.error("Error al obtener los datos:", error);
   }

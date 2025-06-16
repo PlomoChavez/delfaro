@@ -176,7 +176,6 @@ function isProductoSeleccionado(producto: any) {
 }
 function nextStep() {
   step.value = step.value + 1;
-  console.log("step.value", step.value);
 }
 
 function sendToCotizar() {
@@ -185,7 +184,6 @@ function sendToCotizar() {
 
 function selectCompania(compania: any) {
   const index = isCompaniaSelected(compania);
-  console.log("index", index);
   if (index) {
     // Si existe, elimínala
     configuracion.value.companias = configuracion.value.companias.filter(

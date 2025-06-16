@@ -47,13 +47,9 @@ const handleActionsEdit = (dataRow: any) => {
   showFormEdit.value = true;
 };
 
-const handleActionCreate = (dataRow: any) => {
-  console.log("handleActionCreate ", dataRow);
-};
+const handleActionCreate = (dataRow: any) => {};
 
-const handleActionDelete = (dataRow: any) => {
-  console.log("handleActionDelete", dataRow);
-};
+const handleActionDelete = (dataRow: any) => {};
 
 const handleAtras = () => {
   showFormEdit.value = false;

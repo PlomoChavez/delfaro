@@ -57,7 +57,7 @@ router.post('/api/companias/ramos', companiaController.getRamos);
 router.post('/api/companias/ramos/update', companiaController.updateRamos);
 router.post('/api/companias/productos/get', companiaController.getCompaniaProductos);
 router.post('/api/companias/productos', companiaController.createOrUpdateCompaniaProductos);
-// router.post('/api/companias/productos/delete', companiaController.deleteCompaniaProductos);
+router.post('/api/companias/productos/delete', companiaController.deleteCompaniaProductos);
 
 // Compañías Representantes
 router.post('/api/companias/representantes/get', companiaRepresentantesController.getAll);

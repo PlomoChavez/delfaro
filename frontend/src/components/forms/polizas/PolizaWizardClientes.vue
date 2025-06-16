@@ -74,7 +74,7 @@ const handleCustomAction = (data: any) => {
       emit("actionSeleccionar", item);
       break;
     default:
-      console.log("Acción no reconocida");
+      break;
   }
 };
 
