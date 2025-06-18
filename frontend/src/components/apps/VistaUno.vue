@@ -33,7 +33,7 @@ const emit = defineEmits<{
 const props = withDefaults(
   defineProps<{
     title: string; // Título del módulo
-    formSchema: FormSchemaField[]; // Esquema del formulario
+    formSchema?: any; // Esquema del formulario
     refreshTable?: boolean; // Indica si se debe refrescar la tabla
     tableHeaders: TableHeader[]; // Esquema de la tabla
     showBtnNuevo?: boolean; // Indica si el formulario será un modal
@@ -48,6 +48,7 @@ const props = withDefaults(
     showTitle?: boolean; // Indica si se debe mostrar el título
     filtroAgrupador?: string | null; // Indica si se debe mostrar el título
     filtroAgrupadorInicial?: string | null; // Indica si se debe mostrar el título
+    estatusDefault?: boolean; // Indica el estatus por defecto
     subtitulos?: any; // Configuración de la tabla
     configTable?: any; // Configuración de la tabla
     apiEndpoints?: {
@@ -58,6 +59,7 @@ const props = withDefaults(
     };
   }>(),
   {
+    formSchema: [],
     configTable: { actions: ["Editar", "Eliminar"] },
     filtroAgrupadorInicial: null,
     subtitulos: null,
@@ -67,6 +69,7 @@ const props = withDefaults(
     refreshTable: false, // Valor predeterminado
     customAction: false, // Valor predeterminado
     exportSubmit: false, // Valor predeterminado
+    estatusDefault: false, // Valor predeterminado
     showBtnNuevo: true, // Valor predeterminado
     emitDelete: false, // Valor predeterminado
   }
@@ -95,9 +98,15 @@ async function fetchTableData() {
       if (response.data.result && response.data.data) {
         let tmp = response.data.data.map((item: any) => ({
           ...item,
-          estatus: item.estatus ? "Activo" : "Inactivo",
           created_at: formatToAmPm(item.created_at),
         }));
+
+        if (props.estatusDefault) {
+          tmp.map((item: any) => {
+            item.estatus = item.estatus ? "Activo" : "Inactivo";
+            return item;
+          });
+        }
 
         tableData.value = tmp;
         respaldoData.value = tmp;

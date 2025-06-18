@@ -24,6 +24,6 @@ exports.delete = async (req, res, tabla) => {
 };
 
 exports.createOrUpdate = async (req, res, tabla) => {
-  const result = await createOrUpdate(tabla, { ...req.body });
+  const result = await createOrUpdate({ tabla, data: { ...req.body } });
   res.json(result);
 };

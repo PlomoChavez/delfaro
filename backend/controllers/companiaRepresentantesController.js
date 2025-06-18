@@ -43,36 +43,8 @@ exports.createOrUpdate = async (req, res) => {
         message: "compania_id y nombre son requeridos",
       });
     }
-    data = await sanitizeData(data);
 
-    if (data.id) {
-      // Actualizar
-      const respresentante = await findOne({
-        table: tabla,
-        filters: { id: data.id },
-      });
-
-      if (!respresentante) {
-        return res.json({
-          result: false,
-          message: "Registro no encontrado",
-        });
-      }
-      await createOrUpdate(tabla, data);
-
-      return res.json({
-        result: true,
-        message: "Registro actualizado con éxito",
-      });
-    } else {
-      // Crear
-      await createOrUpdate(tabla, data);
-
-      return res.json({
-        result: true,
-        message: "Registro creado con éxito",
-      });
-    }
+    return res.json(await createOrUpdate({ tabla, data: { ...data } }));
   } catch (e) {
     res.json({
       result: false,

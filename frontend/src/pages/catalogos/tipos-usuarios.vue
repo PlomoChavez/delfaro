@@ -26,6 +26,7 @@ const apiEndpoints = {
   <CrudManager
     title="Tipos de usuario"
     :formModal="true"
+    :estatusDefault="true"
     :formSchema="formSchema"
     :tableHeaders="tableHeaders"
     :apiEndpoints="apiEndpoints"

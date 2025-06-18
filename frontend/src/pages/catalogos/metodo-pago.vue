@@ -25,6 +25,7 @@ const apiEndpoints = {
   <CrudManager
     title="Métodos de Pago"
     :formModal="true"
+    :estatusDefault="true"
     :formSchema="formSchema"
     :tableHeaders="tableHeaders"
     :apiEndpoints="apiEndpoints"

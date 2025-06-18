@@ -14,11 +14,11 @@ function renderSQL(sql, values) {
     return val;
   });
 }
-const executeQuery = async (sql, params = [], console = false) => {
+const executeQuery = async (sql, params = [], printSQL = false) => {
   try {
     const sqlRendered = renderSQL(sql, params);
 
-    if (console) {
+    if (printSQL) {
       console.log("SQL: ", sql);
       console.log("Params:", params);
       console.log("SQL Render:", sqlRendered);
@@ -30,7 +30,7 @@ const executeQuery = async (sql, params = [], console = false) => {
 
     return rows;
   } catch (e) {
-    console.error("Error ejecutando query:", e);
+    console.log("Error ejecutando query:", e);
     throw e;
   }
 };

@@ -20,7 +20,6 @@ export function startTokenTimer(onExpire: () => void) {
       const decoded: any = jwtDecode(jwt);
       token_exp = decoded.exp || 0;
       const segundosRestantes = token_exp - Math.floor(Date.now() / 1000);
-      console.log("Segundos restantes:", segundosRestantes);
       if (segundosRestantes <= 0) {
         clearInterval(timerInterval!);
         timerInterval = null;

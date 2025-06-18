@@ -34,6 +34,7 @@ const apiEndpoints = {
   <CrudManager
     title="Actividades"
     :formModal="true"
+    :estatusDefault="true"
     :formSchema="formSchema"
     :tableHeaders="tableHeaders"
     :apiEndpoints="apiEndpoints"

@@ -27,6 +27,7 @@ const apiEndpoints = {
   <CrudManager
     title="Estatus de Clientes"
     :formModal="true"
+    :estatusDefault="true"
     :formSchema="formSchema"
     :tableHeaders="tableHeaders"
     :apiEndpoints="apiEndpoints"

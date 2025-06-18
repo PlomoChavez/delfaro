@@ -10,15 +10,44 @@ const { executeQuery } = require("../executeQuery");
  * @param {Array} [include] - Arreglo de objetos que define las relaciones a incluir.
  * @returns {Promise<Array>} - Arreglo de objetos con los registros encontrados.
  */
-const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
+const getAllFrom = async (
+  modelo,
+  filtros = {},
+  include = undefined,
+  printSQL = false
+) => {
   try {
-    // 1. Construcción del WHERE y parámetros
+    // 1. Construcción del WHERE y parámetros mejorada
     let whereClause = "";
     let params = [];
     if (filtros && Object.keys(filtros).length) {
       const conditions = Object.keys(filtros).map((key, idx) => {
-        params.push(filtros[key]);
-        return `\`${modelo}\`.\`${key}\` = $${idx + 1}`;
+        let field = key;
+        let op = "=";
+        let value = filtros[key];
+
+        // Soporte para _not
+        if (key.endsWith("_not")) {
+          field = key.replace(/_not$/, "");
+          op = "!=";
+        }
+
+        // Si el valor es array, usar IN o NOT IN
+        if (Array.isArray(value)) {
+          if (key.endsWith("_not")) {
+            op = "NOT IN";
+          } else {
+            op = "IN";
+          }
+          params.push(...value);
+          const placeholders = value
+            .map((_, i) => `$${params.length - value.length + i + 1}`)
+            .join(", ");
+          return `\`${modelo}\`.\`${field}\` ${op} (${placeholders})`;
+        } else {
+          params.push(value);
+          return `\`${modelo}\`.\`${field}\` ${op} $${params.length}`;
+        }
       });
       whereClause = `WHERE ${conditions.join(" AND ")}`;
     }
@@ -35,15 +64,12 @@ const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
     }
 
     // 3. Obtener los campos de la tabla principal
-    // Esto permite construir el SELECT dinámicamente
     const [mainFieldsRows] = await executeQuery(
       `SHOW COLUMNS FROM \`${modelo}\``
     );
     const mainFields = mainFieldsRows.map((col) => col.Field);
 
     // 4. Preparar SELECT y JOINs
-    // selectClause: lista de campos a seleccionar (con alias si es necesario)
-    // joinClause: los LEFT JOINs necesarios para las relaciones
     let selectClause = mainFields.map(
       (field) => `\`${modelo}\`.\`${field}\` AS \`${field}\``
     );
@@ -51,13 +77,11 @@ const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
 
     // 5. Para cada relación, agregar JOIN y los campos con prefijo o no según customName
     for (const rel of relaciones) {
-      // Obtener los campos de la tabla relacionada
       const [relFieldsRows] = await executeQuery(
         `SHOW COLUMNS FROM \`${rel.tabla}\``
       );
       const relFields = relFieldsRows.map((col) => col.Field);
 
-      // Guardar los campos en el objeto de relación para usarlos después
       rel._fields = relFields;
 
       relFields.forEach((field) => {
@@ -67,7 +91,6 @@ const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
         } else if (typeof rel.customName === "string") {
           alias = `${rel.customName}${field}`;
         }
-        // Si customName === false, alias se queda igual (sin prefijo)
         selectClause.push(`\`${rel.tabla}\`.\`${field}\` AS \`${alias}\``);
       });
 
@@ -78,26 +101,23 @@ const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
     const sql = `SELECT ${selectClause.join(
       ", "
     )} FROM \`${modelo}\` ${joinClause} ${whereClause}`;
-    const [rows] = await executeQuery(sql, params);
+    const [rows] = await executeQuery(sql, params, printSQL);
 
     // 7. Post-procesar para anidar los objetos relacionados si corresponde
     if (relaciones.length) {
       return rows.map((row) => {
         let newRow = {};
-        // Copiar campos principales
         mainFields.forEach((field) => {
           newRow[field] = row[field];
         });
-        // Procesar relaciones
         relaciones.forEach((rel) => {
           const relObj = {};
-          // Determinar el prefijo real según customName
           let prefix = "";
           if (rel.customName === true) {
             prefix = (rel.labelKey || rel.tabla) + "_";
           } else if (typeof rel.customName === "string") {
             prefix = rel.customName;
-          } // si es false, prefix = ""
+          }
           let tieneAlgunValor = false;
           Object.keys(row).forEach((key) => {
             if (prefix && key.startsWith(prefix)) {
@@ -114,12 +134,10 @@ const getAllFrom = async (modelo, filtros = {}, include = undefined) => {
             newRow[rel.labelKey || rel.tabla] = tieneAlgunValor ? relObj : null;
           }
         });
-        // Si no es integrado, los campos ya están en newRow por defecto
         return { ...newRow, ...row };
       });
     }
 
-    // 8. Si no hay relaciones, devolver los registros tal cual
     return rows;
   } catch (e) {
     console.error("Error en getAllFrom:", e);

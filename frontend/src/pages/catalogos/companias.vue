@@ -48,6 +48,7 @@ const handleAtras = () => {
       :emitEdit="true"
       :formModal="true"
       :show-title="false"
+      :estatusDefault="true"
       :formSchema="formSchema"
       :tableHeaders="tableHeaders"
       :apiEndpoints="apiEndpoints"

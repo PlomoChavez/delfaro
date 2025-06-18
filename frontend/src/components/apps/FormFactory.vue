@@ -11,7 +11,7 @@ interface Field {
   label: string;
   type: string; // Tipo de input: text, number, email, select, etc.
   model: string; // Nombre de la propiedad en el modelo
-  options?: { value: string | number; label: string }[]; // Opciones para select
+  options?: { value: string | number | boolean; label: string }[]; // Opciones para select
   placeholder?: string;
 }
 
@@ -21,7 +21,7 @@ const props = withDefaults(
     schema: Field[];
     modelValue: Record<string, any>;
     formModal?: boolean;
-    isDialogVisible: boolean;
+    isDialogVisible?: boolean;
     formLive?: boolean;
     isDisabled?: boolean;
     showButtonsAction?: boolean;
@@ -33,6 +33,7 @@ const props = withDefaults(
     formModal: false,
     formLive: false,
     isDisabled: false,
+    isDialogVisible: false,
     showButtonsAction: true,
     textButtonCancel: null,
     textButtonSubmit: null,
@@ -257,7 +258,7 @@ onMounted(async () => {
       if (formLocal[field.model]) {
         if (field.options) {
           let option = field.options.find(
-            (option: any) => option.label === formLocal[field.model]
+            (option: any) => option.value == formLocal[field.model]
           );
           if (option) {
             formLocal[field.model] = option.value;

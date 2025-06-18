@@ -10,13 +10,21 @@ const { executeQuery } = require("../executeQuery");
  * @param {boolean} [estatusDefault=true] - Valor por defecto para estatus
  * @param {object} [unique] - Filtro para verificar unicidad antes de insertar (solo en create)
  */
-const createOrUpdate = async (
-  tabla,
-  data,
-  estatusDefault = true,
-  unique = undefined
-) => {
+const createOrUpdate = async (params = {}) => {
   try {
+    const paramsDefault = {
+      tabla: "",
+      data: [],
+      estatusDefault: true,
+      unique: undefined,
+      returnResponse: false,
+    };
+
+    let { tabla, data, estatusDefault, unique, returnResponse } = {
+      ...paramsDefault,
+      ...params,
+    };
+
     data = await sanitizeData(data, { estatusDefault });
 
     let sql, values, message;
@@ -60,12 +68,58 @@ const createOrUpdate = async (
       message = "Registro creado con éxito";
     }
 
-    await executeQuery(sql, values);
+    const dataQuery = await executeQuery(sql, values);
 
-    return {
+    let response = {
       result: true,
       message,
     };
+
+    if (returnResponse) {
+      let registro;
+      if (data.id) {
+        // UPDATE: buscar el registro actualizado por ID
+        const selectSql = `SELECT * FROM \`${tabla}\` WHERE \`id\` = $1`;
+        const [rows] = await executeQuery(selectSql, [data.id]);
+        registro = rows && rows.length ? rows[0] : null;
+      } else {
+        // INSERT: obtener el último insertado (asumiendo autoincrement y que el pool retorna insertId)
+        const lastId =
+          dataQuery.insertId || (dataQuery[0] && dataQuery[0].insertId);
+        if (lastId) {
+          const selectSql = `SELECT * FROM \`${tabla}\` WHERE \`id\` = $1`;
+          const [rows] = await executeQuery(selectSql, [lastId]);
+          registro = rows && rows.length ? rows[0] : null;
+        } else if (
+          unique &&
+          typeof unique === "object" &&
+          Object.keys(unique).length
+        ) {
+          const uniqueFields = Object.keys(unique);
+          const uniqueValues = uniqueFields.map((key) => unique[key]);
+          const whereClause = uniqueFields
+            .map((key, idx) => `\`${key}\` = $${idx + 1}`)
+            .join(" AND ");
+          const selectSql = `SELECT * FROM \`${tabla}\` WHERE ${whereClause}`;
+          const [rows] = await executeQuery(selectSql, uniqueValues);
+          registro = rows && rows.length ? rows[0] : null;
+        }
+      }
+
+      if (typeof returnResponse === "string") {
+        response.data = registro ? registro[returnResponse] : null;
+      } else if (Array.isArray(returnResponse)) {
+        response.data = registro
+          ? Object.fromEntries(
+              returnResponse.map((prop) => [prop, registro[prop]])
+            )
+          : null;
+      } else if (returnResponse === true) {
+        response.data = registro;
+      }
+    }
+
+    return response;
   } catch (e) {
     return {
       result: false,

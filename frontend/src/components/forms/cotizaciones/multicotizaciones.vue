@@ -1,112 +1,64 @@
 <script setup lang="ts">
-import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
-
+import FormFactory from "@/components/apps/FormFactory.vue";
+import {
+  showErrorMessage,
+  showSuccessMessage,
+} from "@/components/apps/sweetAlerts/SweetAlets";
 import CotizacionPlanSeguro from "@/components/forms/cotizaciones/cotizacionPlanSeguro.vue";
 import { customRequest } from "@/utils/axiosInstance";
 
-const emit = defineEmits(["cotizar"]);
+const emit = defineEmits(["cotizar", "cancelar"]);
 
+const props = withDefaults(
+  defineProps<{
+    registro: any;
+  }>(),
+  {
+    registro: null,
+  }
+);
+
+const localData: any = ref(props.registro ? { ...props.registro } : {});
+const productoSeleccionado: any = ref(null);
+const configuracion: any = ref({}); // Referencia al componente FormFactory
+const updateWatch = ref(false); // Referencia al componente FormFactory
 const companias: any = ref([]); // Referencia al componente FormFactory
 const productos: any = ref([]); // Referencia al componente FormFactory
-const productoSeleccionado: any = ref(null);
 const ramos: any = ref(null); // Referencia al componente FormFactory
-const step: any = ref(1); // Referencia al componente FormFactory
+const step: any = ref(0); // Referencia al componente FormFactory
+
+const optionsSexo = [
+  { value: true, label: "Masculino" },
+  { value: false, label: "Femenino" },
+];
+
 const configuracionDefault: any = ref({
   ramo: null,
   companias: [],
   productos: [],
 });
-// const configuracion: any = ref({
-//   ramo: {
-//     id: "2",
-//     label: "GMM",
-//     estatus: true,
-//     created_at: "2025-04-20T00:39:13.000Z",
-//     updated_at: "2025-04-20T00:39:13.000Z",
-//     deleted_at: null,
-//   },
-//   compania: [
-//     {
-//       id: "2",
-//       rfc: "PSS970203FI6",
-//       nombre: "PLAN SEGURO S.A. DE C.V.",
-//       nombreCorto: "PLAN SEGURO",
-//       direccion: "",
-//       estado: null,
-//       codigoPostal: "",
-//       ciudad: "",
-//       limitePrimerPago: "0",
-//       limitePrimerSubsecuente: "0",
-//       estatus: false,
-//       colonia: null,
-//       created_at: "2025-04-24T00:22:11.000Z",
-//       updated_at: "2025-04-24T00:22:11.000Z",
-//       companias_productos: [
-//         {
-//           id: "2",
-//           compania_id: "2",
-//           ramo_id: "2",
-//           nombre: "Plan Seguro Óptimo Plus",
-//           created_at: "2025-04-29T04:07:12.000Z",
-//           updated_at: "2025-04-29T04:09:31.000Z",
-//           estatus: true,
-//         },
-//       ],
-//     },
-//     {
-//       id: "1",
-//       rfc: "SAF980202D99",
-//       nombre: "SEGUROS AFIRME S.A. DE C.V.",
-//       nombreCorto: "AFIRME",
-//       direccion: "dedede",
-//       estado: "ddddd",
-//       codigoPostal: "dede",
-//       ciudad: "dede",
-//       limitePrimerPago: "3",
-//       limitePrimerSubsecuente: "4",
-//       estatus: false,
-//       colonia: "dede",
-//       created_at: "2025-04-20T21:51:55.000Z",
-//       updated_at: "2025-04-21T17:48:27.000Z",
-//       companias_productos: [
-//         {
-//           id: "1",
-//           compania_id: "1",
-//           ramo_id: "2",
-//           nombre: "GMM Firme",
-//           created_at: "2025-04-29T04:07:12.000Z",
-//           updated_at: "2025-05-17T02:48:21.000Z",
-//           estatus: true,
-//         },
-//       ],
-//     },
-//   ],
-//   productos: [
-//     {
-//       id: "1",
-//       compania_id: "1",
-//       ramo_id: "2",
-//       nombre: "GMM Firme",
-//       created_at: "2025-04-29T04:07:12.000Z",
-//       updated_at: "2025-05-17T02:48:21.000Z",
-//       estatus: true,
-//       selected: true,
-//     },
-//     {
-//       id: "2",
-//       compania_id: "2",
-//       ramo_id: "2",
-//       nombre: "Plan Seguro Óptimo Plus",
-//       created_at: "2025-04-29T04:07:12.000Z",
-//       updated_at: "2025-04-29T04:09:31.000Z",
-//       estatus: true,
-//       selected: true,
-//     },
-//   ],
-// });
-
-//  Referencia al componente FormFactory
-const configuracion: any = ref({ ...configuracionDefault.value }); // Referencia al componente FormFactory
+// prettier-ignore
+const schemaInicial = [
+  {
+    label: "Nombre",
+    type: "text",
+    model: "nombre",
+    classElement: " wFull"
+  },
+  {
+    label: "Fecha de nacimiento",
+    type: "date",
+    model: "fechaNacimiento",
+    classElement: " wFull"
+  },
+  {
+    label: "Sexo",
+    type: "switch",
+    model: "sexo",
+    classElement: " wFull",
+    options  : optionsSexo
+  },
+];
 
 async function getRamos() {
   let url = "/api/catalogos/ramos";
@@ -174,6 +126,7 @@ function isProductoSeleccionado(producto: any) {
     productoSeleccionado.value && productoSeleccionado.value.id === producto.id
   );
 }
+
 function nextStep() {
   step.value = step.value + 1;
 }
@@ -203,9 +156,83 @@ function resetCotizacion() {
   };
   step.value = 1;
 }
+
+const handleInicialSubmit = async (data: any) => {
+  console.log("Datos iniciales:", { ...data });
+  let tmp = {
+    ...props.registro,
+    nombre: data.nombre,
+    fechaNacimiento: data.fechaNacimiento,
+    configuracion: {
+      step: step.value + 1,
+      ...data,
+    },
+  };
+  console.log("Datos para actualizar:", toRaw(tmp));
+  await updateCotizacion(tmp);
+};
+
+const updateCotizacion = async (data: any) => {
+  const response = await customRequest({
+    url: "/api/cotizaciones/update",
+    method: "POST",
+    data: { ...data },
+  });
+  const dataResponse = response.data;
+
+  if (dataResponse.result) {
+    showSuccessMessage({
+      title: "Guardado",
+      message: dataResponse.message,
+    });
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: dataResponse.message,
+    });
+  }
+};
+
+const handleInicialCancel = () => {
+  emit("cancelar");
+};
+
 onMounted(() => {
   getRamos();
+  if (props.registro) {
+    configuracion.value = {
+      ...configuracionDefault.value,
+      ...props.registro.configuracion,
+    };
+    step.value = props.registro.configuracion?.step || 0;
+  } else {
+    configuracion.value = { ...configuracionDefault.value };
+  }
+  console.log("Configuración inicial:", { ...configuracion.value });
+
+  if (step.value == 2) {
+    getCompanias();
+  }
+  setTimeout(() => {
+    updateWatch.value = true;
+  }, 100);
 });
+
+watch(
+  () => step.value,
+  async (newRamo) => {
+    if (newRamo > 1 && updateWatch.value == true) {
+      let tmp = {
+        ...localData.value,
+        configuracion: {
+          step: step.value,
+          ...configuracion.value,
+        },
+      };
+      await updateCotizacion(tmp);
+    }
+  }
+);
 </script>
 
 <style scoped lang="scss">
@@ -213,9 +240,6 @@ onMounted(() => {
   background-color: red;
 }
 
-.w-full {
-  width: 100%;
-}
 .divItems {
   display: flex;
   gap: 2rem;
@@ -311,12 +335,14 @@ onMounted(() => {
 .cardProductos {
   width: 400px !important;
 }
+.cardForm {
+  width: 600px !important;
+}
 .card {
   padding: 16px !important;
   border-radius: 10px !important;
   background-color: white !important;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1) !important;
-  width: fit-content !important;
 }
 .p0 {
   padding: 0 !important;
@@ -330,6 +356,21 @@ onMounted(() => {
 </style>
 
 <template>
+  <pre>Step: {{ step }}</pre>
+  <!-- Preguntas iniciales -->
+  <div v-if="step == 0">
+    <h2 class="w-full text-center mb-5">Quien realiza la cotización:</h2>
+    <div class="card cardForm mx-auto">
+      <FormFactory
+        :formLive="true"
+        :schema="schemaInicial"
+        :modelValue="configuracion"
+        @update:modelValue="(val) => (configuracion = val)"
+        @submit="handleInicialSubmit"
+        @cancel="handleInicialCancel"
+      />
+    </div>
+  </div>
   <!-- Selector de Ramo -->
   <div v-if="step == 1">
     <h2 class="w-full text-center mb-5">Selecciona un ramo:</h2>

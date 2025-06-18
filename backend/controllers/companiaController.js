@@ -60,7 +60,8 @@ exports.create = async (req, res) => {
       limitePrimerPago: 0,
       limitePrimerSubsecuente: 0,
     };
-    await createOrUpdate(tabla, dataNuevaCompania);
+
+    await createOrUpdate({ tabla, data: { ...dataNuevaCompania } });
 
     res.json({
       result: true,
@@ -145,12 +146,14 @@ exports.updateRamos = async (req, res) => {
         },
       });
 
-      // Usar createOrUpdate para actualizar o crear el registro
-      await createOrUpdate("companias_ramos", {
-        compania_id: Number(compania_id),
-        ramo_id: ramo.id,
-        estatus: ramo.isActivo ? 1 : 0,
-        id: existente ? existente.id : undefined, // Si existe, actualiza; si no, crea
+      await createOrUpdate({
+        tabla: "companias_ramos",
+        data: {
+          compania_id: Number(compania_id),
+          ramo_id: ramo.id,
+          estatus: ramo.isActivo ? 1 : 0,
+          id: existente ? existente.id : undefined, // Si existe, actualiza; si no, crea
+        },
       });
     }
     res.json({
