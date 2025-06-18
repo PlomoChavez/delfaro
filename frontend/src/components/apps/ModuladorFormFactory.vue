@@ -45,6 +45,9 @@ const emit = defineEmits<{
 function handleSubmit(data: any) {
   emit("submit", data);
   emit("update:isDialogVisible", false);
+} // prettier-ignore
+function handleUpdate(data: any) {
+  emit("update:modelValue", data);
 }
 
 function handleCancel() {
@@ -83,6 +86,8 @@ function handleCancel() {
         :modelValue="props.modelValue"
         :isDialogVisible="props.isDialogVisible"
         :isDisabled="props.isDisabled"
+        :formLive="props.formLive"
+        @update:modelValue="handleUpdate"
         :showButtonsAction="props.showButtonsAction"
         @submit="handleSubmit"
         @cancel="handleCancel"

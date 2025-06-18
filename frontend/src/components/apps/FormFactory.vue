@@ -11,7 +11,11 @@ interface Field {
   label: string;
   type: string; // Tipo de input: text, number, email, select, etc.
   model: string; // Nombre de la propiedad en el modelo
-  options?: { value: string | number | boolean; label: string }[]; // Opciones para select
+  options?: {
+    id?: string | number | boolean;
+    value?: string | number | boolean;
+    label?: string;
+  }[]; // Opciones para select
   placeholder?: string;
 }
 

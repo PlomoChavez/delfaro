@@ -1,10 +1,23 @@
 <script setup lang="ts">
 import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
+import { customRequest } from "@/utils/axiosInstance";
 
+import { onMounted, ref } from "vue";
+const props = withDefaults(
+  defineProps<{
+    registro: any;
+  }>(),
+  {
+    registro: null,
+  }
+);
 const cotizacion: any = ref({});
-const formTmp: any = ref(null);
+const newAsegurado: any = ref(null);
+const formTitular: any = ref({});
 const tmp: any = ref([]);
 const formTmpSchema: any = ref([]);
+const formTmp: any = ref(null);
+const formTmpValores: any = ref({});
 const step = ref(1);
 
 // prettier-ignore
@@ -29,10 +42,19 @@ const planes = ref([
   { label: "Plan Seguro Esencial" },
   { label: "Plan Seguro Primer Nivel" },
 ]);
+
+function editarAsegurado(index: number) {
+  newAsegurado.value = { ...cotizacion.value.asegurados[index] };
+}
+
+function eliminarAsegurado(index: number) {
+  cotizacion.value.asegurados.splice(index, 1);
+}
+
 // prettier-ignore
 const formSchemaPersonalizacion2: any = [
   { label: "Emergencia en el Extranjero (EMER)", type: "switch", model: "emergenciaExtranjero",},
-  { label: "SumaAsegurada",                 type: "select", model: "sumaAsegurada",         
+  { label: "SumaAsegurada",                 type: "select", model: "sumaAsegurada",
     options: [
       { label:"S.A. 50,000 dls",id:"S.A. 50,000 dls"},
       { label:"S.A. 100,000 dls",id:"S.A. 100,000 dls"},
@@ -40,14 +62,14 @@ const formSchemaPersonalizacion2: any = [
   },
   { label: "Cobertura en el Extranjero (CE)", type: "switch", model: "coberturaExtranjero"},
   { label: "Atención Dental", type: "switch", model: "atencionDental"},
-  { label: "Cobertura Dental",                 type: "select", model: "atencionDentalSelect",         
+  { label: "Cobertura Dental",                 type: "select", model: "atencionDentalSelect",
     options: [
       { label:"Atención Dental +",id:"Atención Dental +"},
       { label:"Atención Dental Total",id:"Atención Dental Total"},
     ]
   },
   { label: "Indemnización Diaria por Hospitalización por Accidente (IDHA)", type: "switch", model: "indemnizacionDiaria"},
-  { label: "Suma por dia",                 type: "select", model: "indemnizacionDiariaSelect",         
+  { label: "Suma por dia",                 type: "select", model: "indemnizacionDiariaSelect",
     options: [
       { label:"500.00 por dia",id:"500.00 por dia"},
       { label:"1000.00 por dia",id:"1000.00 por dia"},
@@ -58,9 +80,10 @@ const formSchemaPersonalizacion2: any = [
   { label: "Reducción de coaseguro por Padecimiento de Nariz en caso de Accidente.", type: "switch", model: "reduccionCoaseguro"},
   { label: "Eliminación de Deducible por Accidente", type: "switch", model: "eliminacionDeducible"},
 ];
+
 // prettier-ignore
 const formSchemaPersonalizacion1: any = [
-  { label: "Suma Asegurada",            type: "select", model: "sumaAsegurada",     
+  { label: "Suma Asegurada",            type: "select", model: "sumaAsegurada",
     options: [
       { label:"1000 UMAM",id:"1000 UMAM"},
       { label:"1500 UMAM",id:"1500 UMAM"},
@@ -76,7 +99,7 @@ const formSchemaPersonalizacion1: any = [
       { label:"Sin límites",id:"Sin límites"},
     ]
   },
-  { label: "Deducible",                 type: "select", model: "deducible",         
+  { label: "Deducible",                 type: "select", model: "deducible",
     options: [
       { label:"0 UMAM",id:"0 UMAM"},
       { label:"4 UMAM",id:"4 UMAM"},
@@ -97,7 +120,7 @@ const formSchemaPersonalizacion1: any = [
       { label:"40 UMAM",id:"40 UMAM"},
     ]
   },
-  { label: "Coaseguro",                 type: "select", model: "coaseguro",                  
+  { label: "Coaseguro",                 type: "select", model: "coaseguro",
     options: [
     { label:"0 %",id:"0 %"},
     { label:"10 %",id:"10 %"},
@@ -107,21 +130,21 @@ const formSchemaPersonalizacion1: any = [
     { label:"30 %",id:"30 %"},
     ]
   },
-  { label: "Tope Máximo de Coaseguro",  type: "select", model: "topeMaximo",                        
+  { label: "Tope Máximo de Coaseguro",  type: "select", model: "topeMaximo",
     options: [
     { label:"$30,000",id:"$30,000"},
     { label:"$40,000",id:"$40,000"},
     { label:"$50,000",id:"$50,000"},
     ]
   },
-  { label: "Nivel Hospitalario",        type: "select", model: "nivelHospitalario", 
+  { label: "Nivel Hospitalario",        type: "select", model: "nivelHospitalario",
     options: [
       {label:"Serie 200",id:"Serie 200"},
       {label:"Serie 300",id:"Serie 300"},
       {label:"Serie 400",id:"Serie 400"},
     ]
   },
-  { label: "T.H.Q.",                    type: "select", model: "thq",               
+  { label: "T.H.Q.",                    type: "select", model: "thq",
     options: [
       {label:"24",id:"24"},
       {label:"27",id:"27"},
@@ -134,7 +157,7 @@ const formSchemaPersonalizacion1: any = [
       {label:"G.U.A.",id:"G.U.A."},
     ]
   },
-  { label: "Frecuencia de pago",        type: "select", model: "frecuenciaPago",    
+  { label: "Frecuencia de pago",        type: "select", model: "frecuenciaPago",
     options: [
       {label:"Anual",id:"Anual"},
       {label:"Semestral",id:"Semestral"},
@@ -205,12 +228,13 @@ async function handleNextPlan() {
 }
 
 async function handleFormSubmitPersona(data: any) {
-  tmp.value = [...tmp.value, data];
-  handleNextStep();
+  cotizacion.value.asegurados = [...cotizacion.value.asegurados, data];
+  newAsegurado.value = null;
 }
 async function handleSubmit(data: any) {
   cotizacion.value[formTmp.value] = data;
   formTmp.value = null;
+  formTmpValores.value = {};
 }
 
 async function handleFormPersonalizacion(tipo: string) {
@@ -235,7 +259,6 @@ async function handleNextStep() {
   step.value = step.value + 1;
 }
 
-import { customRequest } from "@/utils/axiosInstance";
 async function sendCotizacion() {
   try {
     const payload = cotizacion.value;
@@ -249,9 +272,42 @@ async function sendCotizacion() {
     console.error("Error al obtener los datos:", error);
   }
 }
+
+onMounted(() => {
+  cotizacion.value = props.registro || {};
+  console.log("cotizacion", cotizacion.value);
+  if (cotizacion.value.asegurados === undefined) {
+    cotizacion.value.asegurados = [];
+  }
+  if (cotizacion.value.titular != undefined) {
+    formTitular.value = { ...cotizacion.value.titular };
+  }
+});
 </script>
 
 <style scoped lang="scss">
+.asegurado-card {
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fafbfc;
+  box-shadow: 0 2px 8px 0 rgba(60, 60, 60, 0.04);
+}
+.asegurado-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.asegurado-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.asegurado-info {
+  margin-top: 0.5rem;
+}
 .bgRed {
   background-color: red;
 }
@@ -288,30 +344,75 @@ async function sendCotizacion() {
 
 <template>
   <div>
+    <pre>{{ formTmpValores }}</pre>
+    <pre>{{ cotizacion }}</pre>
     <div v-if="step == 1">
       <ModuladorFormFactory
+        class="w-full"
         title="Titular"
         :schema="formSchema"
-        :modelValue="{}"
+        :formLive="true"
+        :modelValue="formTitular"
+        @update:modelValue="
+          (val) => {
+            cotizacion.titular = { ...val };
+          }
+        "
         :isDialogVisible="false"
         @submit="handleFormSubmit"
       />
     </div>
     <div v-if="step == 2">
-      <div v-if="formTmp">
+      <div v-if="newAsegurado == null">
         <div class="d-flex justify-end">
-          <VBtn color="secondary" @click="() => (formTmp = !formTmp)">
+          <VBtn color="secondary" @click="() => (newAsegurado = {})">
             Nuevo
             <VIcon start icon="tabler-checkbox" />
           </VBtn>
         </div>
-        <div v-for="(item, index) in tmp" :key="index">
-          <h2>Datos del Asegurado</h2>
-          <p>Nombre: {{ item.nombre }}</p>
-          <p>Sexo: {{ item.sexo }}</p>
-          <p>Fecha de Nacimiento: {{ item.fechaNacimiento }}</p>
+        <div
+          v-for="(item, index) in cotizacion.asegurados"
+          :key="index"
+          class="asegurado-card"
+        >
+          <div class="asegurado-header">
+            <h3>Datos del Asegurado</h3>
+            <div class="asegurado-actions">
+              <span
+                class="icon-action"
+                @click="editarAsegurado(index)"
+                title="Editar"
+                tabindex="0"
+                role="button"
+              >
+                <VIcon icon="tabler-edit" color="primary" size="25" />
+              </span>
+              <span
+                class="icon-action"
+                @click="eliminarAsegurado(index)"
+                title="Eliminar"
+                tabindex="0"
+                role="button"
+              >
+                <VIcon icon="tabler-trash" color="error" size="25" />
+              </span>
+            </div>
+          </div>
+          <div class="asegurado-info">
+            <p class="p-0 m-0">
+              <strong>Nombre:</strong> {{ item.nombre || "Sin nombre" }}<br />
+              <strong>Sexo:</strong>
+              {{
+                typeof item.sexo === "object"
+                  ? item.sexo.label
+                  : item.sexo || "Sin especificar"
+              }}<br />
+              <strong>Fecha de Nacimiento:</strong>
+              {{ item.fechaNacimiento || "Sin fecha" }}
+            </p>
+          </div>
         </div>
-        <div v-if="tmp.length == 0">
+        <div v-if="cotizacion.asegurados.length == 0">
           <p class="w-full text-center">No hay asegurados registrados</p>
         </div>
       </div>
@@ -319,9 +420,9 @@ async function sendCotizacion() {
         v-else
         title="Asegurado"
         :schema="formSchemaPersona"
-        :modelValue="{}"
+        :modelValue="newAsegurado"
         :isDialogVisible="false"
-        @cancel="() => (formTmp = !formTmp)"
+        @cancel="() => (newAsegurado = null)"
         @submit="handleFormSubmitPersona"
       />
       <VBtn @click="handleNextPersonas">
@@ -375,7 +476,13 @@ async function sendCotizacion() {
       <div v-else>
         <ModuladorFormFactory
           :schema="formTmpSchema"
-          :modelValue="{}"
+          :formLive="true"
+          :modelValue="formTmpValores"
+          @update:modelValue="
+            (val) => {
+              formTmpValores.value = { ...val };
+            }
+          "
           :isDialogVisible="false"
           @submit="handleSubmit"
           @cancel="() => (formTmp = null)"
@@ -398,4 +505,3 @@ async function sendCotizacion() {
     </div>
   </div>
 </template>
-sendCotizacion

@@ -8,6 +8,12 @@ const {
 } = require("../db/functionsSQL");
 const prisma = new PrismaClient();
 
+exports.deleteCotizacion = async (req, res, catalogo) => {
+  const id = req.body.id;
+  const result = await deleteById("cotizaciones", id);
+  res.json(result);
+};
+
 exports.getCompniasByRamo = async (req, res) => {
   try {
     const ramoId = req.body.ramo;

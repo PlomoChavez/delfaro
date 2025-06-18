@@ -106,6 +106,7 @@ router.post('/api/polizas/historial', polizasController.getHistorial);
 // Cotizaciones
 router.post('/api/cotizaciones', cotizacionesController.getAllCotizaciones);
 router.post('/api/cotizaciones/update', cotizacionesController.createOrUpdateCotizacion);
+router.post('/api/cotizaciones/delete', cotizacionesController.deleteCotizacion);
 
 // // Robot
 // router.post('/api/robot', robotController.startRobot);

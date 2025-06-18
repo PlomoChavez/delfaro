@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import FormFactory from "@/components/apps/FormFactory.vue";
-import {
-  showErrorMessage,
-  showSuccessMessage,
-} from "@/components/apps/sweetAlerts/SweetAlets";
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import CotizacionPlanSeguro from "@/components/forms/cotizaciones/cotizacionPlanSeguro.vue";
 import { customRequest } from "@/utils/axiosInstance";
+import { toast } from "vue3-toastify";
 
 const emit = defineEmits(["cotizar", "cancelar"]);
 
@@ -53,11 +51,14 @@ const schemaInicial = [
   },
   {
     label: "Sexo",
-    type: "switch",
+    type: "select",
     model: "sexo",
     classElement: " wFull",
-    options  : optionsSexo
-  },
+      options: [
+      {label:"Hombre",id:"Hombre"},
+      {label:"Mujer",id:"Mujer"}
+    ]
+  }
 ];
 
 async function getRamos() {
@@ -86,7 +87,22 @@ async function getCompanias() {
     },
   });
   if (response.data.result) {
-    companias.value = response.data.data;
+    const dataResponse = toRaw(response.data.data).map((compania: any) => {
+      // Si tiene productos, mapea cada producto
+      if (Array.isArray(compania.companias_productos)) {
+        compania.companias_productos = compania.companias_productos.map(
+          (producto: any) => {
+            producto.titular = configuracion.value.titular;
+            producto.nombre_producto = producto.nombre;
+            delete producto.nombre;
+            return producto;
+          }
+        );
+      }
+      return compania;
+    });
+    companias.value = dataResponse;
+    console.log("Companias response:", toRaw(dataResponse));
   } else {
     showErrorMessage({
       title: "Error",
@@ -168,7 +184,6 @@ const handleInicialSubmit = async (data: any) => {
       ...data,
     },
   };
-  console.log("Datos para actualizar:", toRaw(tmp));
   await updateCotizacion(tmp);
 };
 
@@ -181,9 +196,8 @@ const updateCotizacion = async (data: any) => {
   const dataResponse = response.data;
 
   if (dataResponse.result) {
-    showSuccessMessage({
-      title: "Guardado",
-      message: dataResponse.message,
+    toast.success("¡Cotización guardada!", {
+      theme: "dark", // Activa el tema oscuro
     });
   } else {
     showErrorMessage({
@@ -209,6 +223,13 @@ onMounted(() => {
     configuracion.value = { ...configuracionDefault.value };
   }
   console.log("Configuración inicial:", { ...configuracion.value });
+  if (step.value > 0 && configuracion.value.titular == undefined) {
+    configuracion.value.titular = {
+      nombre: configuracion.value.nombre,
+      fechaNacimiento: configuracion.value.fechaNacimiento,
+      sexo: configuracion.value.sexo,
+    };
+  }
 
   if (step.value == 2) {
     getCompanias();
@@ -225,10 +246,11 @@ watch(
       let tmp = {
         ...localData.value,
         configuracion: {
-          step: step.value,
           ...configuracion.value,
+          step: step.value,
         },
       };
+      console.log("Actualizando cotización:", step.value);
       await updateCotizacion(tmp);
     }
   }
@@ -236,10 +258,6 @@ watch(
 </script>
 
 <style scoped lang="scss">
-.bgRed {
-  background-color: red;
-}
-
 .divItems {
   display: flex;
   gap: 2rem;
@@ -250,8 +268,17 @@ watch(
 .divRows {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 2rem;
-  width: fit-content;
+  width: 100%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.divCards {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
   margin-left: auto !important;
   margin-right: auto !important;
 }
@@ -262,9 +289,6 @@ watch(
   width: fit-content;
   margin-left: auto !important;
   margin-right: auto !important;
-}
-.w-fit {
-  width: fit-content;
 }
 
 .divButtons {
@@ -329,27 +353,38 @@ watch(
   letter-spacing: normal !important;
   text-transform: none !important;
 }
+
 .cardActive {
   border: 2px solid rgb(var(--v-theme-primary));
 }
+
 .cardProductos {
   width: 400px !important;
 }
+
 .cardForm {
   width: 600px !important;
 }
+
+.cardEntrevista {
+  width: 100% !important;
+}
+
 .card {
   padding: 16px !important;
   border-radius: 10px !important;
   background-color: white !important;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1) !important;
 }
+
 .p0 {
   padding: 0 !important;
 }
+
 .m0 {
   margin: 0 !important;
 }
+
 .fontBold {
   font-weight: bolder !important;
 }
@@ -357,13 +392,15 @@ watch(
 
 <template>
   <pre>Step: {{ step }}</pre>
+  <pre>{{ configuracion }}</pre>
+  <pre>{{ configuracion.productos }}</pre>
   <!-- Preguntas iniciales -->
   <div v-if="step == 0">
     <h2 class="w-full text-center mb-5">Quien realiza la cotización:</h2>
     <div class="card cardForm mx-auto">
       <FormFactory
-        :formLive="true"
         :schema="schemaInicial"
+        :formLive="true"
         :modelValue="configuracion"
         @update:modelValue="(val) => (configuracion = val)"
         @submit="handleInicialSubmit"
@@ -423,7 +460,7 @@ watch(
         <template v-for="(item, i) in compania.companias_productos">
           <!-- v-model="" -->
           <VCheckbox
-            :label="item.nombre"
+            :label="item.nombre_producto"
             true-icon="tabler-checkbox"
             false-icon="tabler-square"
             color="primary"
@@ -450,13 +487,15 @@ watch(
         @click="() => (productoSeleccionado = item)"
         :class="[isProductoSeleccionado(item) ? 'cardActive' : '']"
       >
-        <p class="p0 m0 fontBold">{{ item.nombre }}</p>
+        <p class="p0 m0 fontBold">{{ item.nombre_producto }}</p>
       </div>
     </div>
-    <div class="divRows">
-      <div class="card" v-if="productoSeleccionado">
-        <h5 class="titleSeparator">{{ productoSeleccionado.nombre }}</h5>
-        <CotizacionPlanSeguro class="wFull" />
+    <div class="divCards">
+      <div class="cardEntrevista card" v-if="productoSeleccionado">
+        <h5 class="titleSeparator">
+          {{ productoSeleccionado.nombre_producto }}
+        </h5>
+        <CotizacionPlanSeguro :registro="productoSeleccionado" class="wFull" />
       </div>
     </div>
     <!-- prettier-ignore -->
