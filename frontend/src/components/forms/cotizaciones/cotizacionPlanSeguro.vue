@@ -555,22 +555,15 @@ onMounted(() => {
             @click="() => { handleFormPersonalizacion('parametrosFlexibles'); }"
             style="position: relative;"
           >
-            Parámetros flexibles
-            <VIcon
-              v-if="cotizacion.parametrosFlexibles"
-              icon="tabler-check"
-              color="success"
-              size="20"
-              style="position: absolute; top: 8px; right: 8px;"
-              title="Ya registrado"
-            />
+          <span v-if="cotizacion.parametrosFlexibles" class="text-success font-bold font20"><i class="fa-solid fa-circle-check"></i></span><br>
+          <span>Parámetros flexibles</span> 
           </div>
           <!-- prettier-ignore -->
           <div class="divPlanItem" @click="() => { handleFormPersonalizacion('proteccionAdicional'); }" style="position: relative;">
-            Protección con costo adicional
-            <span v-if="cotizacion.proteccionAdicional" class="badge" style="position: absolute; top: 8px; right: 8px; background: #43a047;" title="Ya registrado" >
-              <VIcon icon="tabler-check" size="16" color="white" />
-            </span>
+            
+            <span v-if="cotizacion.proteccionAdicional" class="text-success font-bold font20"><i class="fa-solid fa-circle-check"></i></span> <br>
+          <span>Protección con costo adicional</span>
+
           </div>
           <!-- prettier-ignore -->
           <!-- <div class="divPlanItem" @click="() => { handleFormPersonalizacion('reconocimientoAntiguedad'); }">Reconocimiento de Antigüedad</div> -->

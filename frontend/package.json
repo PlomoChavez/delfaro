@@ -18,6 +18,7 @@
     "@casl/vue": "2.2.2",
     "@floating-ui/dom": "1.6.8",
     "@formkit/drag-and-drop": "0.1.6",
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "@sindresorhus/is": "7.0.1",
     "@tiptap/extension-highlight": "^2.10.3",
     "@tiptap/extension-image": "^2.10.3",

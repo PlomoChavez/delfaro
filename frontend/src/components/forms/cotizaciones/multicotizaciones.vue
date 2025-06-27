@@ -627,7 +627,7 @@ watch(
             class="icon-action"
             @click="handleModoEditarEntrevistas"
           >
-            <VIcon icon="tabler-edit" color="error" size="20" />
+            <VIcon icon="tabler-edit" color="warning" size="35" />
           </span>
           <span
             v-if="modoEditarEntrevistas"
