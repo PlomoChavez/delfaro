@@ -24,6 +24,12 @@ const props = withDefaults(
     isDisabled?: boolean;
     formLive?: boolean;
     showButtonsAction?: boolean;
+    textButtonCancel?: string | null;
+    textButtonSubmit?: string | null;
+    showIconButtonSubmit?: boolean;
+    showIconButtonCancel?: boolean;
+    showButtonSubmit?: boolean;
+    showButtonCancel?: boolean;
   }>(),
   {
     title: null,
@@ -31,6 +37,12 @@ const props = withDefaults(
     formLive: false,
     isDisabled: false,
     showButtonsAction: true,
+    showIconButtonSubmit: true,
+    showIconButtonCancel: true,
+    showButtonSubmit: true,
+    showButtonCancel: true,
+    textButtonCancel: null,
+    textButtonSubmit: null,
   }
 );
 
@@ -89,6 +101,12 @@ function handleCancel() {
         :formLive="props.formLive"
         @update:modelValue="handleUpdate"
         :showButtonsAction="props.showButtonsAction"
+        :showIconButtonSubmit="props.showIconButtonSubmit"
+        :showIconButtonCancel="props.showIconButtonCancel"
+        :showButtonSubmit="props.showButtonSubmit"
+        :showButtonCancel="props.showButtonCancel"
+        :textButtonCancel="props.textButtonCancel"
+        :textButtonSubmit="props.textButtonSubmit"
         @submit="handleSubmit"
         @cancel="handleCancel"
       />

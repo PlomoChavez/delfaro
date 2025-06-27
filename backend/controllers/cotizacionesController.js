@@ -89,7 +89,7 @@ exports.createOrUpdateCotizacion = async (req, res) => {
 
     data.configuracion = JSON.stringify(data.configuracion || {});
 
-    let tipoResponse = data.id ? false : "id";
+    let tipoResponse = data.configuracion.id ? false : "id";
 
     const response = await createOrUpdate({
       tabla: "cotizaciones",

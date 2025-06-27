@@ -91,7 +91,43 @@ export function showSuccessMessage({
         confirmButton.innerHTML = `<span style="font-weight: bold; color: white;">${confirmText}</span>`; // Solo el texto es dinámico
       }
     },
-    confirmButtonColor: "#28C76F", // Verde para el botón de éxito
+    confirmButtonColor: "#4E9F6E", // Verde para el botón de éxito
+  });
+}
+export function showInfoMessage({
+  title = "Eliminado",
+  message = "El elemento ha sido eliminado con éxito.",
+  confirmText = "Aceptar", // Solo el texto es personalizable
+}: {
+  title?: string;
+  message?: string;
+  confirmText?: string; // Texto personalizable para el botón de confirmación
+}) {
+  Swal.fire({
+    title,
+    html: `
+      <p style="
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 0px;
+        margin-bottom: 0px;
+      ">
+        ${message}
+      </p>
+    `,
+    icon: "info",
+    showConfirmButton: true,
+    customClass: {
+      confirmButton: "custom-confirm-button", // Clase personalizada para el botón
+    },
+    didRender: () => {
+      const confirmButton = document.querySelector(".custom-confirm-button");
+      if (confirmButton) {
+        confirmButton.innerHTML = `<span style="font-weight: bold; color: white;">${confirmText}</span>`; // Solo el texto es dinámico
+      }
+    },
+    confirmButtonColor: "#2F7BD9", // Verde para el botón de éxito
   });
 }
 

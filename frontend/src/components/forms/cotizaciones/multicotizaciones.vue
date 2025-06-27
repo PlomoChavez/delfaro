@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import FormFactory from "@/components/apps/FormFactory.vue";
-import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import {
+  showDeleteItem,
+  showErrorMessage,
+} from "@/components/apps/sweetAlerts/SweetAlets";
 import CotizacionPlanSeguro from "@/components/forms/cotizaciones/cotizacionPlanSeguro.vue";
 import { customRequest } from "@/utils/axiosInstance";
 import { toast } from "vue3-toastify";
@@ -18,6 +21,7 @@ const props = withDefaults(
 
 const localData: any = ref(props.registro ? { ...props.registro } : {});
 const productoSeleccionado: any = ref(null);
+const modoEditarEntrevistas = ref(false);
 const configuracion: any = ref({}); // Referencia al componente FormFactory
 const updateWatch = ref(false); // Referencia al componente FormFactory
 const companias: any = ref([]); // Referencia al componente FormFactory
@@ -35,6 +39,7 @@ const configuracionDefault: any = ref({
   companias: [],
   productos: [],
 });
+
 // prettier-ignore
 const schemaInicial = [
   {
@@ -120,7 +125,7 @@ function selectRamo(ramo: any) {
 function selectProducto(valor: any, producto: any) {
   if (valor) {
     // Si el checkbox está marcado, agrega el producto a la lista
-    configuracion.value.productos.push(producto);
+    configuracion.value.productos.push({ ...producto, isTerminado: false });
   } else {
     // Si el checkbox está desmarcado, elimina el producto de la lista
     configuracion.value.productos = configuracion.value.productos.filter(
@@ -131,6 +136,7 @@ function selectProducto(valor: any, producto: any) {
 
 function goToSeleccionarProducto() {
   step.value = 3;
+  handleUpdateConfiguracion();
 }
 
 function isCompaniaSelected(compania: any) {
@@ -145,6 +151,7 @@ function isProductoSeleccionado(producto: any) {
 
 function nextStep() {
   step.value = step.value + 1;
+  productoSeleccionado.value = configuracion.value.productos[0];
 }
 
 function sendToCotizar() {
@@ -164,23 +171,75 @@ function selectCompania(compania: any) {
   }
 }
 
+const todosProductosTerminados = computed(() => {
+  return (
+    Array.isArray(configuracion.value.productos) &&
+    configuracion.value.productos.length > 0 &&
+    configuracion.value.productos.every((p: any) => p.isTerminado === true)
+  );
+});
+
+async function handleUpdateConfiguracion() {
+  let tmp = {
+    ...localData.value,
+    configuracion: {
+      ...configuracion.value,
+      step: step.value,
+    },
+  };
+  await updateCotizacion(tmp);
+}
+
+function handleModoEditarEntrevistas() {
+  modoEditarEntrevistas.value = !modoEditarEntrevistas.value;
+}
+
+async function handleTerminarEntrevista(data: any) {
+  // Si data es un ref, obtén el valor real
+  const realData = data.value ? data.value : data;
+  // O mejor aún:
+  const rawData = toRaw(realData);
+  console.log("Datos de la entrevista:", { ...rawData });
+  // Busca el índice del producto
+  const idx = configuracion.value.productos.findIndex(
+    (p: any) => p.id == rawData.id
+  );
+  if (idx !== -1) {
+    // Reemplaza el objeto para asegurar reactividad
+    configuracion.value.productos[idx] = {
+      ...configuracion.value.productos[idx],
+      ...rawData,
+      isTerminado: true,
+    };
+  }
+
+  handleUpdateConfiguracion();
+}
+
 function resetCotizacion() {
   configuracion.value = {
+    titular: {
+      nombre: props.registro.nombre,
+      fechaNacimiento: props.registro.fechaNacimiento,
+      sexo: props.registro.sexo,
+    },
     ramo: null,
     companias: [],
     productos: [],
   };
   step.value = 1;
+  handleUpdateConfiguracion();
 }
 
 const handleInicialSubmit = async (data: any) => {
   console.log("Datos iniciales:", { ...data });
+  step.value = 1;
   let tmp = {
     ...props.registro,
     nombre: data.nombre,
     fechaNacimiento: data.fechaNacimiento,
     configuracion: {
-      step: step.value + 1,
+      step: step.value,
       ...data,
     },
   };
@@ -191,11 +250,20 @@ const updateCotizacion = async (data: any) => {
   const response = await customRequest({
     url: "/api/cotizaciones/update",
     method: "POST",
-    data: { ...data },
+    data: data,
   });
   const dataResponse = response.data;
 
   if (dataResponse.result) {
+    if (localData.value.id == undefined) {
+      console.log("Creando nueva cotización");
+      localData.value.id = dataResponse.data;
+      configuracion.value.titular = {
+        nombre: configuracion.value.nombre,
+        fechaNacimiento: configuracion.value.fechaNacimiento,
+        sexo: configuracion.value.sexo,
+      };
+    }
     toast.success("¡Cotización guardada!", {
       theme: "dark", // Activa el tema oscuro
     });
@@ -210,6 +278,53 @@ const updateCotizacion = async (data: any) => {
 const handleInicialCancel = () => {
   emit("cancelar");
 };
+
+const handleAtras = () => {
+  emit("cancelar");
+};
+
+function confirmarEliminarProducto(item: any, index: number) {
+  showDeleteItem({
+    title: "¿Estás seguro de eliminar este registro?",
+    message: "Esta acción no se puede deshacer.",
+    confirmText: "Sí, eliminar",
+    cancelText: "Cancelar",
+    onConfirm: () => {
+      if (configuracion.value.productos.length == 1) {
+        resetCotizacion();
+      } else {
+        configuracion.value.productos.splice(index, 1);
+        productoSeleccionado.value = null;
+
+        if (configuracion.value.productos.length > 0) {
+          productoSeleccionado.value = configuracion.value.productos[0];
+        }
+
+        handleUpdateConfiguracion();
+        modoEditarEntrevistas.value = false; // Salir del modo edición
+
+        if (configuracion.value.productos.length == 0) {
+          resetCotizacion();
+          modoEditarEntrevistas.value = false; // Salir del modo edición
+        }
+      }
+    },
+    onCancel: () => {},
+  });
+}
+
+function handleSeleccionProducto(item: any) {
+  if (modoEditarEntrevistas.value) {
+    // Si estamos en modo edición, confirmamos la eliminación
+    confirmarEliminarProducto(
+      item,
+      configuracion.value.productos.indexOf(item)
+    );
+  } else {
+    // Si no estamos en modo edición, seleccionamos el producto
+    productoSeleccionado.value = item;
+  }
+}
 
 onMounted(() => {
   getRamos();
@@ -229,6 +344,12 @@ onMounted(() => {
       fechaNacimiento: configuracion.value.fechaNacimiento,
       sexo: configuracion.value.sexo,
     };
+  }
+  if (
+    configuracion.value.productos != undefined &&
+    configuracion.value.productos.length > 0
+  ) {
+    productoSeleccionado.value = configuracion.value.productos[0];
   }
 
   if (step.value == 2) {
@@ -250,7 +371,11 @@ watch(
           step: step.value,
         },
       };
+      localData.value = tmp;
       console.log("Actualizando cotización:", step.value);
+      setTimeout(() => {
+        updateWatch.value = false;
+      }, 1);
       await updateCotizacion(tmp);
     }
   }
@@ -258,6 +383,22 @@ watch(
 </script>
 
 <style scoped lang="scss">
+.icon-bold svg {
+  filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff);
+}
+.badge {
+  position: absolute;
+  top: -0.5em;
+  right: -0.5em;
+  display: inline-block;
+  background: #4e9f6e;
+  color: #fff;
+  border-radius: 1rem;
+  padding: 0.2em 0.7em;
+  font-size: 0.9em;
+  font-weight: bolder;
+  margin-top: 0;
+}
 .divItems {
   display: flex;
   gap: 2rem;
@@ -312,20 +453,6 @@ watch(
   border-width: 1px;
   border-style: solid;
   border-color: #ccc;
-}
-
-.badge {
-  position: absolute; // Añade esto
-  top: -0.5em; // Ajusta según tu preferencia
-  right: -0.5em; // Ajusta según tu preferencia
-  display: inline-block;
-  background: #3996f3;
-  color: #fff;
-  border-radius: 1rem;
-  padding: 0.2em 0.7em;
-  font-size: 0.9em;
-  font-weight: bolder;
-  margin-top: 0; // Elimina el margin-top si lo tienes
 }
 
 .disabledItem {
@@ -392,8 +519,16 @@ watch(
 
 <template>
   <pre>Step: {{ step }}</pre>
-  <pre>{{ configuracion }}</pre>
-  <pre>{{ configuracion.productos }}</pre>
+  <!-- <pre>{{ configuracion.productos }}</pre> -->
+  <div class="d-flex justify-start align-center mb-5">
+    <VBtn
+      icon="tabler-arrow-left"
+      class="cursor-pointer"
+      variant="text"
+      color="secondary"
+      @click="handleAtras"
+    />
+  </div>
   <!-- Preguntas iniciales -->
   <div v-if="step == 0">
     <h2 class="w-full text-center mb-5">Quien realiza la cotización:</h2>
@@ -403,6 +538,9 @@ watch(
         :formLive="true"
         :modelValue="configuracion"
         @update:modelValue="(val) => (configuracion = val)"
+        :textButtonSubmit="'Empezar cotización'"
+        :showIconButtonSubmit="false"
+        :showIconButtonCancel="false"
         @submit="handleInicialSubmit"
         @cancel="handleInicialCancel"
       />
@@ -478,30 +616,74 @@ watch(
   </div>
   <!-- Selector de entrevistas -->
   <div v-if="step == 4">
-    <h2 class="w-full text-center mb-5">Entrevista de cotizacion:</h2>
-    <div class="divRows">
+    <div>
+      <!-- Icono de editar/eliminar -->
+      <div class="w-full d-flex justify-between align-center">
+        <div></div>
+        <h2 class="w-full text-center">Entrevista de cotizacion:</h2>
+        <div>
+          <span
+            v-if="!modoEditarEntrevistas"
+            class="icon-action"
+            @click="handleModoEditarEntrevistas"
+          >
+            <VIcon icon="tabler-edit" color="error" size="20" />
+          </span>
+          <span
+            v-if="modoEditarEntrevistas"
+            class="icon-action"
+            @click="handleModoEditarEntrevistas"
+            title="Cancelar edición"
+          >
+            <VIcon icon="tabler-x" color="primary" size="20" />
+          </span>
+        </div>
+      </div>
+
+      <h3
+        v-if="modoEditarEntrevistas"
+        class="w-full text-center my-2 textDanger"
+      >
+        Da clic en las entrevistas para eliminar:
+      </h3>
+    </div>
+    <div class="divRows mt-3">
       <div
         v-for="(item, index) in configuracion.productos"
         :key="item.id"
         class="mb-5 card"
-        @click="() => (productoSeleccionado = item)"
+        @click="handleSeleccionProducto(item)"
         :class="[isProductoSeleccionado(item) ? 'cardActive' : '']"
+        style="position: relative"
       >
-        <p class="p0 m0 fontBold">{{ item.nombre_producto }}</p>
+        <p class="p0 m0 fontBold">
+          {{ item.nombre_producto }}
+        </p>
+        <span v-if="item.isTerminado && !modoEditarEntrevistas" class="badge">
+          <VIcon icon="tabler-check" size="18" />
+        </span>
       </div>
     </div>
-    <div class="divCards">
+    <div class="divCards" v-if="!modoEditarEntrevistas">
       <div class="cardEntrevista card" v-if="productoSeleccionado">
         <h5 class="titleSeparator">
           {{ productoSeleccionado.nombre_producto }}
         </h5>
-        <CotizacionPlanSeguro :registro="productoSeleccionado" class="wFull" />
+        <CotizacionPlanSeguro
+          :registro="productoSeleccionado"
+          class="wFull"
+          @terminar="handleTerminarEntrevista"
+        />
       </div>
     </div>
     <!-- prettier-ignore -->
     <div class="divButtons">
-      <VBtn variant="outlined" color="secondary" @click="resetCotizacion"> Cancelar</VBtn>
-      <VBtn :disabled="!configuracion.productos.length" @click="sendToCotizar">Continuar</VBtn>
+      <VBtn variant="outlined" color="secondary" @click="resetCotizacion"> Atrás</VBtn>
+      <VBtn :disabled="!configuracion.productos.length" v-if="step != 4 || todosProductosTerminados" @click="sendToCotizar">Siguiente</VBtn>
     </div>
   </div>
+
+  <!-- <pre>{{ localData }}</pre> -->
+  <!-- <pre>{{ configuracion }}</pre> -->
+  <!-- <pre>{{ configuracion }}</pre> -->
 </template>

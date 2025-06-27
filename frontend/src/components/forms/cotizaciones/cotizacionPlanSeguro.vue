@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ModuladorFormFactory from "@/components/apps/ModuladorFormFactory.vue";
+import { showInfoMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
+const emit = defineEmits(["terminar"]);
 
 import { onMounted, ref } from "vue";
 const props = withDefaults(
@@ -12,6 +14,7 @@ const props = withDefaults(
   }
 );
 const cotizacion: any = ref({});
+const isEditando = ref(false);
 const newAsegurado: any = ref(null);
 const formTitular: any = ref({});
 const tmp: any = ref([]);
@@ -228,22 +231,49 @@ async function handleNextPlan() {
 }
 
 async function handleFormSubmitPersona(data: any) {
-  cotizacion.value.asegurados = [...cotizacion.value.asegurados, data];
+  const asegurados = cotizacion.value.asegurados || [];
+  const idx = asegurados.findIndex((a: any) => a.id === data.id);
+
+  if (!data.id) {
+    // Si no hay id, asigna el siguiente id incremental
+    const maxId =
+      asegurados.length > 0
+        ? Math.max(...asegurados.map((a: any) => a.id || 0))
+        : 0;
+    data.id = maxId + 1;
+  }
+
+  if (idx !== -1) {
+    // Reemplaza el asegurado existente
+    cotizacion.value.asegurados = asegurados.map((a: any, i: number) =>
+      i === idx ? data : a
+    );
+  } else {
+    // Agrega el nuevo asegurado
+    cotizacion.value.asegurados = [...asegurados, data];
+  }
   newAsegurado.value = null;
 }
+
 async function handleSubmit(data: any) {
   cotizacion.value[formTmp.value] = data;
   formTmp.value = null;
   formTmpValores.value = {};
 }
 
+async function terminarCotizacion() {
+  emit("terminar", cotizacion);
+}
+
 async function handleFormPersonalizacion(tipo: string) {
   switch (tipo) {
     case "parametrosFlexibles":
       formTmpSchema.value = [...formSchemaPersonalizacion1];
+      formTmpValores.value = cotizacion.value.parametrosFlexibles || {};
       break;
     case "proteccionAdicional":
       formTmpSchema.value = [...formSchemaPersonalizacion2];
+      formTmpValores.value = cotizacion.value.proteccionAdicional || {};
       break;
     case "reconocimientoAntiguedad":
       formTmpSchema.value = [];
@@ -257,6 +287,25 @@ async function handleFormPersonalizacion(tipo: string) {
 
 async function handleNextStep() {
   step.value = step.value + 1;
+}
+async function handleTerminarEntrevista() {
+  if (
+    cotizacion.value.parametrosFlexibles !== undefined &&
+    cotizacion.value.proteccionAdicional !== undefined
+  ) {
+    isEditando.value = false;
+  } else {
+    showInfoMessage({
+      title: "Faltan formularios",
+      message:
+        "Debes completar los formularios de personalización antes de terminar la entrevista.",
+    });
+    return;
+  }
+}
+
+async function handlePrevStep() {
+  step.value = step.value - 1;
 }
 
 async function sendCotizacion() {
@@ -272,6 +321,9 @@ async function sendCotizacion() {
     console.error("Error al obtener los datos:", error);
   }
 }
+function handleAtras() {
+  // emit("atras");
+}
 
 onMounted(() => {
   cotizacion.value = props.registro || {};
@@ -282,6 +334,7 @@ onMounted(() => {
   if (cotizacion.value.titular != undefined) {
     formTitular.value = { ...cotizacion.value.titular };
   }
+  isEditando.value = !props.registro.isTerminado || false;
 });
 </script>
 
@@ -344,164 +397,242 @@ onMounted(() => {
 
 <template>
   <div>
-    <pre>{{ formTmpValores }}</pre>
-    <pre>{{ cotizacion }}</pre>
-    <div v-if="step == 1">
-      <ModuladorFormFactory
-        class="w-full"
-        title="Titular"
-        :schema="formSchema"
-        :formLive="true"
-        :modelValue="formTitular"
-        @update:modelValue="
-          (val) => {
-            cotizacion.titular = { ...val };
-          }
-        "
-        :isDialogVisible="false"
-        @submit="handleFormSubmit"
-      />
-    </div>
-    <div v-if="step == 2">
-      <div v-if="newAsegurado == null">
-        <div class="d-flex justify-end">
-          <VBtn color="secondary" @click="() => (newAsegurado = {})">
-            Nuevo
-            <VIcon start icon="tabler-checkbox" />
-          </VBtn>
-        </div>
-        <div
-          v-for="(item, index) in cotizacion.asegurados"
-          :key="index"
-          class="asegurado-card"
-        >
-          <div class="asegurado-header">
-            <h3>Datos del Asegurado</h3>
-            <div class="asegurado-actions">
-              <span
-                class="icon-action"
-                @click="editarAsegurado(index)"
-                title="Editar"
-                tabindex="0"
-                role="button"
-              >
-                <VIcon icon="tabler-edit" color="primary" size="25" />
-              </span>
-              <span
-                class="icon-action"
-                @click="eliminarAsegurado(index)"
-                title="Eliminar"
-                tabindex="0"
-                role="button"
-              >
-                <VIcon icon="tabler-trash" color="error" size="25" />
-              </span>
-            </div>
-          </div>
-          <div class="asegurado-info">
-            <p class="p-0 m-0">
-              <strong>Nombre:</strong> {{ item.nombre || "Sin nombre" }}<br />
-              <strong>Sexo:</strong>
-              {{
-                typeof item.sexo === "object"
-                  ? item.sexo.label
-                  : item.sexo || "Sin especificar"
-              }}<br />
-              <strong>Fecha de Nacimiento:</strong>
-              {{ item.fechaNacimiento || "Sin fecha" }}
-            </p>
-          </div>
-        </div>
-        <div v-if="cotizacion.asegurados.length == 0">
-          <p class="w-full text-center">No hay asegurados registrados</p>
-        </div>
-      </div>
-      <ModuladorFormFactory
-        v-else
-        title="Asegurado"
-        :schema="formSchemaPersona"
-        :modelValue="newAsegurado"
-        :isDialogVisible="false"
-        @cancel="() => (newAsegurado = null)"
-        @submit="handleFormSubmitPersona"
-      />
-      <VBtn @click="handleNextPersonas">
-        Next
-        <VIcon start icon="tabler-checkbox" />
-      </VBtn>
-    </div>
-    <div v-if="step == 3" class="divPlanes">
-      <div class="d-flex justify-center w-full">
-        <h3 class="w-full">¿En qué fecha iniciará tu plan de salud?</h3>
-      </div>
-      <div class="divFechas">
-        <div class="w-fit text-center">
-          <h3>Inicio de vigencia</h3>
-          <p>{{ tmp.inicio }}</p>
-        </div>
-        <div class="w-fit text-center">
-          <h3>Fin de Vigencia</h3>
-          <p>{{ tmp.fin }}</p>
-        </div>
-      </div>
-      <div v-if="tmp.plan">
-        <h3>Plan Seleccionado</h3>
-        <p>{{ tmp.plan.label }}</p>
-      </div>
-      <div v-else>
-        <div
-          v-for="(item, index) in planes"
-          :key="index"
-          @click="() => (tmp.plan = item)"
-        >
-          Nombre: {{ item.label }}
-        </div>
-      </div>
-      <div class="d-flex justify-end w-full">
-        <VBtn @click="handleNextPlan">
-          Next
-          <VIcon start icon="tabler-checkbox" />
-        </VBtn>
-      </div>
-    </div>
-    <div v-if="step == 4">
-      <div v-if="!formTmp" class="d-flex justify-center w-full gap-5">
-        <!-- prettier-ignore -->
-        <div class="divPlanItem" @click="() => { handleFormPersonalizacion('parametrosFlexibles'); }">Parámetros flexibles</div>
-        <!-- prettier-ignore -->
-        <div class="divPlanItem" @click="() => { handleFormPersonalizacion('proteccionAdicional'); }">Protección con costo adicional</div>
-        <!-- prettier-ignore -->
-        <!-- <div class="divPlanItem" @click="() => { handleFormPersonalizacion('reconocimientoAntiguedad'); }">Reconocimiento de Antigüedad</div> -->
-      </div>
-      <div v-else>
+    <div v-if="isEditando">
+      <!-- Boton de atras  -->
+      <!-- <div class="d-flex justify-start align-center mb-5">
+        <VBtn
+          icon="tabler-arrow-left"
+          class="cursor-pointer"
+          variant="text"
+          color="secondary"
+          @click="handleAtras"
+        />
+      </div> -->
+      <div v-if="step == 1">
         <ModuladorFormFactory
-          :schema="formTmpSchema"
+          class="w-full"
+          title="Titular"
+          :schema="formSchema"
           :formLive="true"
-          :modelValue="formTmpValores"
+          :modelValue="formTitular"
+          :isDialogVisible="false"
+          :textButtonSubmit="'Siguiente pregunta'"
+          :showIconButtonSubmit="false"
+          :showButtonCancel="false"
           @update:modelValue="
             (val) => {
-              formTmpValores.value = { ...val };
+              cotizacion.titular = { ...val };
             }
           "
-          :isDialogVisible="false"
-          @submit="handleSubmit"
-          @cancel="() => (formTmp = null)"
+          @submit="handleFormSubmit"
         />
       </div>
-      <div class="d-flex justify-end w-full">
-        <VBtn @click="handleNextPlan">
-          Next
-          <VIcon start icon="tabler-checkbox" />
-        </VBtn>
+      <div v-if="step == 2">
+        <!-- Entrevista -->
+        <div v-if="newAsegurado != null">
+          <ModuladorFormFactory
+            title="Asegurado"
+            :schema="formSchemaPersona"
+            :textButtonSubmit="'Guardar asegurado'"
+            :modelValue="newAsegurado"
+            :isDialogVisible="false"
+            @cancel="() => (newAsegurado = null)"
+            @submit="handleFormSubmitPersona"
+          />
+        </div>
+        <!-- Vista Uno de asegurados -->
+        <div v-else>
+          <!-- Boton de nuevo -->
+          <div class="d-flex justify-end">
+            <VBtn color="secondary" @click="() => (newAsegurado = {})">
+              Nuevo
+              <VIcon start icon="tabler-checkbox" />
+            </VBtn>
+          </div>
+          <!-- Registro de los asegurados -->
+          <div v-if="cotizacion.asegurados.length == 0">
+            <p class="w-full text-center">No hay asegurados registrados</p>
+          </div>
+          <div
+            v-for="(item, index) in cotizacion.asegurados"
+            :key="index"
+            class="asegurado-card"
+          >
+            <div class="asegurado-header">
+              <h3>Datos del Asegurado</h3>
+              <div class="asegurado-actions">
+                <span
+                  class="icon-action"
+                  @click="editarAsegurado(index)"
+                  title="Editar"
+                  tabindex="0"
+                  role="button"
+                >
+                  <VIcon icon="tabler-edit" color="warning" size="25" />
+                </span>
+                <span
+                  class="icon-action"
+                  @click="eliminarAsegurado(index)"
+                  title="Eliminar"
+                  tabindex="0"
+                  role="button"
+                >
+                  <VIcon icon="tabler-trash" color="error" size="25" />
+                </span>
+              </div>
+            </div>
+            <div class="asegurado-info">
+              <p class="p-0 m-0">
+                <strong>ID:</strong> {{ item.id }}<br />
+                <strong>Nombre:</strong> {{ item.nombre || "Sin nombre" }}<br />
+                <strong>Sexo:</strong>
+                {{
+                  typeof item.sexo === "object"
+                    ? item.sexo.label
+                    : item.sexo || "Sin especificar"
+                }}<br />
+                <strong>Fecha de Nacimiento:</strong>
+                {{ item.fechaNacimiento || "Sin fecha" }}
+              </p>
+            </div>
+          </div>
+          <!-- Botones de redireccion -->
+          <div class="d-flex justify-between w-full mt-5">
+            <div>
+              <VBtn color="dark" variant="outlined" @click="handlePrevStep">
+                Anterior
+              </VBtn>
+            </div>
+            <div><VBtn @click="handleNextPlan"> Siguiente </VBtn></div>
+          </div>
+        </div>
+      </div>
+      <div v-if="step == 3" class="divPlanes">
+        <div class="d-flex justify-center w-full">
+          <h3 class="w-full">¿En qué fecha iniciará tu plan de salud?</h3>
+        </div>
+        <div class="divFechas">
+          <div class="w-fit text-center">
+            <h3>Inicio de vigencia</h3>
+            <p>{{ cotizacion.inicio }}</p>
+          </div>
+          <div class="w-fit text-center">
+            <h3>Fin de Vigencia</h3>
+            <p>{{ cotizacion.fin }}</p>
+          </div>
+        </div>
+        <div v-if="cotizacion.plan">
+          <h3>Plan Seleccionado</h3>
+          <div class="d-flex align-center w-full">
+            <span class="icon-action" @click="() => (cotizacion.plan = null)">
+              <VIcon icon="tabler-x" class="textDanger" size="20" />
+            </span>
+            <p class="mb-0">{{ cotizacion.plan.label }}</p>
+          </div>
+        </div>
+        <div v-else>
+          <div
+            v-for="(item, index) in planes"
+            :key="index"
+            @click="() => (cotizacion.plan = item)"
+          >
+            Nombre: {{ item.label }}
+          </div>
+        </div>
+        <div class="d-flex justify-between w-full mt-5">
+          <VBtn color="dark" variant="outlined" @click="handlePrevStep">
+            Anterior
+          </VBtn>
+          <VBtn @click="handleNextPlan"> Siguiente </VBtn>
+        </div>
+      </div>
+      <div v-if="step == 4">
+        <div v-if="!formTmp" class="d-flex justify-center w-full gap-5">
+          <!-- prettier-ignore -->
+          <div
+            class="divPlanItem"
+            :class="{ 'completado': cotizacion.parametrosFlexibles }"
+            @click="() => { handleFormPersonalizacion('parametrosFlexibles'); }"
+            style="position: relative;"
+          >
+            Parámetros flexibles
+            <VIcon
+              v-if="cotizacion.parametrosFlexibles"
+              icon="tabler-check"
+              color="success"
+              size="20"
+              style="position: absolute; top: 8px; right: 8px;"
+              title="Ya registrado"
+            />
+          </div>
+          <!-- prettier-ignore -->
+          <div class="divPlanItem" @click="() => { handleFormPersonalizacion('proteccionAdicional'); }" style="position: relative;">
+            Protección con costo adicional
+            <span v-if="cotizacion.proteccionAdicional" class="badge" style="position: absolute; top: 8px; right: 8px; background: #43a047;" title="Ya registrado" >
+              <VIcon icon="tabler-check" size="16" color="white" />
+            </span>
+          </div>
+          <!-- prettier-ignore -->
+          <!-- <div class="divPlanItem" @click="() => { handleFormPersonalizacion('reconocimientoAntiguedad'); }">Reconocimiento de Antigüedad</div> -->
+        </div>
+        <div v-else>
+          <ModuladorFormFactory
+            :schema="formTmpSchema"
+            :formLive="true"
+            :modelValue="formTmpValores"
+            @update:modelValue="
+              (val) => {
+                console.log({ ...val });
+                formTmpValores = { ...val };
+              }
+            "
+            :isDialogVisible="false"
+            @submit="handleSubmit"
+            @cancel="() => (formTmp = null)"
+          />
+        </div>
+        <div class="d-flex justify-between w-full mt-5">
+          <div>
+            <VBtn color="dark" variant="outlined" @click="handlePrevStep">
+              Anterior
+            </VBtn>
+          </div>
+          <div><VBtn @click="handleTerminarEntrevista"> Siguiente </VBtn></div>
+        </div>
       </div>
     </div>
-    <div v-if="step == 5">
-      <div class="d-flex justify-center w-full">
-        <VBtn @click="sendCotizacion">
-          Enviar Cotización
-          <VIcon start icon="tabler-checkbox" />
-        </VBtn>
+    <div v-else>
+      <div class="card-entrevista-terminada mx-auto">
+        <div class="text-center mb-4">
+          <VIcon icon="tabler-check" color="success" size="32" class="mb-2" />
+          <h4 class="mb-1">¡Entrevista terminada!</h4>
+          <p class="mb-0 text-secondary">
+            Puedes editar o finalizar la entrevista.
+          </p>
+        </div>
+        <div class="d-flex justify-center gap-3">
+          <VBtn
+            color="warning"
+            variant="outlined"
+            @click="() => (isEditando = true)"
+          >
+            <VIcon icon="tabler-edit" start /> Editar entrevista
+          </VBtn>
+          <VBtn color="success" @click="terminarCotizacion">
+            <span class="mr-3">Terminar Entrevista</span>
+            <VIcon icon="tabler-check" class="ml-0 mr-0" start />
+          </VBtn>
+        </div>
       </div>
     </div>
+
+    <!-- <pre>{{ formTmpValores }}</pre> -->
+    <pre>{{ cotizacion.parametrosFlexibles }}</pre>
   </div>
 </template>
+
+<style lang="scss">
+.justify-between {
+  justify-content: space-between;
+}
+</style>

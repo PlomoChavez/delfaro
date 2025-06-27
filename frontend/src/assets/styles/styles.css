@@ -6,6 +6,10 @@
   background-color: red;
 }
 
+.textDanger {
+  color: red;
+}
+
 .w-fit {
   width: fit-content;
 }

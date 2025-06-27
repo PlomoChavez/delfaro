@@ -1,0 +1,33 @@
+ 
+ #164c97  
+ #e9e8e6  
+ #258ebe  
+ #1772b5  
+ #0b237b  
+ #061166  
+ #6fa1c2  
+ #a4b4cc 
+
+ #28C76F
+
+ 🎨 Paleta de Colores – Pastel Fuerte (No Brillante)
+Estado	Nombre base	Hex	Descripción breve
+✅ Success      Verde musgo suave    #4E9F6E    Verde tierra con tono natural
+⚠️ Warning      Mostaza opaca        #C89F33	 Amarillo cálido, terroso
+ℹ️ Info         Azul petróleo        #3C91E6	 Azul sobrio, elegante y profesional 
+🟣 Secondary	Lavanda grisácea     #A38FC5	 Lila neutral, con subtono grisáceo
+❌ Danger	   Rojo óxido suave     #D66565    Rojo cálido, sin saturación excesiva
+
+
+✅ Success      Verde musgo suavergb(47, 122, 77)    Verde tierra con tono natural
+⚠️ Warning      Mostaza opaca        #C89F33	 Amarillo cálido, terroso
+ℹ️ Info         Azul petróleo        #3C91E6	 Azul sobrio, elegante y profesional 
+🟣 Secondary	Lavanda grisácea     #A38FC5	 Lila neutral, con subtono grisáceo
+❌ Danger	   Rojo óxido suave     #D66565    Rojo cálido, sin saturación excesiva
+
+Estado	Original	Nítido
+Success	#4E9F6E → #3C8D5A	
+Warning	#C89F33 → #B8891F	
+Info	#3C91E6 → #2F7BD9	
+Secondary	#A38FC5 → #8D72B4	
+Danger	#D66565 → #C94F4F

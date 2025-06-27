@@ -31,6 +31,10 @@ const props = withDefaults(
     showButtonsAction?: boolean;
     textButtonCancel?: string | null;
     textButtonSubmit?: string | null;
+    showIconButtonSubmit?: boolean;
+    showIconButtonCancel?: boolean;
+    showButtonSubmit?: boolean;
+    showButtonCancel?: boolean;
   }>(),
   {
     title: null,
@@ -39,6 +43,10 @@ const props = withDefaults(
     isDisabled: false,
     isDialogVisible: false,
     showButtonsAction: true,
+    showIconButtonSubmit: true,
+    showIconButtonCancel: true,
+    showButtonSubmit: true,
+    showButtonCancel: true,
     textButtonCancel: null,
     textButtonSubmit: null,
   }
@@ -453,13 +461,18 @@ onMounted(async () => {
       </div>
       <div v-if="showButtonsAction" class="d-flex justify-end gap-3 mt-4">
         <!-- prettier-ignore -->
-        <VBtn variant="outlined" color="secondary" @click.prevent="handleCancel"  > 
-          <VIcon start icon="tabler-x" />
+        <VBtn v-if="showButtonCancel" variant="outlined" color="secondary" @click.prevent="handleCancel"  > 
+          <VIcon v-if="showIconButtonCancel"  start icon="tabler-x" />
           {{ props.textButtonCancel || "Cancelar" }} 
         </VBtn>
 
-        <VBtn @click="handleSubmit" type="submit" color="success">
-          <VIcon start icon="tabler-check" />
+        <VBtn
+          v-if="showButtonSubmit"
+          @click="handleSubmit"
+          type="submit"
+          color="success"
+        >
+          <VIcon v-if="showIconButtonSubmit" start icon="tabler-check" />
           {{ props.textButtonSubmit || "Enviar" }}
         </VBtn>
       </div>
