@@ -226,10 +226,15 @@ exports.createOrUpdateCompaniaProductos = async (req, res) => {
       });
     }
 
-    const response = await createOrUpdate("companias_productos", data, true, {
-      compania_id: data.compania_id,
-      ramo_id: data.ramo_id,
-      nombre: data.nombre,
+    const response = await createOrUpdate({
+      tabla: "companias_productos",
+      data,
+      unique: {
+        compania_id: data.compania_id,
+        ramo_id: data.ramo_id,
+        nombre: data.nombre,
+      },
+      returnResponse: true, // si quieres que te regrese el registro insertado/actualizado
     });
 
     return res.json(response);

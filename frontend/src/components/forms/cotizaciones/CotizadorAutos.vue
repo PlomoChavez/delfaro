@@ -1,0 +1,277 @@
+<script setup lang="ts">
+// Make sure the file exists at the specified path and extension
+import BtnAtras from "@/components/apps/BtnAtras.vue";
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import { isItemSelected, toggleItemInArray } from "@/utils/helper";
+import { toast } from "vue3-toastify";
+const emit = defineEmits(["cancelar"]);
+
+const props = withDefaults(
+  defineProps<{
+    registro: any;
+  }>(),
+  {
+    registro: null,
+  }
+);
+
+const handleCancelarCotizacion = () => {
+  emit("cancelar");
+};
+
+// prettier-ignore
+const schemaInicial : any = [
+  {
+    label: "Nombre",
+    type: "text",
+    model: "nombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Segundo nombre",
+    type: "text",
+    model: "segundoNombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido paterno",
+    type: "text",
+    model: "apellidoPaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido materno",
+    type: "text",
+    model: "apellidoMaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Fecha de nacimiento",
+    type: "date",
+    model: "fechaNacimiento",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
+  },
+  {
+    label: "Sexo",
+    type: "select",
+    model: "sexo",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
+      options: [
+      {label:"Hombre",id:"Hombre"},
+      {label:"Mujer",id:"Mujer"}
+    ]
+  },
+  {
+    label: "Telefono",
+    type: "text",
+    model: "telefono",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Correo electronico",
+    type: "text",
+    model: "correo",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Datos del auto",
+    type: "separador",
+    classElement: " col-12 ",
+  },
+  {
+    label: "Marca",
+    type: "text",
+    model: "marca",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Modelo",
+    type: "text",
+    model: "modelo",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Año",
+    type: "text",
+    model: "anio",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Version",
+    type: "text",
+    model: "version",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+];
+
+const step = ref(1);
+const companias: any = ref([]);
+// prettier-ignore
+const localData: any = ref(props.registro ? { ...props.registro } : { compania: [], titular: {} });
+
+const handleStepPrev = () => {
+  if (step.value === 1) {
+    handleCancelarCotizacion(); // Si estamos en el primer paso, cancelamos la cotización
+  } else {
+    step.value = step.value - 1; // Regresa al paso anterior
+  }
+};
+const handleStepNext = () => {
+  step.value = step.value + 1; // Avanza al siguiente paso
+};
+
+const handleSelectCompania = (item: any) => {
+  item = toRaw(item); // Asegúrate de que el item sea un objeto plano
+  console.log("handleSelectCompania", item);
+  if (!Array.isArray(localData.value.configuracion.compania)) {
+    localData.value.configuracion.compania = [];
+  }
+  localData.value.configuracion.compania = toggleItemInArray(
+    localData.value.configuracion.compania,
+    item,
+    "id"
+  );
+};
+
+const handleInicialSubmit = async () => {
+  if (!localData.value.configuracion.titular) {
+    showErrorMessage({
+      title: "Error",
+      message: "Por favor, completa la información del cliente.",
+    });
+    return;
+  }
+  step.value = 2; // Cambia al siguiente paso
+  await handleUpdateCotizacion();
+};
+
+const getCompanias = async () => {
+  let url = "/api/wizard/cotizacion/companias";
+  let response = await customRequest({
+    url: url,
+    method: "POST",
+    data: {
+      ramo: 3,
+    },
+  });
+  if (response.data.result) {
+    companias.value = response.data.data;
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: response.data.message,
+    });
+  }
+};
+
+const handleUpdateCotizacion = async () => {
+  // prettier-ignore
+  let tmp = {
+    nombre: localData.value?.configuracion?.titular.nombre ?? '' + " " + localData.value?.configuracion?.titular.segundoNombre ?? '' + " " + localData.value?.configuracion?.titular.apellidoPaterno ?? '' + " " + localData.value?.configuracion?.titular.apellidoMaterno ?? '',
+    configuracion: {
+        ...localData.value,
+        compania : localData.value?.configuracion?.compania ?? [],
+    },
+  };
+  await updateCotizacion(tmp);
+};
+
+const updateCotizacion = async (data: any) => {
+  const response = await customRequest({
+    url: "/api/cotizaciones/update",
+    method: "POST",
+    data: data,
+  });
+  const dataResponse = response.data;
+
+  if (dataResponse.result) {
+    if (localData.value.id == undefined) {
+      console.log("Creando nueva cotización");
+      localData.value.id = dataResponse.data;
+    }
+    toast.success("¡Cotización guardada!", {
+      theme: "dark", // Activa el tema oscuro
+    });
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: dataResponse.message,
+    });
+  }
+};
+
+onMounted(async () => {
+  if (props.registro) {
+    localData.value = { ...props.registro };
+  }
+
+  step.value = localData?.step ?? 1; // Inicia en el primer paso
+
+  await getCompanias();
+});
+</script>
+
+<template>
+  <div>
+    <!-- prettier-ignore -->
+    <BtnAtras titulo="Volver a cotizaciones" @atras="handleCancelarCotizacion" />
+    <h1 class="module-title">Cotizador de Seguros de Autos</h1>
+    <!-- Preguntas iniciales -->
+    <div v-if="step == 1">
+      <div class="card cardForm mx-auto mt-3">
+        <h2 class="w-full mb-5">Información del cliente:</h2>
+        <FormFactory
+          :schema="schemaInicial"
+          :formLive="true"
+          :modelValue="localData.configuracion.titular"
+          @update:modelValue="(val) => (localData.configuracion.titular = val)"
+          :textButtonSubmit="'Empezar cotización'"
+          :showIconButtonSubmit="false"
+          :showIconButtonCancel="false"
+          @submit="handleInicialSubmit"
+          @cancel="handleCancelarCotizacion"
+        />
+      </div>
+    </div>
+    <div v-if="step == 2">
+      <h2 class="title wFull text-center">Selecciona las compañias</h2>
+      <div class="divRows mt-3">
+        <!-- prettier-ignore -->
+        <div
+            v-for="item in companias"
+            :key="item"
+            class="mb-5 card cardCompania"
+            @click="handleSelectCompania(item)"
+            :class="{ ' activeItem ': isItemSelected(localData.configuracion.compania, item, 'id') }"
+        >
+          <!-- prettier-ignore -->
+          <p class="p-0 m-0 fontBold"> {{ item.nombreCorto }} </p>
+        </div>
+      </div>
+      <div class="d-flex justify-between w-full mt-5">
+        <div>
+          <VBtn color="dark" variant="outlined" @click="handleStepPrev">
+            Anterior
+          </VBtn>
+        </div>
+        <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped lang="scss">
+.divRows {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.cardCompania {
+  text-align: center !important;
+  min-width: 100px !important;
+}
+</style>

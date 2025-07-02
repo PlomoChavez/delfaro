@@ -342,122 +342,132 @@ onMounted(async () => {
       <!-- Renderiza el formulario -->
       <div class="formWrapper">
         <!-- Render dynamic fields -->
-        <template v-for="field in schemaLocal" :key="field.model">
-          <!-- Campo de texto -->
-          <!-- prettier-ignore -->
-          <div v-if="field.type === 'label'" :class="field.classElement">
-            <label> {{ field.label }} </label>
-            <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
-            <p class="ml-3"> {{ obtenerPropiedad(formLocal, field.model) || '' }} </p>
-          </div>
-          <div v-if="field.type === 'text'" :class="field.classElement">
-            <label :for="field.model"> {{ field.label }} </label>
-            <VTextField
-              variant="outlined"
-              v-model="formLocal[field.model]"
-              :disabled="props.isDisabled || field.disabled"
-              :placeholder="field.placeholder || `Introduce el dato requerido`"
-              @input="handleInputChange(field.model, $event.target.value)"
-            />
-          </div>
-
-          <!-- Campo number -->
-          <!-- prettier-ignore -->
-          <div v-else-if="field.type === 'number'" :class="field.classElement">
-            <label :for="field.model"> {{ field.label }} </label>
-            <VTextField
-              @input="handleNumberInput($event, field)"
-              :disabled="props.isDisabled || field.disabled"
-              :placeholder="field.placeholder || `Introduce el dato requerido`"
-              v-model="formLocal[field.model]"
-              class="form-control"
-            />
-          </div>
-
-          <!-- Campo date -->
-          <!-- prettier-ignore -->
-          <div v-else-if="field.type === 'date'" :class="field.classElement">
-            <label :for="field.model"> {{ field.label }} </label>
+        <v-row>
+          <template v-for="field in schemaLocal" :key="field.model">
+            <!-- Campo de texto -->
             <!-- prettier-ignore -->
-            <AppDateTimePicker
-              :key="`${field.model}`"
-              v-model="formLocal[field.model]"
-              :placeholder="field?.placeholder ?? 'Ingresa un fecha'"
-              :config="{
-                ...(field?.config || { dateFormat: 'Y-m-d' }),
-                locale: 'es',
-                minDate: field.config?.minDate ? formLocal[field.config.minDate] : undefined,
-                maxDate: field.config?.maxDate ? formLocal[field.config.maxDate] : undefined,
-              }"
-            />
-          </div>
+            <div v-if="field.type === 'label'" :class="field.classElement">
+               <label> {{ field.label }} </label>
+               <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
+               <p class="ml-3"> {{ obtenerPropiedad(formLocal, field.model) || '' }} </p>
+             </div>
+            <!-- prettier-ignore -->
+            <div v-if="field.type === 'separador'" :class="field.classElement">
+               <h3 class="titleForm"> {{ field.label }} </h3>
+               <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
+             </div>
 
-          <!-- Campo rangeDate -->
-          <!-- prettier-ignore -->
-          <template v-else-if="field.type === 'rangeDate'">
-            <div :class="field.classElement">
-              <label :for="field.minModel"> {{ field.minLabel }} </label>
-              <!-- prettier-ignore -->
-              <AppDateTimePicker
-                :key="field.refreshKey" 
-                v-model="formLocal[field.minModel]"
-                :placeholder="field?.minPlaceholder ?? 'Ingresa un fecha'"
-                @change="handleRangeDateChange(field, 'minModel')"
-                :config="field.minConfig"
-                :disabled="props.isDisabled || field.minDisable"
-                clearable
+            <div v-if="field.type === 'text'" :class="field.classElement">
+              <label :for="field.model"> {{ field.label }} </label>
+              <VTextField
+                variant="outlined"
+                v-model="formLocal[field.model]"
+                :disabled="props.isDisabled || field.disabled"
+                :placeholder="
+                  field.placeholder || `Introduce el dato requerido`
+                "
+                @input="handleInputChange(field.model, $event.target.value)"
               />
             </div>
-            <div :class="field.classElement">
-              <label :for="field.maxModel"> {{ field.maxLabel }} </label>
-              <!-- prettier-ignore -->
-              <AppDateTimePicker
-              :key="field.refreshKey" 
-                v-model="formLocal[field.maxModel]"
-                :placeholder="field?.maxPlaceholder ?? 'Ingresa un fecha'"
-                @change="handleRangeDateChange(field, 'maxModel')"
-                :config="field.maxConfig"
-                :disabled="props.isDisabled || field.maxDisable"
-                clearable
-              />
-            </div>
+
+            <!-- Campo number -->
+            <!-- prettier-ignore -->
+            <div v-else-if="field.type === 'number'" :class="field.classElement">
+               <label :for="field.model"> {{ field.label }} </label>
+               <VTextField
+                 @input="handleNumberInput($event, field)"
+                 :disabled="props.isDisabled || field.disabled"
+                 :placeholder="field.placeholder || `Introduce el dato requerido`"
+                 v-model="formLocal[field.model]"
+                 class="form-control"
+               />
+             </div>
+
+            <!-- Campo date -->
+            <!-- prettier-ignore -->
+            <div v-else-if="field.type === 'date'" :class="field.classElement">
+               <label :for="field.model"> {{ field.label }} </label>
+               <!-- prettier-ignore -->
+               <AppDateTimePicker
+                 :key="`${field.model}`"
+                 v-model="formLocal[field.model]"
+                 :placeholder="field?.placeholder ?? 'Ingresa un fecha'"
+                 :config="{
+                   ...(field?.config || { dateFormat: 'Y-m-d' }),
+                   locale: 'es',
+                   minDate: field.config?.minDate ? formLocal[field.config.minDate] : undefined,
+                   maxDate: field.config?.maxDate ? formLocal[field.config.maxDate] : undefined,
+                 }"
+               />
+             </div>
+
+            <!-- Campo rangeDate -->
+            <!-- prettier-ignore -->
+            <template v-else-if="field.type === 'rangeDate'">
+               <div :class="field.classElement">
+                 <label :for="field.minModel"> {{ field.minLabel }} </label>
+                 <!-- prettier-ignore -->
+                 <AppDateTimePicker
+                   :key="field.refreshKey" 
+                   v-model="formLocal[field.minModel]"
+                   :placeholder="field?.minPlaceholder ?? 'Ingresa un fecha'"
+                   @change="handleRangeDateChange(field, 'minModel')"
+                   :config="field.minConfig"
+                   :disabled="props.isDisabled || field.minDisable"
+                   clearable
+                 />
+               </div>
+               <div :class="field.classElement">
+                 <label :for="field.maxModel"> {{ field.maxLabel }} </label>
+                 <!-- prettier-ignore -->
+                 <AppDateTimePicker
+                 :key="field.refreshKey" 
+                   v-model="formLocal[field.maxModel]"
+                   :placeholder="field?.maxPlaceholder ?? 'Ingresa un fecha'"
+                   @change="handleRangeDateChange(field, 'maxModel')"
+                   :config="field.maxConfig"
+                   :disabled="props.isDisabled || field.maxDisable"
+                   clearable
+                 />
+               </div>
+             </template>
+            <!-- Campo select -->
+            <!-- prettier-ignore -->
+            <div v-else-if="field.type === 'select'" :class="field.classElement">
+               <label :for="field.model"> {{ field.label }} </label>
+               <!-- prettier-ignore -->
+               <VSelect
+                 :items="field.options || []"
+                 :value="formLocal[field.model]?.label ?? ''"
+                 item-title="label"
+                 :placeholder="field.placeholder || 'Selecciona una opción'"
+                 :disabled="props.isDisabled || field.disabled"
+                 @update:modelValue=" (selected) => handleSelectChange(field, selected) "
+               >
+                 <template v-for="(_, label) in $slots" v-slot:[label]="slotProps">
+                   <slot :name="label" v-bind="slotProps || {}" />
+                 </template>
+               </VSelect>
+             </div>
+            <!-- Campo switch -->
+            <!-- prettier-ignore -->
+            <div v-else-if="field.type === 'switch'" :class="field.classElement">
+               <label :for="field.model"> {{ field.label }} </label>
+               <VSwitch
+                 v-model="formLocal[field.model]"
+                 :id="field.model"
+                 :disabled="props.isDisabled || field.disabled"
+                 :label="
+                   (field.options || [
+                     { value: true, label: 'Activo' },
+                     { value: false, label: 'Inactivo' },
+                   ])[formLocal[field.model] ? 0 : 1].label
+                 "
+                 @change="handleSwitchChange(field.model)"
+               />
+             </div>
           </template>
-          <!-- Campo select -->
-          <!-- prettier-ignore -->
-          <div v-else-if="field.type === 'select'" :class="field.classElement">
-            <label :for="field.model"> {{ field.label }} </label>
-            <!-- prettier-ignore -->
-            <VSelect
-              :items="field.options || []"
-              :value="formLocal[field.model]?.label ?? ''"
-              item-title="label"
-              :placeholder="field.placeholder || 'Selecciona una opción'"
-              :disabled="props.isDisabled || field.disabled"
-              @update:modelValue=" (selected) => handleSelectChange(field, selected) "
-            >
-              <template v-for="(_, label) in $slots" v-slot:[label]="slotProps">
-                <slot :name="label" v-bind="slotProps || {}" />
-              </template>
-            </VSelect>
-          </div>
-          <!-- Campo switch -->
-          <!-- prettier-ignore -->
-          <div v-else-if="field.type === 'switch'" :class="field.classElement">
-            <label :for="field.model"> {{ field.label }} </label>
-            <VSwitch
-              v-model="formLocal[field.model]"
-              :id="field.model"
-              :disabled="props.isDisabled || field.disabled"
-              :label="
-                (field.options || [
-                  { value: true, label: 'Activo' },
-                  { value: false, label: 'Inactivo' },
-                ])[formLocal[field.model] ? 0 : 1].label
-              "
-              @change="handleSwitchChange(field.model)"
-            />
-          </div>
-        </template>
+        </v-row>
       </div>
       <div v-if="showButtonsAction" class="d-flex justify-end gap-3 mt-4">
         <!-- prettier-ignore -->
