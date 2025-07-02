@@ -1,0 +1,358 @@
+<body id="document:body"><iframe frameborder="0" id="history-frame:jqhSXvHDF-5oMHLPHz_rHg:1" name="history-frame:jqhSXvHDF-5oMHLPHz_rHg:1" src="/MotorWorksites/xmlhttp/blank" style="z-index: 10000; visibility: hidden; width: 0; height: 0; position: absolute; opacity: 0.22; filter: alpha(opacity=22);" title="Icefaces Redirect"></iframe>
+<script id="jqhSXvHDF-5oMHLPHz_rHg:1:configuration-script" type="text/javascript">window.disposeViewsURI = '/MotorWorksites/block/dispose-views';
+window.windowFocusRestore = false;
+var container = 'jqhSXvHDF-5oMHLPHz_rHg:1:configuration-script'.asElement().parentNode;
+container.bridge = new Ice.Community.Application({optimizedJSListenerCleanup: false,session: 'jqhSXvHDF-5oMHLPHz_rHg',view: 1,synchronous: true,connectionLostRedirectURI: null,sessionExpiredRedirectURI: null,serverErrorRetryTimeouts: [1000,2000,4000], connection: {blockUI: true,context: '/MotorWorksites/', sendReceiveUpdatesURI: '/MotorWorksites/block/send-receive-updates',timeout: 900000},messages: {sessionExpired: 'Sesión de usuario finalizada',connectionLost: 'Interrupción en la conexión de red',serverError: 'Error interno del servidor',description: 'Para restablecer la conexión dé click en el botón Actualizar',buttonText: 'Actualizar'}}, container);</script>
+	
+	<noscript><iframe height="0" src="https://www.googletagmanager.com/ns.html?id=GTM-NW7T5Q5" style="display:none;visibility:hidden" width="0"></iframe></noscript>
+	
+
+	<div class="tb_trzvo">
+		
+		<div class="wrapper">
+			<table id="tblMessages" style="display:none;"><tbody><tr><td></td></tr></tbody></table>
+			
+			
+			<form action="javascript:;" class="iceFrm" enctype="application/x-www-form-urlencoded" id="frmHeader" method="post" onsubmit="return false;" style="margin: 0px;"><script id="frmHeaderscript" type="text/javascript">$element(document.getElementById('frmHeader')).captureAndRedirectSubmit();</script><input name="frmHeader" type="hidden" value="frmHeader" tabindex="-1"><input name="icefacesCssUpdates" type="hidden" value="" tabindex="-1"><nav class="navbar navbar-default">
+	<div class="container">
+		<a class="navbar-brand navbar-right-icon" data-target="#pva-datosusr" data-toggle="collapse" href="#" tabindex="-1">
+			<img alt="AXA Usuario" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/axa-head-face.png">
+		</a>
+		<div class="navbar-header">
+			<button class="navbar-toggle" data-target="#pva-datosusr" data-toggle="collapse" type="button" tabindex="-1">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="iceCmdLnk navbar-brand" href="javascript:;" id="frmHeader:subView_Header:lnkInicio" onblur="setFocus('');" onclick="var form=formOf(this);form['frmHeader:_idcl'].value='frmHeader:subView_Header:lnkInicio';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" tabindex="-1"><img alt="AXA" class="iceGphImg" id="frmHeader:subView_Header:imgAxaLogo" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/axa-logo_mov.png" title="Ir al Inicio"></a>
+		</div>
+		<div class="collapse navbar-collapse navbar-right-icon  navabarinfo-usr" id="pva-datosusr">
+			<span class="iceOutTxt usr-name" id="frmHeader:subView_Header:txtHdrUsuario">DEL FARO ASESORES, AGENTE DE SEGUROS Y DE FIANZAS  </span>
+			<br>
+			<span class="iceOutTxt usr-code" id="frmHeader:subView_Header:txtHdrUser">MXE00647937A</span>
+ - <span class="iceOutTxt usr-code" id="frmHeader:subView_Header:txtHdrRol">Agente</span>
+			<br>
+			<span class="iceOutTxt prod-code" id="frmHeader:subView_Header:txtHdrFecha">miércoles, 02 de julio de 2025</span>
+ | <a class="iceCmdLnk" href="javascript:;" id="frmHeader:subView_Header:lnkHdrSalir" onblur="setFocus('');" onclick="setTimeout('window.close()',300);var form=formOf(this);form['frmHeader:_idcl'].value='frmHeader:subView_Header:lnkHdrSalir';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" tabindex="-1">Salir</a>
+		</div>
+	</div>
+</nav>
+<div class="icePnlPop" id="frmHeader:popUpAcceso" name="frmHeader:popUpAcceso" style="display: none; position: absolute; left: 452px; top: 258px;"><table cellpadding="0" cellspacing="0"><tbody><tr id="frmHeader:popUpAcceso-tr"><td class="icePnlPopBody" colspan="2"><div class="icePnlGrp tb_trzvo" id="frmHeader:_id1"><div class="icePnlGrp aviso_header" id="frmHeader:_id2"><span class="iceOutTxt" id="frmHeader:_id3">EL USUARIO NO PUEDE COTIZAR</span></div>
+<div class="icePnlGrp aviso_body" id="frmHeader:_id4"><img alt="" class="iceGphImg aviso_full_img" id="frmHeader:imgAcceso" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/icon_aviso1.png"><div class="icePnlGrp clear-20" id="frmHeader:_id5"></div>
+<span class="iceOutTxt" id="frmHeader:_id6">USUARIO VIGOR</span></div>
+<div class="icePnlGrp aviso_footer" id="frmHeader:_id7"><input class="iceCmdBtn btn btn-default btn-rojo btn-full-width" id="frmHeader:btnSalir" name="frmHeader:btnSalir" onblur="setFocus('');" onclick="setTimeout('window.close()',300);iceSubmit(form,this,event);return false;" onfocus="setFocus(this.id);" type="submit" value="Salir" tabindex="-1"></div></div></td></tr></tbody></table><input id="frmHeader:_idfrmHeader:popUpAccesostatus" name="frmHeader:_idfrmHeader:popUpAccesostatus" type="hidden" value="" tabindex="-1"><input id="frmHeader:_idfrmHeader:popUpAccesodropID" name="frmHeader:_idfrmHeader:popUpAccesodropID" type="hidden" value="" tabindex="-1"><script id="frmHeader:popUpAccesoscript" language="JavaScript" type="text/javascript">Ice.modal.stop('frmHeader:popUpAcceso');; Ice.DnD.adjustPosition('frmHeader:popUpAcceso');; new Draggable('frmHeader:popUpAcceso',{dragGhost:false,dragCursor:false,ghosting:false,revert:false,mask:'1,4,5'});; Ice.autoPosition.stop('frmHeader:popUpAcceso');; Ice.autoCentre.start('frmHeader:popUpAcceso',false);; Ice.iFrameFix.start('frmHeader:popUpAcceso','/MotorWorksites/xmlhttp/blank');</script></div>
+<iframe title="Ice Modal Frame" id="iceModalFramefrmHeader:popUpMensajeAlerta" src="/MotorWorksites/xmlhttp/blank" style="z-index: 25000; opacity: 0.5; position: absolute; visibility: visible; background-color: black; border-width: 0px; top: 0px; left: 0px; width: 1200px; height: 826px;"></iframe><div style="position: absolute; z-index: 25001; background-color: transparent; left: 0px; top: 0px; width: 1200px; height: 826px;"></div><div class="icePnlPop" id="frmHeader:popUpMensajeAlerta" name="frmHeader:popUpMensajeAlerta" style="visibility: visible; position: absolute; top: 216px; left: 348px; z-index: 25002;"><table cellpadding="0" cellspacing="0"><tbody><tr id="frmHeader:popUpMensajeAlerta-tr"><td class="icePnlPopBody" colspan="2"><div class="icePnlGrp tb_trzvo" id="frmHeader:_id8"><div class="icePnlGrp modal-avisos" id="frmHeader:_id9"><div class="icePnlGrp aviso_header" id="frmHeader:_id10"><span class="iceOutTxt" id="frmHeader:_id11">AVISO</span></div>
+<div class="icePnlGrp aviso_body_plain" id="frmHeader:_id12"><img alt="" class="iceGphImg" id="frmHeader:_id13" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/icon_aviso3.png"><div class="icePnlGrp clear-20" id="frmHeader:_id14"></div>
+<div class="icePnlGrp aviso_body_center" id="frmHeader:_id15"><span class="iceOutTxt" id="frmHeader:_id16">Estimado socio comercial,<br>con motivo de nuestra estrategia de identificación de clientes es necesario colocar la CURP (persona físicas) o el RFC (personas morales). Si no necesitas hacer cambios en la renovación, este proceso continua automáticamente.</span></div></div>
+<div class="icePnlGrp aviso_footer" id="frmHeader:_id17"><input class="iceCmdBtn btn btn-default btn-rojo btn-full-width" id="frmHeader:btnAceptarAlerta" name="frmHeader:btnAceptarAlerta" onblur="setFocus('');" onclick="iceSubmit(form,this,event);return false;" onfocus="setFocus(this.id);" type="submit" value="Aceptar" tabindex="0"></div></div></div></td></tr></tbody></table><input id="frmHeader:_idfrmHeader:popUpMensajeAlertastatus" name="frmHeader:_idfrmHeader:popUpMensajeAlertastatus" type="hidden" value="" tabindex="0"><input id="frmHeader:_idfrmHeader:popUpMensajeAlertadropID" name="frmHeader:_idfrmHeader:popUpMensajeAlertadropID" type="hidden" value="" tabindex="0"><input id="frmHeader:popUpMensajeAlerta_rendered" name="frmHeader:popUpMensajeAlerta_rendered" type="hidden" tabindex="0"><script id="frmHeader:popUpMensajeAlertascript" language="JavaScript" type="text/javascript">Ice.modal.start('frmHeader:popUpMensajeAlerta', '/MotorWorksites/xmlhttp/blank', '',false,false);Ice.registeredPopups = Ice.registeredPopups ? Ice.registeredPopups : [];if (!Ice.registeredPopups.include('frmHeader:popUpMensajeAlerta')) {Ice.registeredPopups.push('frmHeader:popUpMensajeAlerta');Ice.onAsynchronousReceive('frmHeader:popUpMensajeAlerta', function(){if (!document.getElementById('frmHeader:popUpMensajeAlerta')) Ice.modal.stop('frmHeader:popUpMensajeAlerta');});}; Ice.DnD.adjustPosition('frmHeader:popUpMensajeAlerta');; new Draggable('frmHeader:popUpMensajeAlerta',{dragGhost:false,dragCursor:false,ghosting:false,revert:false,mask:'1,4,5'});; Ice.autoPosition.stop('frmHeader:popUpMensajeAlerta');; Ice.autoCentre.start('frmHeader:popUpMensajeAlerta',false);; Ice.iFrameFix.start('frmHeader:popUpMensajeAlerta','/MotorWorksites/xmlhttp/blank');</script></div>
+<div class="icePnlPop" id="frmHeader:popUpMensajeCartera" name="frmHeader:popUpMensajeCartera" style="display: none; position: absolute; left: 438px; top: 232px;"><table cellpadding="0" cellspacing="0"><tbody><tr id="frmHeader:popUpMensajeCartera-tr"><td class="icePnlPopBody" colspan="2"><div class="icePnlGrp modal-aviso" id="frmHeader:_id18"><div class="icePnlGrp modal-sm" id="frmHeader:_id19"><div class="icePnlGrp modal-content" id="frmHeader:_id20"><div class="icePnlGrp modal-header" id="frmHeader:_id21"><div class="icePnlGrp modal-title" id="frmHeader:_id22"><span class="iceOutTxt" id="frmHeader:_id23">GESTIÓN DE CARTERA</span></div></div>
+<table class="icePnlGrd modal-body-none" id="frmHeader:_id24"><tbody><tr class="icePnlGrdRow1 modal-body-noneRow1"><td class="icePnlGrdCol1 modal-body-noneCol1" id="frmHeader:_id24-0-0"><span class="iceOutTxt" id="frmHeader:_id25"><b>Ha iniciado el proceso de renovación para las pólizas que vencen en el mes de enero<br><br>El periodo para renovar o modificar las pólizas dará inicio el día 01 de junio<br>de 2025 y termina el 01 de junio de 2025.<b><br><br><span style="color:#ff0000;"><b>Te quedan -31 días  antes de que se corra el proceso de renovación automática.<b></b></b></span><b><b><br><br> Ya puedes consultar, gestionar y renovar tu cartera correspondiente a diciembre 2022 y enero 2023. Consulta el calendario en "Material de Apoyo"</b></b></b></b></span></td></tr></tbody></table>
+<table class="icePnlGrd modal-body-none" id="frmHeader:_id26"><tbody><tr class="icePnlGrdRow1 modal-body-noneRow1"><td class="icePnlGrdCol1 modal-body-noneCol1" id="frmHeader:_id26-0-0"><input class="iceCmdBtn btn btn-default btn-rojo" id="frmHeader:btnCarteraRegresar" name="frmHeader:btnCarteraRegresar" onblur="setFocus('');" onclick="iceSubmit(form,this,event);return false;" onfocus="setFocus(this.id);" style="margin-top:0px;" type="submit" value="Regresar"></td><td class="icePnlGrdCol2 modal-body-noneCol2" id="frmHeader:_id26-0-1"><input class="iceCmdBtn btn btn-default btn-verde" id="frmHeader:btnCarteraAceptar" name="frmHeader:btnCarteraAceptar" onblur="setFocus('');" onclick="iceSubmit(form,this,event);return false;" onfocus="setFocus(this.id);" style="margin-top:0px;" type="submit" value="Gestionar Cartera"></td></tr></tbody></table></div></div></div></td></tr></tbody></table><input id="frmHeader:_idfrmHeader:popUpMensajeCarterastatus" name="frmHeader:_idfrmHeader:popUpMensajeCarterastatus" type="hidden" value=""><input id="frmHeader:_idfrmHeader:popUpMensajeCarteradropID" name="frmHeader:_idfrmHeader:popUpMensajeCarteradropID" type="hidden" value=""><script id="frmHeader:popUpMensajeCarterascript" language="JavaScript" type="text/javascript">Ice.modal.stop('frmHeader:popUpMensajeCartera');; Ice.DnD.adjustPosition('frmHeader:popUpMensajeCartera');; new Draggable('frmHeader:popUpMensajeCartera',{dragGhost:false,dragCursor:false,ghosting:false,revert:false,mask:'1,4,5'});; Ice.autoPosition.stop('frmHeader:popUpMensajeCartera');; Ice.autoCentre.start('frmHeader:popUpMensajeCartera',false);; Ice.iFrameFix.start('frmHeader:popUpMensajeCartera','/MotorWorksites/xmlhttp/blank');</script></div>
+<div class="icePnlPop" id="frmHeader:popUpMensajeBloqueo" name="frmHeader:popUpMensajeBloqueo" style="display: none; position: absolute; left: 361px; top: 241px;"><table cellpadding="0" cellspacing="0"><tbody><tr id="frmHeader:popUpMensajeBloqueo-tr"><td class="icePnlPopBody" colspan="2"><div class="icePnlGrp tb_trzvo" id="frmHeader:_id27"><div class="icePnlGrp aviso_header" id="frmHeader:_id28"><span class="iceOutTxt" id="frmHeader:_id29">EL PORTAL SE ENCUENTRA EN MANTENIMIENTO</span></div>
+<div class="icePnlGrp aviso_body_plain" id="frmHeader:_id30"><img alt="" class="iceGphImg aviso_full_img" id="frmHeader:imgBloqueo" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/icon_aviso2.png"><div class="icePnlGrp clear-20" id="frmHeader:_id31"></div>
+<span class="iceOutTxt" id="frmHeader:_id32">El portal se encuentra en mantenimiento, favor de ingresar más tarde.</span></div>
+<div class="icePnlGrp aviso_footer" id="frmHeader:_id33"><input class="iceCmdBtn btn btn-default btn-rojo btn-full-width" id="frmHeader:btnSalirBloqueo" name="frmHeader:btnSalirBloqueo" onblur="setFocus('');" onclick="setTimeout('window.close()',300);iceSubmit(form,this,event);return false;" onfocus="setFocus(this.id);" type="submit" value="Salir"></div></div></td></tr></tbody></table><input id="frmHeader:_idfrmHeader:popUpMensajeBloqueostatus" name="frmHeader:_idfrmHeader:popUpMensajeBloqueostatus" type="hidden" value=""><input id="frmHeader:_idfrmHeader:popUpMensajeBloqueodropID" name="frmHeader:_idfrmHeader:popUpMensajeBloqueodropID" type="hidden" value=""><script id="frmHeader:popUpMensajeBloqueoscript" language="JavaScript" type="text/javascript">Ice.modal.stop('frmHeader:popUpMensajeBloqueo');; Ice.DnD.adjustPosition('frmHeader:popUpMensajeBloqueo');; new Draggable('frmHeader:popUpMensajeBloqueo',{dragGhost:false,dragCursor:false,ghosting:false,revert:false,mask:'1,4,5'});; Ice.autoPosition.stop('frmHeader:popUpMensajeBloqueo');; Ice.autoCentre.start('frmHeader:popUpMensajeBloqueo',false);; Ice.iFrameFix.start('frmHeader:popUpMensajeBloqueo','/MotorWorksites/xmlhttp/blank');</script></div>
+<div class="icePnlPop" id="frmHeader:popUpBolsasCupos" name="frmHeader:popUpBolsasCupos" style="display: none; position: absolute; left: 298px; top: 299px;"><table cellpadding="0" cellspacing="0"><tbody><tr id="frmHeader:popUpBolsasCupos-tr"><td class="icePnlPopBody" colspan="2"><div class="icePnlGrp modal-bolsasycupos" id="frmHeader:subView_Bolsas:divBolsasCupos"><div class="icePnlGrp modal-dialog modal-md" id="frmHeader:subView_Bolsas:_id34"><div class="icePnlGrp modal-content" id="frmHeader:subView_Bolsas:_id35"><div class="icePnlGrp modal-header" id="frmHeader:subView_Bolsas:_id36"><span class="iceOutTxt modal-title" id="frmHeader:subView_Bolsas:_id37">Rapidescuento</span>
+<a class="iceCmdLnk" href="javascript:;" id="frmHeader:subView_Bolsas:lnkCerrarPopup" onblur="setFocus('');" onclick="var form=formOf(this);form['frmHeader:_idcl'].value='frmHeader:subView_Bolsas:lnkCerrarPopup';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);"><img alt="" class="iceGphImg" id="frmHeader:subView_Bolsas:_id38" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/pva_cx-close1.png"></a></div>
+<table id="frmHeader:subView_Bolsas:tblMessagesPop" style="display:none;"><tbody><tr><td></td></tr></tbody></table>
+<div class="icePnlGrp modal-body" id="frmHeader:subView_Bolsas:_id39"><span class="iceOutTxt" id="frmHeader:subView_Bolsas:otxtBolsa">Tu porcentaje máximo de descuento para Autos y Pick up hasta 3.5 ton es:</span>
+<span class="iceOutTxt" id="frmHeader:subView_Bolsas:_id40"><br></span>
+<span class="iceOutTxt saldo-bolsasycupos" id="frmHeader:subView_Bolsas:txtBolsa">0.00 %</span>
+<span class="iceOutTxt" id="frmHeader:subView_Bolsas:_id41"><br></span>
+<span class="iceOutTxt" id="frmHeader:subView_Bolsas:_id49"><br></span>
+<span class="iceOutTxt" id="frmHeader:subView_Bolsas:_id50"><br></span>
+<span class="iceOutTxt" id="frmHeader:subView_Bolsas:_id51"><br></span></div></div></div></div></td></tr></tbody></table><input id="frmHeader:_idfrmHeader:popUpBolsasCuposstatus" name="frmHeader:_idfrmHeader:popUpBolsasCuposstatus" type="hidden" value=""><input id="frmHeader:_idfrmHeader:popUpBolsasCuposdropID" name="frmHeader:_idfrmHeader:popUpBolsasCuposdropID" type="hidden" value=""><script id="frmHeader:popUpBolsasCuposscript" language="JavaScript" type="text/javascript">Ice.modal.stop('frmHeader:popUpBolsasCupos');; Ice.DnD.adjustPosition('frmHeader:popUpBolsasCupos');; new Draggable('frmHeader:popUpBolsasCupos',{dragGhost:false,dragCursor:false,ghosting:false,revert:false,mask:'1,4,5'});; Ice.autoPosition.stop('frmHeader:popUpBolsasCupos');; Ice.autoCentre.start('frmHeader:popUpBolsasCupos',false);; Ice.iFrameFix.start('frmHeader:popUpBolsasCupos','/MotorWorksites/xmlhttp/blank');</script></div>
+<div id="frmHeaderhdnFldsDiv" style="display:none;"><input name="frmHeader:iceDND" type="hidden"><input name="frmHeader:_idcl" type="hidden"></div></form>
+			
+			<div class="page-title-separator" style="margin-bottom: 0px;">
+				<div class="container">
+						Bienvenidos
+				</div>
+			</div>
+			
+			<img class="img-carrusel" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/inicio.png">
+			<input id="srcPath" type="hidden" value="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual"> 
+			<input id="hidConsultar" name="hidConsultar" type="hidden" value="true">
+			<input id="hidCotizar" name="hidCotizar" type="hidden" value="true">
+			
+			
+			<form action="javascript:;" class="iceFrm" enctype="application/x-www-form-urlencoded" id="frmMenuOpciones" method="post" onsubmit="return false;"><script id="frmMenuOpcionesscript" type="text/javascript">$element(document.getElementById('frmMenuOpciones')).captureAndRedirectSubmit();</script><input name="frmMenuOpciones" type="hidden" value="frmMenuOpciones"><input name="icefacesCssUpdates" type="hidden" value=""><div align="center" class="container">	
+					<div class="home-icon-menu">
+						<div class="home-menu-section" id="pnlCotizaciones">
+							<div class="page-subtitle-separator">
+								Cotizar
+							</div>
+							<div class="home-icon-menu-row">
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkNuevaCotizacionResidentes" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkNuevaCotizacionResidentes';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Nueva cotización Residentes"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_01a.png">
+										</div>
+										<div class="home-icon-menu-title">Residentes</div>
+									</div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkNuevaCotizacionFronterizos" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkNuevaCotizacionFronterizos';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Nueva cotización Fronterizos"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_02a.png">
+										</div>
+										<div class="home-icon-menu-title">Fronterizos y transfer
+										</div>
+									</div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkNuevaCotizacionTurista" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkNuevaCotizacionTurista';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Nueva cotización Turista"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:divNuevaCotizacionTurista"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id54"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id55" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_03a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id56"><span class="iceOutTxt" id="frmMenuOpciones:_id57">Turista</span></div></div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkRC" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkRC';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="RC Obligatorio y Estatal"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_04a.png">
+										</div>
+										<div class="home-icon-menu-title">Seguros Obligatorios</div>
+									</div></a>
+							</div>
+						</div>
+						<div class="home-menu-section" id="pnlConsultas">
+							<div class="page-subtitle-separator">
+								Consultar
+							</div>
+							<div class="home-icon-menu-row">
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkConsultaPoliza" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkConsultaPoliza';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Consulta de pólizas"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_05a.png">
+										</div>
+										<div class="home-icon-menu-title">Pólizas / Endosos</div>
+									</div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkPropuestasRenovacion" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkPropuestasRenovacion';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Propuestas de Renovación"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_06a.png">
+										</div>
+										<div class="home-icon-menu-title">Propuesta de Renovación</div>
+									</div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkConsultaBolsa" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkConsultaBolsa';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Rapidescuento"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_07a.png">
+										</div>
+										<div class="home-icon-menu-title">Rapidescuento</div>
+									</div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkConsultaCotizacion" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkConsultaCotizacion';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Consulta de cotización"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_08a.png">
+										</div>
+										<div class="home-icon-menu-title">Cotización</div>
+									</div></a>
+							</div>
+						</div>
+						<div class="home-menu-section" id="pnlApoyo">
+							<div class="page-subtitle-separator">
+								Material de Apoyo
+							</div>
+							<div class="home-icon-menu-row">
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkNovedades" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkNovedades';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Novedades: Axa voz autos"><div class="home-icon-menu-element active">
+										<div class="home-icon-menu-img">
+											<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_09a.png">
+										</div>
+										<div class="home-icon-menu-title">Novedades: Axa voz autos</div>
+									</div></a>
+								
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkInfoRapidescuento" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkInfoRapidescuento';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Información de Rapidescuento"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:divInfoRapidescuento"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id62"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id63" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_10a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id64"><span class="iceOutTxt" id="frmMenuOpciones:_id65">Rapidescuento</span></div></div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkCalendarioRenova" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkCalendarioRenova';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Calendario"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:divCalendarioRenova"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id66"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id67" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_11a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id68"><span class="iceOutTxt" id="frmMenuOpciones:_id69">Calendario Renovación</span></div></div></a>
+								<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkComunicacionAutos" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkComunicacionAutos';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Comunicación autos"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:divComunicacionAutos"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id70"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id71" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_12a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id72"><span class="iceOutTxt" id="frmMenuOpciones:_id73">Comunicación autos</span></div></div></a>
+							</div>
+						</div>
+						
+						<div class="icePnlGrp home-menu-section" id="frmMenuOpciones:pnlPyme" style="margin-top: 15px;"><div class="icePnlGrp page-subtitle-separator" id="frmMenuOpciones:_id74"><span class="iceOutTxt" id="frmMenuOpciones:_id75">PYME</span></div>
+<div class="icePnlGrp home-icon-menu-row" id="frmMenuOpciones:_id76"><a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkPymeAltaCliente" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkPymeAltaCliente';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Alta de Clientes"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:_id77"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id78"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id79" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_09a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id80"><span class="iceOutTxt" id="frmMenuOpciones:_id81">Alta de Clientes</span></div></div></a>
+<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkPymeCotizacion" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkPymeCotizacion';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Cotización"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:_id82"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id83"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id84" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_08a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id85"><span class="iceOutTxt" id="frmMenuOpciones:_id86">Cotización</span></div></div></a>
+<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkPymeCotizacionMasiva" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkPymeCotizacionMasiva';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Cotización Masiva"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:_id87"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id88"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id89" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_13a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id90"><span class="iceOutTxt" id="frmMenuOpciones:_id91">Cotización Masiva</span></div></div></a></div></div>
+						
+						<div class="icePnlGrp home-menu-section" id="frmMenuOpciones:pnlCFDI" style="margin-top: 15px;"><div class="icePnlGrp page-subtitle-separator" id="frmMenuOpciones:_id92"><span class="iceOutTxt" id="frmMenuOpciones:_id93">Datos Fiscales</span></div>
+<div class="icePnlGrp home-icon-menu-row" id="frmMenuOpciones:_id94"><a class="iceCmdLnk" href="javascript:;" id="frmMenuOpciones:lnkCarga1a1CFDI" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpciones:_idcl'].value='frmMenuOpciones:lnkCarga1a1CFDI';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Carga 1 a 1 CFDI"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpciones:_id100"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpciones:_id101"><img alt="" class="iceGphImg" id="frmMenuOpciones:_id102" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_0aa.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpciones:_id103"><span class="iceOutTxt" id="frmMenuOpciones:_id104">Captura clientes 1 a 1</span></div></div></a></div></div>
+					</div>
+				</div>
+<div id="frmMenuOpcioneshdnFldsDiv" style="display:none;"><input name="frmMenuOpciones:_idcl" type="hidden"></div></form>
+			
+			
+			<form action="javascript:;" class="iceFrm" enctype="application/x-www-form-urlencoded" id="frmMenuOpcionesMovil" method="post" onsubmit="return false;"><script id="frmMenuOpcionesMovilscript" type="text/javascript">$element(document.getElementById('frmMenuOpcionesMovil')).captureAndRedirectSubmit();</script><input name="frmMenuOpcionesMovil" type="hidden" value="frmMenuOpcionesMovil"><input name="icefacesCssUpdates" type="hidden" value=""><div class="panel-group" id="accordion">
+					<div class="panel panel-default" id="pnlCotizacionesMovil">
+						<div class="panel-heading " data-parent="#accordion" data-toggle="collapse" href="#collapse1" id="heading_1">
+							Cotizar
+							<img class="img-notshow" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_abajo.png">
+							<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_arriba.png">
+						</div>
+						<div class="panel-collapse collapse in" id="collapse1">
+							<div class="panel-body">
+								<div class="home-menu-section">
+									<div class="home-icon-menu-row">
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkNuevaCotizacionResidentesMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkNuevaCotizacionResidentesMovil';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Nueva cotización Residentes"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_01a.png">
+												</div>
+												<div class="home-icon-menu-title">Residentes</div>
+											</div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkNuevaCotizacionFronterizosMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkNuevaCotizacionFronterizosMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Nueva cotización Fronterizos"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_02a.png">
+												</div>
+												<div class="home-icon-menu-title">Fronterizos y transfer</div>
+											</div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkNuevaCotizacionTuristaMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkNuevaCotizacionTuristaMovil';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Nueva cotización Turista"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:divNuevaCotizacionTuristaMovil"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id105"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id106" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_03a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id107"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id108">Turista</span></div></div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkRCMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkRCMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="RC Obligatorio y Estatal"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_04a.png">
+												</div>
+												<div class="home-icon-menu-title">Seguros Obligatorios</div>
+											</div></a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="panel panel-default" id="pnlConsultasMovil">
+						<div class="panel-heading" data-parent="#accordion" data-toggle="collapse" href="#collapse2" id="heading_2">
+							Consultar
+							<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_abajo.png">
+							<img class="img-notshow" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_arriba.png">
+						</div>
+						<div class="panel-collapse collapse" id="collapse2">
+							<div class="panel-body">
+								<div class="home-menu-section">
+									<div class="home-icon-menu-row">
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkConsultaPolizaMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkConsultaPolizaMovil';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Consulta de pólizas"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_05a.png">
+												</div>
+												<div class="home-icon-menu-title">Pólizas / Endosos</div>
+											</div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkPropuestasRenovacionMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkPropuestasRenovacionMovil';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Propuestas de Renovación"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_06a.png">
+												</div>
+												<div class="home-icon-menu-title">Propuesta de Renovación</div>
+											</div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkConsultaBolsaMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkConsultaBolsaMovil';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Rapidescuento"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_07a.png">
+												</div>
+												<div class="home-icon-menu-title">Rapidescuento</div>
+											</div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkConsultaCotizacionMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkConsultaCotizacionMovil';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Consulta de cotización"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_08a.png">
+												</div>
+												<div class="home-icon-menu-title">Cotización</div>
+											</div></a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="panel panel-default" id="pnlApoyoMovil">
+						<div class="panel-heading" data-parent="#accordion" data-toggle="collapse" href="#collapse3" id="heading_3">
+							Material de Apoyo
+							<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_abajo.png">
+							<img class="img-notshow" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_arriba.png">
+						</div>
+						<div class="panel-collapse collapse" id="collapse3">
+							<div class="panel-body">
+								<div class="home-menu-section">
+									<div class="home-icon-menu-row">
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkNovedadesMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkNovedadesMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Novedades"><div class="home-icon-menu-element active">
+												<div class="home-icon-menu-img">
+													<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_09a.png">
+												</div>
+												<div class="home-icon-menu-title">Novedades</div>
+											</div></a>
+										
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkInfoRapidescuentoMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkInfoRapidescuentoMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Información de Repidescuento"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:divInfoRapidescuentoMovil"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id113"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id114" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_10a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id115"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id116">Rapidecuento</span></div></div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkCalendarioRenovaMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkCalendarioRenovaMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Calendario"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:divCalendarioRenovaMovil"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id117"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id118" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_11a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id119"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id120">Calendario Renovación</span></div></div></a>
+										<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkComunicacionAutosMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkComunicacionAutosMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Comunicación autos"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:divComunicacionAutosMovil"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id121"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id122" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_12a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id123"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id124">Comunicación autos</span></div></div></a>
+									</div>	
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="panel panel-default">
+						<div class="panel-heading" data-parent="#accordion" data-toggle="collapse" href="#collapse4" id="heading_4">
+							<span class="iceOutTxt" id="frmMenuOpcionesMovil:otxtPyme">PYME</span>
+							<img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:imgAbajoPymes" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_abajo.png">
+							<img alt="" class="iceGphImg img-notshow" id="frmMenuOpcionesMovil:imgArribaPymes" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_arriba.png">
+						</div>
+						<div class="panel-collapse collapse" id="collapse4">
+							<div class="icePnlGrp panel-body" id="frmMenuOpcionesMovil:pnlBodyMovil"><div class="icePnlGrp home-menu-section" id="frmMenuOpcionesMovil:_id125"><div class="icePnlGrp home-icon-menu-row" id="frmMenuOpcionesMovil:_id126"><a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkPymeAltaClienteMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkPymeAltaClienteMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Alta de Clientes"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:_id127"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id128"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id129" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_09a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id130"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id131">Alta de Clientes</span></div></div></a>
+<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkPymeCotizacionMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkPymeCotizacionMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Cotización"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:_id132"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id133"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id134" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_08a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id135"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id136">Cotización</span></div></div></a>
+<a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkPymeCotizacionMasivaMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkPymeCotizacionMasivaMovil';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);" title="Cotización Masiva"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:_id137"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id138"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id139" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_13a.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id140"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id141">Cotización Masiva</span></div></div></a></div></div></div>
+						</div>
+					</div>
+					
+					<div class="panel panel-default">
+						<div class="panel-heading" data-parent="#accordion" data-toggle="collapse" href="#collapse5" id="heading_5">
+							<span class="iceOutTxt" id="frmMenuOpcionesMovil:otxtCFDI">Datos Fiscales</span>
+							<img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:imgAbajoCFDI" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_abajo.png">
+							<img alt="" class="iceGphImg img-notshow" id="frmMenuOpcionesMovil:imgArribaCFDI" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/home-btn_arriba.png">
+						</div>
+						<div class="panel-collapse collapse" id="collapse5">
+							<div class="icePnlGrp panel-body" id="frmMenuOpcionesMovil:pnlCFDIMovil"><div class="icePnlGrp home-menu-section" id="frmMenuOpcionesMovil:_id142"><div class="icePnlGrp home-icon-menu-row" id="frmMenuOpcionesMovil:_id143"><a class="iceCmdLnk" href="javascript:;" id="frmMenuOpcionesMovil:lnkCarga1a1CFDIMovil" onblur="setFocus('');" onclick="var form=formOf(this);form['frmMenuOpcionesMovil:_idcl'].value='frmMenuOpcionesMovil:lnkCarga1a1CFDIMovil';return iceSubmitPartial(form,this,event);" onfocus="setFocus(this.id);" title="Pantalla CFDI"><div class="icePnlGrp home-icon-menu-element active" id="frmMenuOpcionesMovil:_id149"><div class="icePnlGrp home-icon-menu-img" id="frmMenuOpcionesMovil:_id150"><img alt="" class="iceGphImg" id="frmMenuOpcionesMovil:_id151" src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_0aa.png"></div>
+<div class="icePnlGrp home-icon-menu-title" id="frmMenuOpcionesMovil:_id152"><span class="iceOutTxt" id="frmMenuOpcionesMovil:_id153">Captura clientes 1 a 1</span></div></div></a></div></div></div>
+						</div>
+					</div>
+				</div>
+<div id="frmMenuOpcionesMovilhdnFldsDiv" style="display:none;"><input name="frmMenuOpcionesMovil:_idcl" type="hidden"></div></form>
+		</div>
+		
+			
+		<div style="display:none">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_01b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_02b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_03b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_04b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_05b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_06b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_07b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_08b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_09b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_10b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_11b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_12b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_13b.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_0ab.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_0bb.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/home/menu_0cb.png">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/imgs/icon_aviso1.png">
+			
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/images/sitio_en_construccion.jpg">
+			<img src="/MotorWorksites/resources/AutosIndividualUX/AutosIndividual/images/mensaje_bloqueo.jpg">
+		</div>
+		
+		<form action="javascript:;" class="iceFrm" enctype="application/x-www-form-urlencoded" id="frmFooter" method="post" onsubmit="return false;" style="margin: 0px;"><script id="frmFooterscript" type="text/javascript">$element(document.getElementById('frmFooter')).captureAndRedirectSubmit();</script><input name="frmFooter" type="hidden" value="frmFooter"><input name="icefacesCssUpdates" type="hidden" value=""><div class="footer">
+	<div class="container">
+		<div class="container">
+			<a class="iceCmdLnk" href="javascript:;" id="frmFooter:subView_Footer:lnkDerechos" onblur="setFocus('');" onclick="var form=formOf(this);form['frmFooter:_idcl'].value='frmFooter:subView_Footer:lnkDerechos';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);">Derechos de asegurado</a>
+ | 
+			<a class="iceCmdLnk" href="javascript:;" id="frmFooter:subView_Footer:lnkPrivacidad" onblur="setFocus('');" onclick="var form=formOf(this);form['frmFooter:_idcl'].value='frmFooter:subView_Footer:lnkPrivacidad';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);">Aviso de privacidad</a>
+ | 
+			<a class="iceCmdLnk" href="javascript:;" id="frmFooter:subView_Footer:lnkPoliticas" onblur="setFocus('');" onclick="var form=formOf(this);form['frmFooter:_idcl'].value='frmFooter:subView_Footer:lnkPoliticas';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);">Políticas de Uso y Privacidad</a>
+ | 
+			<a class="iceCmdLnk" href="javascript:;" id="frmFooter:subView_Footer:lnkBuro" onblur="setFocus('');" onclick="var form=formOf(this);form['frmFooter:_idcl'].value='frmFooter:subView_Footer:lnkBuro';return iceSubmit(form,this,event);" onfocus="setFocus(this.id);">Buró de entidades financieras</a>
+ | 
+			AXA México <span class="iceOutTxt" id="frmFooter:subView_Footer:txtAnioFooter">2025</span>
+ ©
+		</div>
+	</div>
+</div>
+<div id="frmFooterhdnFldsDiv" style="display:none;"><input name="frmFooter:_idcl" type="hidden"></div></form>
+	</div>
+<script id="jqhSXvHDF-5oMHLPHz_rHg:1:dynamic-code" type="text/javascript">enciendeSpan('SECCION_AGENTE', false);enciendeSpan('pnlCotizaciones', true);enciendeSpan('pnlCotizacionesMovil', true);enciendeSpan('pnlConsultas', true);enciendeSpan('pnlConsultas', true);//-711349760</script>
+<noscript><meta content="0;url=/MotorWorksites/xmlhttp/javascript-blocked" http-equiv="refresh" /></noscript>
+<div id="NR-TimingFooter"><script type="text/javascript">
+window.NREUM||(NREUM={});NREUM.info={"errorBeacon":"bam.nr-data.net","licenseKey":"32f0729201","agent":"","beacon":"bam.nr-data.net","applicationTime":1240,"applicationID":"360171134","transactionName":"YFRbZ0MCV0tXV0YMC1kefEtUAExMU3JeChMYRlZBWhBQTFMaXQsIWFBd","queueTime":0}</script></div>
+</body>

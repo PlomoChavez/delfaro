@@ -1,5 +1,6 @@
 const { Builder, By, until } = require("selenium-webdriver");
 const chrome = require("selenium-webdriver/chrome");
+const fs = require("fs").promises;
 
 function getBy(by, locator) {
   switch (by) {
@@ -51,9 +52,16 @@ function sleep(ms) {
 }
 
 // prettier-ignore
-async function setInputValue(driver, { locator, value, by = "id" }) {
+async function setInputValue(driver, { 
+    locator, 
+    value, 
+    by = "id", 
+    sleeptime = 0, 
+  }) {
+  if (sleeptime > 0) await sleep(sleeptime);
   const input = await driver.wait( until.elementLocated(getBy(by, locator)), 10000 );
   await input.sendKeys(value);
+  await input.sendKeys('\uE004'); // '\uE004' es la tecla TAB en WebDriver
 }
 
 async function getElement(driver, { locator, by = "id", multiple = false }) {
@@ -64,8 +72,14 @@ async function getElement(driver, { locator, by = "id", multiple = false }) {
 }
 
 // prettier-ignore
-async function clickElement(driver, { locator, by = "id", timeout = 10000 }) {
+async function clickElement(driver, { 
+  locator, 
+  by = "id", 
+  sleeptime= 0, 
+  timeout = 10000 
+}) {
   try {
+    if (sleeptime > 0) await sleep(sleeptime);
     const element = await driver.wait(until.elementLocated(getBy(by, locator)), timeout);
     await driver.wait(until.elementIsVisible(element), timeout);
     await driver.wait(until.elementIsEnabled(element), timeout);
@@ -94,6 +108,59 @@ async function selectMatOption(driver, { locator, optionText, by = "id" }) {
       `No se encontró la opción '${optionText.trim()}' para el select '${locator}'.`
     );
   }
+}
+
+async function selectOptionInSelect(
+  driver,
+  {
+    locator,
+    by = "id",
+    value,
+    tipoValor = "value",
+    timeout = 10000,
+    sleeptime = 0,
+    esperarHabilitado = false,
+  }
+) {
+  if (sleeptime > 0) await sleep(sleeptime);
+  const selectBy = getBy(by, locator);
+
+  // Espera a que el select esté presente
+  await driver.wait(until.elementLocated(selectBy), timeout);
+
+  // Espera a que el select NO esté disabled si se solicita
+  if (esperarHabilitado) {
+    await driver.wait(async () => {
+      const select = await driver.findElement(selectBy);
+      const disabled = await select.getAttribute("disabled");
+      return !disabled;
+    }, timeout);
+  }
+
+  // Siempre vuelve a buscar el select después de cualquier espera
+  const select = await driver.findElement(selectBy);
+
+  // Selecciona la opción según el tipo de valor
+  let opcion;
+  if (tipoValor === "value") {
+    opcion = await select.findElement(By.css(`option[value="${value}"]`));
+  } else if (tipoValor === "label") {
+    opcion = await select.findElement(
+      By.xpath(`.//option[normalize-space(text())="${value}"]`)
+    );
+  } else if (tipoValor === "numero") {
+    const opciones = await select.findElements(By.tagName("option"));
+    if (value < 0 || value >= opciones.length) {
+      throw new Error("Índice de opción fuera de rango");
+    }
+    // Vuelve a buscar la opción por value para evitar stale element
+    const optionValue = await opciones[value].getAttribute("value");
+    opcion = await select.findElement(By.css(`option[value="${optionValue}"]`));
+  } else {
+    throw new Error("tipoValor no soportado: " + tipoValor);
+  }
+
+  await opcion.click();
 }
 
 async function switchToWindow(driver, index = 1, waitMs = 1000) {
@@ -146,6 +213,60 @@ async function demo(driver) {
   await sleep(500);
 }
 
+async function printWindowTitles(driver) {
+  const handles = await driver.getAllWindowHandles();
+  for (let i = 0; i < handles.length; i++) {
+    await driver.switchTo().window(handles[i]);
+    const title = await driver.getTitle();
+    console.log(`Ventana ${i}: ${title}`);
+  }
+}
+
+async function printCurrentWindowTitle(driver) {
+  const title = await driver.getTitle();
+  console.log(`Ventana actual: ${title}`);
+}
+
+async function saveCurrentHtmlToTxt(driver, filename = "pagina.html.txt") {
+  // 1. Guarda el body en un archivo
+  const bodyHtml = await driver.executeScript(() => document.body.outerHTML);
+  await fs.writeFile(filename, bodyHtml, "utf8");
+  console.log(`Body guardado en ${filename}`);
+
+  // 2. Busca el modal por id
+  const modalExiste = await driver.executeScript(() => {
+    return !!document.getElementById("frmHeader:popUpMensajeAlerta");
+  });
+
+  if (modalExiste) {
+    console.log(
+      "Modal encontrado, intentando hacer clic en el botón Aceptar..."
+    );
+    // 3. Haz clic en el input del modal
+    try {
+      const boton = await driver.findElement({
+        id: "frmHeader:btnAceptarAlerta",
+      });
+      await boton.click();
+      console.log("Botón Aceptar clickeado.");
+    } catch (err) {
+      console.log("No se pudo hacer clic en el botón Aceptar:", err.message);
+    }
+  } else {
+    console.log("No se encontró el modal.");
+  }
+}
+
+async function getElementText(driver, { locator, by = "id", timeout = 10000 }) {
+  const elementBy = getBy(by, locator);
+  const element = await driver.wait(until.elementLocated(elementBy), timeout);
+  return await element.getText();
+}
+
+async function forzarCierre(driver) {
+  await driver.quit();
+}
+
 module.exports = {
   openPage,
   waitForElement,
@@ -157,4 +278,10 @@ module.exports = {
   clickElement,
   clickInElementNotClickeable,
   demo,
+  saveCurrentHtmlToTxt,
+  printWindowTitles,
+  printCurrentWindowTitle,
+  selectOptionInSelect,
+  getElementText,
+  forzarCierre,
 };

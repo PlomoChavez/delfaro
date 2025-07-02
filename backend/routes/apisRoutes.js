@@ -109,7 +109,7 @@ router.post('/api/cotizaciones/update', cotizacionesController.createOrUpdateCot
 router.post('/api/cotizaciones/delete', cotizacionesController.deleteCotizacion);
 
 // // Robot
-// router.post('/api/robot', robotController.startRobot);
+router.post('/api/demo/bots', robotController.demoRobots);
 
 // Catálogos Específicos
 router.post('/api/catalogos/tipos-usuarios', (req, res) => catalogoController.getCatalogo(req, res, 'tipos-usuarios'));
