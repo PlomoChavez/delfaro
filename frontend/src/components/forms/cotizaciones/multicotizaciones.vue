@@ -154,8 +154,73 @@ function nextStep() {
   productoSeleccionado.value = configuracion.value.productos[0];
 }
 
-function sendToCotizar() {
-  emit("cotizar", configuracion.value);
+function deepToRaw(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map((item) => deepToRaw(item));
+  }
+  if (obj && typeof obj === "object") {
+    const rawObj = toRaw(obj);
+    const result: any = {};
+    Object.keys(rawObj).forEach((key) => {
+      result[key] = deepToRaw(rawObj[key]);
+    });
+    return result;
+  }
+  return obj;
+}
+
+async function sendToCotizar() {
+  let productos = configuracion.value.productos.map((p: any) => {
+    return {
+      ...p,
+      compania:
+        (configuracion.value.companias || []).find(
+          (c: any) => c.id === p.compania_id
+        ) || null,
+      ramo: toRaw(configuracion.value.ramo) || null,
+      titular: { ...p.titular, ...configuracion.value.titular },
+    };
+  });
+
+  productos = productos.map((p: any) => deepToRaw(p));
+
+  const cotizacionesObj = productos.reduce(
+    (acc: any, prod: any, idx: number) => {
+      acc[`cotizacion${idx + 1}`] = prod;
+      return acc;
+    },
+    {}
+  );
+
+  const response = await customRequest({
+    url: "/api/procesos/bot",
+    method: "POST",
+    data: {
+      cotizaciones: cotizacionesObj,
+    },
+  });
+  const dataResponse = response.data;
+  console.log("Response de enviar a cotizar:", dataResponse);
+
+  // if (dataResponse.result) {
+  //   if (localData.value.id == undefined) {
+  //     console.log("Creando nueva cotización");
+  //     localData.value.id = dataResponse.data;
+  //     configuracion.value.titular = {
+  //       nombre: configuracion.value.nombre,
+  //       fechaNacimiento: configuracion.value.fechaNacimiento,
+  //       sexo: configuracion.value.sexo,
+  //     };
+  //   }
+  //   toast.success("¡Cotización guardada!", {
+  //     theme: "dark", // Activa el tema oscuro
+  //   });
+  // } else {
+  //   showErrorMessage({
+  //     title: "Error",
+  //     message: dataResponse.message,
+  //   });
+  // }
 }
 
 function selectCompania(compania: any) {
@@ -679,7 +744,7 @@ watch(
     <!-- prettier-ignore -->
     <div class="divButtons">
       <VBtn variant="outlined" color="secondary" @click="resetCotizacion"> Atrás</VBtn>
-      <VBtn :disabled="!configuracion.productos.length" v-if="step != 4 || todosProductosTerminados" @click="sendToCotizar">Siguiente</VBtn>
+      <VBtn :disabled="!configuracion.productos.length" v-if="step != 4 || todosProductosTerminados" @click="sendToCotizar">Estimar cotizaciones</VBtn>
     </div>
   </div>
 

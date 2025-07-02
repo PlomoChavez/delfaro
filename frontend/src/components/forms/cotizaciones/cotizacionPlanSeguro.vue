@@ -59,8 +59,8 @@ const formSchemaPersonalizacion2: any = [
   { label: "Emergencia en el Extranjero (EMER)", type: "switch", model: "emergenciaExtranjero",},
   { label: "SumaAsegurada",                 type: "select", model: "sumaAsegurada",
     options: [
-      { label:"S.A. 50,000 dls",id:"S.A. 50,000 dls"},
-      { label:"S.A. 100,000 dls",id:"S.A. 100,000 dls"},
+      { label:" SA 50,000 dlls ",id:" SA 50,000 dlls "},
+      { label:" SA 100,000 dlls ",id:" SA 100,000 dlls "},
     ]
   },
   { label: "Cobertura en el Extranjero (CE)", type: "switch", model: "coberturaExtranjero"},
@@ -74,10 +74,10 @@ const formSchemaPersonalizacion2: any = [
   { label: "Indemnización Diaria por Hospitalización por Accidente (IDHA)", type: "switch", model: "indemnizacionDiaria"},
   { label: "Suma por dia",                 type: "select", model: "indemnizacionDiariaSelect",
     options: [
-      { label:"500.00 por dia",id:"500.00 por dia"},
-      { label:"1000.00 por dia",id:"1000.00 por dia"},
-      { label:"1,500.00 por dia",id:"1,500.00 por dia"},
-      { label:"2,000.00 por dia",id:"502,000.00 por dia"},
+      { label:" 500.00 por dia",id:" 500.00 por dia"},
+      { label:" 1000.00 por dia",id:" 1000.00 por dia"},
+      { label:" 1,500.00 por dia",id:" 1,500.00 por dia"},
+      { label:" 2,000.00 por dia",id:" 2,000.00 por dia"},
     ]
   },
   { label: "Reducción de coaseguro por Padecimiento de Nariz en caso de Accidente.", type: "switch", model: "reduccionCoaseguro"},
@@ -125,26 +125,26 @@ const formSchemaPersonalizacion1: any = [
   },
   { label: "Coaseguro",                 type: "select", model: "coaseguro",
     options: [
-    { label:"0 %",id:"0 %"},
-    { label:"10 %",id:"10 %"},
-    { label:"15 %",id:"15 %"},
-    { label:"20 %",id:"20 %"},
-    { label:"25 %",id:"25 %"},
-    { label:"30 %",id:"30 %"},
+    { label:"0%",id:"0%"},
+    { label:"10%",id:"10%"},
+    { label:"15%",id:"15%"},
+    { label:"20%",id:"20%"},
+    { label:"25%",id:"25%"},
+    { label:"30%",id:"30%"},
     ]
   },
   { label: "Tope Máximo de Coaseguro",  type: "select", model: "topeMaximo",
     options: [
-    { label:"$30,000",id:"$30,000"},
-    { label:"$40,000",id:"$40,000"},
-    { label:"$50,000",id:"$50,000"},
+    { label:"$30,000.00",id:"$30,000.00"},
+    { label:"$40,000.00",id:"$40,000.00"},
+    { label:"$50,000.00",id:"$50,000.00"},
     ]
   },
   { label: "Nivel Hospitalario",        type: "select", model: "nivelHospitalario",
     options: [
-      {label:"Serie 200",id:"Serie 200"},
-      {label:"Serie 300",id:"Serie 300"},
-      {label:"Serie 400",id:"Serie 400"},
+      {label:" Serie 200",id:" Serie 200"},
+      {label:" Serie 300",id:" Serie 300"},
+      {label:" Serie 400",id:" Serie 400"},
     ]
   },
   { label: "T.H.Q.",                    type: "select", model: "thq",
@@ -327,7 +327,6 @@ function handleAtras() {
 
 onMounted(() => {
   cotizacion.value = props.registro || {};
-  console.log("cotizacion", cotizacion.value);
   if (cotizacion.value.asegurados === undefined) {
     cotizacion.value.asegurados = [];
   }
@@ -620,7 +619,7 @@ onMounted(() => {
     </div>
 
     <!-- <pre>{{ formTmpValores }}</pre> -->
-    <pre>{{ cotizacion.parametrosFlexibles }}</pre>
+    <!-- <pre>{{ cotizacion.parametrosFlexibles }}</pre> -->
   </div>
 </template>
 

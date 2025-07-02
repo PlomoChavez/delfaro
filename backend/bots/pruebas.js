@@ -213,8 +213,11 @@ async function ejecutarCotizacion(data) {
       .forBrowser("chrome")
       .setChromeOptions(options)
       .build();
+    let url =
+      "http://187.190.225.107/cotizador/?c=78c2oPRiX1%20bDG97z3ZA64RBf2Vc4EEzOht5CbcbKg4%3D";
 
-    await driver.get("https://agentes.planseguro.com.mx/login");
+    await driver.get(url);
+    // await driver.get("https://agentes.planseguro.com.mx/login");
 
     await driver.wait(until.elementLocated(By.id("numero")), 10000);
 
