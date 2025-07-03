@@ -1,4 +1,4 @@
-const { Builder, By, until } = require("selenium-webdriver");
+const { Builder, By, until, Actions } = require("selenium-webdriver");
 const chrome = require("selenium-webdriver/chrome");
 const fs = require("fs").promises;
 
@@ -190,27 +190,18 @@ async function clickInElementNotClickeable(driver,{ locator, by = "css", timeout
 }
 
 async function demo(driver) {
-  // Encuentra el select por name
-  const select = await driver.findElement(
-    By.name("emergenciaExtranjeroFactor")
+  // Espera a que el elemento esté presente
+  const link = await driver.wait(
+    until.elementLocated(
+      By.xpath(
+        "//a[contains(@class, 'seguro-link') and .//span[normalize-space(text())='Ir a Cotizar']]"
+      )
+    ),
+    10000
   );
-  // Haz click para desplegar las opciones (si es un mat-select)
-  await driver.executeScript("arguments[0].click();", select);
-  await sleep(1000);
 
-  // Espera y obtiene todas las opciones desplegadas (ajusta el selector si es necesario)
-  const options = await driver.findElements(
-    By.css(".mat-select-panel .mat-option-text")
-  );
-  console.log("Opciones disponibles para emergenciaExtranjeroFactor:");
-  for (const option of options) {
-    const text = await option.getText();
-    console.log(` - '${text}'`);
-  }
-
-  // Cierra el panel (opcional)
-  await driver.executeScript("arguments[0].click();", select);
-  await sleep(500);
+  // Realiza hover sobre el elemento
+  await driver.actions({ bridge: true }).move({ origin: link }).perform();
 }
 
 async function printWindowTitles(driver) {
@@ -267,6 +258,16 @@ async function forzarCierre(driver) {
   await driver.quit();
 }
 
+async function setHover(driver, { locator, by = "id", timeout = 10000 }) {
+  const seleniumBy = getBy(by, locator);
+  const element = await driver.wait(until.elementLocated(seleniumBy), timeout);
+  await driver.actions({ bridge: true }).move({ origin: element }).perform();
+}
+
+async function scrollToBottom(driver) {
+  await driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+}
+
 module.exports = {
   openPage,
   waitForElement,
@@ -284,4 +285,6 @@ module.exports = {
   selectOptionInSelect,
   getElementText,
   forzarCierre,
+  setHover,
+  scrollToBottom,
 };

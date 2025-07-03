@@ -1,6 +1,7 @@
 // const { ejecutarCotizacion } = require("../bots/pruebas");
 const { ejecutarCotizacion } = require("../bots/planSeguroCotizacion");
 const CotizadorAutosAXA = require("../bots/CotizadorAutosAXA");
+const CotizadorAutosHDI = require("../bots/CotizadorAutosHDI");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -20,6 +21,9 @@ exports.demoRobots = async (req, res) => {
         break;
       case "cotizadorAutosAXA":
         resultado = await CotizadorAutosAXA.ejecutarCotizacion(data);
+        break;
+      case "cotizadorAutosHDI":
+        resultado = await CotizadorAutosHDI.ejecutarCotizacionAutos(data);
         break;
 
       default:

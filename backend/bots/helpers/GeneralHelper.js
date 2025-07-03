@@ -25,3 +25,17 @@ function convertirFechaHora(fechaHoraStr) {
     hour
   ).padStart(2, "0")}:${min}:${s}-06:00`;
 }
+
+function normalizarKey(key) {
+  return key
+    .normalize("NFD") // Quita acentos
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\s\.\(\)%]/g, "") // Quita espacios, puntos, paréntesis y %
+    .replace(/[^a-zA-Z0-9]/g, "") // Quita cualquier otro caracter especial
+    .toLowerCase();
+}
+
+module.exports = {
+  normalizarKey,
+  convertirFechaHora,
+};

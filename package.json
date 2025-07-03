@@ -44,6 +44,7 @@
   },
   "scripts": {
     "push": "cd frontend && pnpm run build && cd .. && git add . && git commit -m \"Compilado\" && git push",
+    "backend": "pnpm --prefix backend dev",
     "dev": "concurrently \"pnpm --prefix backend start\" \"pnpm --prefix frontend run dev\""
   },
   "keywords": [],
