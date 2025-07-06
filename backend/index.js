@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const port = 3000;
 const cors = require("cors");
@@ -9,14 +10,12 @@ app.use(express.json());
 // Importa las rutas
 const procesosAutomatizadosRoutes = require("./routes/procesosAutomatizadosRoutes");
 const apisRoutes = require("./routes/apisRoutes");
-// const usuariosRoutes = require('./routes/usuarios');
-// const polizasRoutes = require('./routes/polizas');
 
 // Usa las rutas
 app.use(procesosAutomatizadosRoutes);
 app.use(apisRoutes);
-// app.use(usuariosRoutes);
-// app.use(polizasRoutes);
+
+app.use("/files", express.static(path.join(__dirname, "files")));
 
 app.listen(port, () => {
   console.log(`Servidor backend escuchando en http://localhost:${port}`);

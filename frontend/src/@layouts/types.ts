@@ -45,6 +45,9 @@ export interface LayoutConfig {
     verticalNavPinned: any;
     verticalNavUnPinned: any;
     sectionTitlePlaceholder: any;
+    download: any;
+    select: any;
+    unselect: any;
   };
 }
 

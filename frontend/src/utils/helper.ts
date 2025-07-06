@@ -1,5 +1,6 @@
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import { isRef, toRaw } from "vue";
 
 // Función para formatear la fecha en un formato legible
 export function formatearFechaHumana(fecha: string): string {
@@ -36,4 +37,82 @@ export function toggleItemInArray(array: any[] = [], item: any, key: string | nu
     array.splice(index, 1); // Elimina si existe
   }
   return array;
+}
+
+export function deepToRaw(obj: any): any {
+  if (isRef(obj)) {
+    return deepToRaw(obj.value);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(deepToRaw);
+  }
+  if (obj !== null && typeof obj === "object") {
+    const raw = toRaw(obj);
+    const result: { [key: string]: any } = {};
+    for (const key in raw) {
+      result[key] = deepToRaw(raw[key]);
+    }
+    return result;
+  }
+  return obj;
+}
+
+/**
+ * Valida si los elementos de un arreglo cumplen con reglas de existencia, tipo, igualdad, diferencia o no existencia de propiedades.
+ *
+ * Cada regla puede ser:
+ *  - { key: string, tipoValidacion?: "existe" | "notExiste" | "tipo" | "igual" | "diferente", valor?: any }
+ *    - tipoValidacion por defecto: "existe"
+ *    - Si tipoValidacion es "tipo", valor debe ser el tipo esperado ("string", "number", etc.)
+ *    - Si tipoValidacion es "igual" o "diferente", valor es el valor a comparar
+ *    - Si tipoValidacion es "notExiste", valida que la propiedad NO exista
+ *
+ * @param arr - El arreglo a validar.
+ * @param reglas - Array de reglas de validación.
+ * @param estricto - Si es true, todos los elementos deben cumplir; si es false, basta con que uno cumpla.
+ */
+
+// prettier-ignore
+export async function searchKeysInArray(
+  arr: any[],
+  reglas: {
+    key: string;
+    tipoValidacion?: "existe" | "notExiste" | "tipo" | "igual" | "diferente";
+    valor?: any;
+  }[],
+  estricto: boolean = true
+): Promise<boolean> {
+  if (!Array.isArray(arr)) return false;
+
+  const cumpleReglas = (item: any) =>
+    reglas.every(regla => {
+      const tipo = regla.tipoValidacion ?? "existe";
+      switch (tipo) {
+        case "existe":
+          return Object.prototype.hasOwnProperty.call(item, regla.key);
+        case "notExiste":
+          return !Object.prototype.hasOwnProperty.call(item, regla.key);
+        case "tipo":
+          return Object.prototype.hasOwnProperty.call(item, regla.key) &&
+            typeof item[regla.key] === regla.valor;
+        case "igual":
+          return Object.prototype.hasOwnProperty.call(item, regla.key) &&
+            item[regla.key] === regla.valor;
+        case "diferente":
+          return Object.prototype.hasOwnProperty.call(item, regla.key) &&
+            item[regla.key] !== regla.valor;
+        default:
+          // Autocompletado inteligente:
+          if (regla.valor === undefined) {
+            return Object.prototype.hasOwnProperty.call(item, regla.key);
+          }
+          if (typeof regla.valor === "string" || typeof regla.valor === "number" || typeof regla.valor === "boolean") {
+            return Object.prototype.hasOwnProperty.call(item, regla.key) &&
+              item[regla.key] === regla.valor;
+          }
+          return false;
+      }
+    });
+
+  return estricto ? arr.every(cumpleReglas) : arr.some(cumpleReglas);
 }

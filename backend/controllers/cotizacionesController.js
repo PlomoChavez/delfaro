@@ -1,12 +1,11 @@
-const { PrismaClient } = require("@prisma/client");
-const { exportData } = require("./controller");
 const {
   findOne,
   getAllFrom,
   deleteById,
   createOrUpdate,
 } = require("../db/functionsSQL");
-const prisma = new PrismaClient();
+
+const { escaparBarras } = require("../utils/helper");
 
 exports.deleteCotizacion = async (req, res, catalogo) => {
   const id = req.body.id;
@@ -87,9 +86,24 @@ exports.createOrUpdateCotizacion = async (req, res) => {
   try {
     let data = { ...req.body };
 
+    // Si configuracion ya es string, intenta parsear para evitar doble serialización
+    if (typeof data.configuracion === "string") {
+      try {
+        data.configuracion = JSON.parse(data.configuracion);
+      } catch (e) {
+        // Si falla el parseo, deja el string como está (puede ser un string plano)
+      }
+    }
+
+    // Escapa barras invertidas en todo el objeto antes de serializar
+    if (typeof data.configuracion === "object" && data.configuracion !== null) {
+      escaparBarras(data.configuracion);
+    }
+
+    // Ahora serializa correctamente
     data.configuracion = JSON.stringify(data.configuracion || {});
 
-    let tipoResponse = data.configuracion.id ? false : "id";
+    let tipoResponse = data.id ? false : "id";
 
     const response = await createOrUpdate({
       tabla: "cotizaciones",

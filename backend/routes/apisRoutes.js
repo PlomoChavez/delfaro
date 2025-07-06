@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const procesosAutomatizadosController = require('../controllers/procesosAutomatizadosController');
 const catalogoController = require('../controllers/catalogoController');
 const companiaController = require('../controllers/companiaController');
 const companiaRepresentantesController = require('../controllers/companiaRepresentantesController');
@@ -21,6 +22,8 @@ router.post('/api/verificar', authController.verificarToken);
 
 router.post('/api/catalogos/ramos', (req, res) => catalogosController.getCatalogo(req, res, 'ramos'));
 router.post('/api/wizard/cotizacion/companias', (req, res) => cotizacionesController.getCompniasByRamo(req, res));
+
+router.post('/api/cotizaciones/estimar', procesosAutomatizadosController.estimarCotizaciones);
 
 
 // Catálogos Generales

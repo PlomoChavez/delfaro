@@ -26,6 +26,7 @@ declare module 'vue' {
     AppStepper: typeof import('./src/@core/components/AppStepper.vue')['default']
     AppTextarea: typeof import('./src/@core/components/app-form-elements/AppTextarea.vue')['default']
     AppTextField: typeof import('./src/@core/components/app-form-elements/AppTextField.vue')['default']
+    AutosPropuestas: typeof import('./src/components/forms/cotizaciones/componentes/autosPropuestas.vue')['default']
     BtnAtras: typeof import('./src/components/apps/BtnAtras.vue')['default']
     BuyNow: typeof import('./src/@core/components/BuyNow.vue')['default']
     CalendarEventHandler: typeof import('./src/components/apps/calendar/CalendarEventHandler.vue')['default']

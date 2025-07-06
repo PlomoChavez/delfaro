@@ -1,5 +1,6 @@
 // const { ejecutarCotizacion } = require("../bots/pruebas");
 const { ejecutarCotizacion } = require("../bots/planSeguroCotizacion");
+const { handleEstimarCotizaciones } = require("../controllers/robotController");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -243,6 +244,45 @@ exports.obtenerTituloGoogle = async (req, res) => {
     );
 
     res.json(resultado);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.estimarCotizaciones = async (req, res) => {
+  try {
+    let data = req.body; // Obtener los datos del cuerpo de la solicitud
+    const resultado = [];
+
+    const cotizaciones = Object.entries(data.configuracion.compania);
+
+    // Lanzar procesos con delay de 5 segundos entre cada inicio
+    await Promise.all(
+      cotizaciones.map(async ([key, cotizacion], idx) => {
+        await delay(idx * 5000); // Espera 0ms para el primero, 5s para el segundo, 10s para el tercero, etc.
+
+        let dataCotizacion = {
+          titular: data.configuracion.titular,
+          numeroCotizacion: cotizacion?.numeroCotizacion ?? null,
+          detalles: cotizacion?.detalles ?? {},
+          cotizacion: cotizacion,
+        };
+
+        const detalle = await handleEstimarCotizaciones(dataCotizacion);
+
+        resultado.push({
+          ...cotizacion,
+          numeroCotizacion: detalle.numeroCotizacion,
+          detalles: detalle.detalles,
+        });
+      })
+    );
+
+    res.json({
+      result: true,
+      message: "Cotizaciones estimadas con éxito",
+      data: resultado,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

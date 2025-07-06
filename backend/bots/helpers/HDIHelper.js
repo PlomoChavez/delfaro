@@ -59,9 +59,6 @@ async function waitForDivWithContent(driver, idDiv, timeout = 10000) {
     }
     await sleep(300);
   }
-  throw new Error(
-    `El div con id "${idDiv}" no tuvo contenido en el tiempo especificado.`
-  );
 }
 async function waitForTablaCotizacionesConFilas(driver, timeout = 10000) {
   const end = Date.now() + timeout;

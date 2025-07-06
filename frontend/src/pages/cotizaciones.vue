@@ -24,9 +24,18 @@ const apiEndpoints = {
 
 const handleActionsEdit = (dataRow: any) => {
   let tmp = JSON.parse(JSON.stringify(dataRow)); // Clonar el objeto para evitar mutaciones
-  tmp.configuracion = JSON.parse(tmp.configuracion || "{}"); // Asegurarse de que configuracion sea un objeto
+
+  // Solo parsea si es string
+  if (typeof tmp.configuracion == "string") {
+    try {
+      tmp.configuracion = JSON.parse(tmp.configuracion);
+    } catch (e) {
+      console.log("Error al parsear la configuración:", e);
+      return;
+    }
+  }
+
   dataLocal.value = tmp;
-  console.log("handleActionsEdit", tmp);
   showWizard.value = true;
 };
 

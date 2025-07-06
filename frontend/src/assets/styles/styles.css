@@ -1,6 +1,7 @@
 
 .bgRed { background-color: red !important; }
 .textDanger { color: red !important; } 
+.textSuccess { color: var(--v-theme-success)!important; } 
 
 
 .w-fit { width: fit-content; }
@@ -20,6 +21,15 @@
 .font18 { font-size: 18px !important; }
 .font20 { font-size: 20px !important; }
 .font22 { font-size: 22px !important; }
+.font24 { font-size: 24px !important; }
+.font26 { font-size: 26px !important; }
+.font28 { font-size: 28px !important; }
+.font30 { font-size: 30px !important; }
+.font32 { font-size: 32px !important; }
+.font34 { font-size: 34px !important; }
+.font36 { font-size: 36px !important; }
+.font38 { font-size: 38px !important; }
+.font40 { font-size: 40px !important; }
 
 
 
@@ -87,7 +97,7 @@
 
 .activeItem {
   border-color: rgb(var(--v-theme-primary))!important;
-  border-width: 4px!important;
+  border-width: 1px!important;
   box-shadow: 0 0 10px rgb(var(--v-theme-primary))!important;
 }
 
