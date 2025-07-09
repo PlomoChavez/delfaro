@@ -57,11 +57,14 @@ async function setInputValue(driver, {
     value, 
     by = "id", 
     sleeptime = 0, 
+    changeFocus = true
   }) {
   if (sleeptime > 0) await sleep(sleeptime);
   const input = await driver.wait( until.elementLocated(getBy(by, locator)), 10000 );
   await input.sendKeys(value);
-  await input.sendKeys('\uE004'); // '\uE004' es la tecla TAB en WebDriver
+  if (changeFocus) {
+    await input.sendKeys('\uE004'); // '\uE004' es la tecla TAB en WebDriver
+  }
 }
 
 async function getElement(driver, { locator, by = "id", multiple = false }) {
@@ -108,6 +111,26 @@ async function selectMatOption(driver, { locator, optionText, by = "id" }) {
       `No se encontró la opción '${optionText.trim()}' para el select '${locator}'.`
     );
   }
+}
+
+async function enableFirstDisabledOption(driver, selectId) {
+  await driver.executeScript(`
+    var opt = document.querySelector("#${selectId} option[disabled]");
+    if(opt) opt.removeAttribute("disabled");
+  `);
+}
+
+async function getSelectOptions(driver, { locator, by = "id" }) {
+  const select = await driver.findElement(getBy(by, locator));
+  const options = await select.findElements(By.tagName("option"));
+  const result = [];
+  for (const option of options) {
+    const value = await option.getAttribute("value");
+    const label = await option.getText();
+    const selected = await option.isSelected();
+    result.push({ value, label, selected });
+  }
+  return result;
 }
 
 async function selectOptionInSelect(
@@ -264,11 +287,117 @@ async function setHover(driver, { locator, by = "id", timeout = 10000 }) {
   await driver.actions({ bridge: true }).move({ origin: element }).perform();
 }
 
-async function scrollToBottom(driver) {
-  await driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+async function scrollToBottom(driver, options = null) {
+  if (!options) {
+    // Scroll al final de la ventana
+    await driver.executeScript(
+      "window.scrollTo(0, document.body.scrollHeight);"
+    );
+  } else {
+    const { locator, by = "id" } = options;
+    let script;
+    if (by === "id") {
+      script = `
+        var el = document.getElementById('${locator}');
+        if (el) el.scrollTop = el.scrollHeight;
+      `;
+    } else if (by === "name") {
+      script = `
+        var el = document.getElementsByName('${locator}')[0];
+        if (el) el.scrollTop = el.scrollHeight;
+      `;
+    } else if (by === "css") {
+      script = `
+        var el = document.querySelector('${locator}');
+        if (el) el.scrollTop = el.scrollHeight;
+      `;
+    } else if (by === "xpath") {
+      script = `
+        var el = document.evaluate("${locator}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (el) el.scrollTop = el.scrollHeight;
+      `;
+    } else {
+      throw new Error("Tipo de búsqueda no soportado en scrollToBottom: " + by);
+    }
+    await driver.executeScript(script);
+  }
 }
 
+async function getAutocompleteOptions(driver, { locator, by = "id" }) {
+  const ul = await driver.findElement(getBy(by, locator));
+  const divs = await ul.findElements(By.css("li > div.ui-menu-item-wrapper"));
+  const result = [];
+  for (const div of divs) {
+    const value = await div.getText();
+    const id = await div.getAttribute("id");
+    result.push({ value, id });
+  }
+  return result;
+}
+
+// prettier-ignore
+async function selectInUL(
+  driver,
+  { locator, by = "id", tipo = "numero", value = 1 }
+) {
+  const ul = await driver.findElement(getBy(by, locator));
+  const divs = await ul.findElements(By.css("li > div.ui-menu-item-wrapper"));
+
+  let targetDiv = null;
+
+  if (tipo === "numero") {
+    if (typeof value !== "number" || value < 0 || value >= divs.length) {
+      throw new Error("Índice fuera de rango para selectLIInUL");
+    }
+    targetDiv = divs[value];
+  } else if (tipo === "valor") {
+    for (const div of divs) {
+      const text = await div.getText();
+      if (text.trim() === String(value).trim()) {
+        targetDiv = div;
+        break;
+      }
+    }
+  } else if (tipo === "id") {
+    for (const div of divs) {
+      const idAttr = await div.getAttribute("id");
+      if (idAttr === value) {
+        targetDiv = div;
+        break;
+      }
+    }
+  } else if (tipo === "name") {
+    for (const div of divs) {
+      const nameAttr = await div.getAttribute("name");
+      if (nameAttr === value) {
+        targetDiv = div;
+        break;
+      }
+    }
+  } else {
+    throw new Error("Tipo de búsqueda no soportado en selectLIInUL: " + tipo);
+  }
+
+  if (!targetDiv) {
+    throw new Error(
+      `No se encontró el elemento <li> en el <ul> (${locator}) con ${tipo}: ${value}`
+    );
+  }
+
+  await targetDiv.click();
+}
+async function obtenerCantidadFilasTablaCotizaciones(
+  driver,
+  idElemento = "tableCotizaciones_wrapper"
+) {
+  const tbody = await driver.findElement(By.css(`#${idElemento} tbody`));
+  const filas = await tbody.findElements(By.css("tr"));
+  return filas.length;
+}
 module.exports = {
+  obtenerCantidadFilasTablaCotizaciones,
+  selectInUL,
+  getAutocompleteOptions,
   openPage,
   waitForElement,
   sleep,
@@ -287,4 +416,6 @@ module.exports = {
   forzarCierre,
   setHover,
   scrollToBottom,
+  enableFirstDisabledOption,
+  getSelectOptions,
 };

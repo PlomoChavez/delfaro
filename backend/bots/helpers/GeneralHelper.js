@@ -1,3 +1,8 @@
+const path = require("path");
+const { By } = require("selenium-webdriver");
+const axios = require("axios");
+const fs = require("fs");
+
 function convertirFechaHora(fechaHoraStr) {
   // Ejemplo de entrada: "01-07-2025 / 02:47:31 pm"
   const [fecha, hora, ampm] = fechaHoraStr.replace(" / ", " ").split(/[\s:]+/);
@@ -35,7 +40,42 @@ function normalizarKey(key) {
     .toLowerCase();
 }
 
+async function descargarConCookies(driver, url, folder, nombreArchivo) {
+  nombreArchivo = nombreArchivo + ".pdf";
+  let rutaCompletaArchivo = path.join(folder, nombreArchivo);
+
+  try {
+    // Asegura que la carpeta existe
+    fs.mkdirSync(folder, { recursive: true });
+
+    const cookies = await driver.manage().getCookies();
+    const cookieString = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
+    const response = await axios.get(url, {
+      responseType: "stream",
+      headers: {
+        Cookie: cookieString,
+      },
+    });
+
+    const writer = fs.createWriteStream(rutaCompletaArchivo);
+    response.data.pipe(writer);
+
+    return await new Promise((resolve, reject) => {
+      writer.on("finish", () => {
+        resolve({ status: true, path: rutaCompletaArchivo });
+      });
+      writer.on("error", (err) => {
+        reject({ status: false, path: rutaCompletaArchivo, error: err });
+      });
+    });
+  } catch (error) {
+    return { status: false, path: rutaCompletaArchivo, error };
+  }
+}
+
 module.exports = {
   normalizarKey,
+  descargarConCookies,
   convertirFechaHora,
 };

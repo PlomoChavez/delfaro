@@ -23,6 +23,9 @@ router.post('/api/verificar', authController.verificarToken);
 router.post('/api/catalogos/ramos', (req, res) => catalogosController.getCatalogo(req, res, 'ramos'));
 router.post('/api/wizard/cotizacion/companias', (req, res) => cotizacionesController.getCompniasByRamo(req, res));
 
+
+// // Robot
+router.post('/api/demo/bots', robotController.demoRobots);
 router.post('/api/cotizaciones/estimar', procesosAutomatizadosController.estimarCotizaciones);
 
 
@@ -111,8 +114,6 @@ router.post('/api/cotizaciones', cotizacionesController.getAllCotizaciones);
 router.post('/api/cotizaciones/update', cotizacionesController.createOrUpdateCotizacion);
 router.post('/api/cotizaciones/delete', cotizacionesController.deleteCotizacion);
 
-// // Robot
-router.post('/api/demo/bots', robotController.demoRobots);
 
 // Catálogos Específicos
 router.post('/api/catalogos/tipos-usuarios', (req, res) => catalogoController.getCatalogo(req, res, 'tipos-usuarios'));

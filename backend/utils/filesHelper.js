@@ -39,6 +39,19 @@ async function currentPath() {
   return __dirname;
 }
 
+async function getPathFolderCotizaciones(folders = null) {
+  let tmp = await currentPath();
+  tmp = path.join(tmp, "../", "files", "cotizaciones");
+  if (folders) {
+    if (Array.isArray(folders)) {
+      tmp = path.join(tmp, ...folders);
+    } else if (typeof folders === "string") {
+      tmp = path.join(tmp, folders);
+    }
+  }
+  return tmp;
+}
+
 /**
  * Obtiene el path absoluto de un archivo en un directorio.
  * @param {string} dir - Directorio.
@@ -71,4 +84,5 @@ module.exports = {
   obtenerPathArchivo,
   getPath,
   filePathToPublicUrl,
+  getPathFolderCotizaciones,
 };
