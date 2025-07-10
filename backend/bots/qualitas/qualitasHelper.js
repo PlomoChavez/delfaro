@@ -8,9 +8,18 @@ const { getPathFolderCotizaciones } = require("../../utils/filesHelper");
  * @param {string} texto - Texto exacto o parcial dentro del <u> (ej: número de cotización)
  * @param {string} nombreArchivo - (No se usa aquí, solo para compatibilidad)
  */
-async function descargarArchivoLinkPorTexto(driver, texto) {
+async function descargarArchivoHipervinculo(driver, href, nombreArchivo) {
   let pathDirectorioCotizaciones = await getPathFolderCotizaciones("qualitas");
+  let responseFile = await descargarConCookies(
+    driver,
+    href,
+    pathDirectorioCotizaciones,
+    nombreArchivo
+  );
+  return responseFile;
+}
 
+async function handleDescargarPDF(driver, texto) {
   let response = {
     status: false,
     message: "No se pudo descargar el archivo.",
@@ -36,7 +45,7 @@ async function descargarArchivoLinkPorTexto(driver, texto) {
           const href = await a.getAttribute("href");
 
           // prettier-ignore
-          let responseFile = await descargarConCookies(driver,href,pathDirectorioCotizaciones,"cotizacion_" + texto);
+          let responseFile = await descargarArchivoHipervinculo(driver,href,"cotizacion_" + texto);
 
           if (responseFile.status) {
             response = responseFile;
@@ -91,6 +100,7 @@ async function esperarFilasTablaCotizaciones(driver, timeout = 10000) {
 }
 
 module.exports = {
-  descargarArchivoLinkPorTexto,
+  handleDescargarPDF,
+  descargarArchivoHipervinculo,
   esperarFilasTablaCotizaciones,
 };

@@ -20,8 +20,9 @@ const {
 } = require("../helpers/seleniumHelper");
 
 const {
-  descargarArchivoLinkPorTexto,
+  handleDescargarPDF,
   esperarFilasTablaCotizaciones,
+  descargarArchivoHipervinculo,
 } = require("./qualitasHelper");
 
 const { filePathToPublicUrl } = require("../../utils/filesHelper");
@@ -148,7 +149,6 @@ async function generadorCotizacion(driver, data) {
   let versiones = await getSelectOptions(driver, {
     locator: "selectVersion",
   });
-  console.log("Opciones de versiones:", versiones);
 
   await sleep(1000);
 
@@ -166,7 +166,6 @@ async function generadorCotizacion(driver, data) {
   const direcciones = await getAutocompleteOptions(driver, {
     locator: "ui-id-2",
   });
-  console.log("direcciones de autocompletado:", direcciones);
 
   await selectInUL(driver, {
     locator: "ui-id-2",
@@ -210,25 +209,45 @@ async function generadorCotizacion(driver, data) {
 
   let detalles = {};
 
-  detalles.numeroCotizacion = await getElementText(driver, {
+  let numeroCotizacion = await getElementText(driver, {
     locator: "resumenNumCotizacion",
     by: "id",
   });
 
-  console.log("Valor del campo:", detalles);
+  numeroCotizacion = numeroCotizacion.trim();
 
+  await sleep(1000);
+  await scrollToBottom(driver);
   await sleep(1000);
   await scrollToBottom(driver);
 
   let tmp = await obtenerValoresPorId(driver, campos);
+
   detalles = {
     ...detalles,
     ...tmp,
   };
+
   detalles.direcciones = direcciones;
   detalles.versiones = versiones;
-  //
-  console.log("Detalles de la cotización:", detalles);
+
+  let btnDownload = await getElement(driver, { locator: "descargarPDF" });
+  let href = await btnDownload.getAttribute("href");
+
+  // prettier-ignore
+  let responseFile = await descargarArchivoHipervinculo( driver,href,"cotizacion_" + numeroCotizacion);
+  let archivo = null;
+
+  if (responseFile.status) {
+    let pathFinal = await filePathToPublicUrl(responseFile.path);
+    archivo = pathFinal;
+  }
+
+  return {
+    numeroCotizacion,
+    detalles: detalles,
+    archivo: archivo,
+  };
 }
 
 async function buscarCotizacion(driver, data) {
@@ -256,13 +275,13 @@ async function buscarCotizacion(driver, data) {
 
   await sleep(1000);
 
-  let tmp = await descargarArchivoLinkPorTexto(driver, data.numeroCotizacion);
+  // prettier-ignore
+  let tmp = await handleDescargarPDF(driver, data.numeroCotizacion);
 
   if (tmp.status) {
     let pathFinal = await filePathToPublicUrl(tmp.path);
     data.detalles.archivo = pathFinal;
   }
-  console.log("Respuesta de descarga:", tmp);
 
   return data;
 }

@@ -61,6 +61,7 @@ declare global {
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const getFechaAMPM: typeof import('./src/utils/dateHelper')['getFechaAMPM']
   const getTokenRemainingSeconds: typeof import('./src/utils/authHelper')['getTokenRemainingSeconds']
   const h: typeof import('vue')['h']
   const handleLogOut: typeof import('./src/utils/authHelper')['handleLogOut']
@@ -94,6 +95,7 @@ declare global {
   const mapWritableState: typeof import('pinia')['mapWritableState']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
+  const obtenerFechaHoraActual: typeof import('./src/utils/dateHelper')['obtenerFechaHoraActual']
   const onActivated: typeof import('vue')['onActivated']
   const onBeforeMount: typeof import('vue')['onBeforeMount']
   const onBeforeRouteLeave: typeof import('vue-router/auto')['onBeforeRouteLeave']
@@ -443,6 +445,7 @@ declare module 'vue' {
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getFechaAMPM: UnwrapRef<typeof import('./src/utils/dateHelper')['getFechaAMPM']>
     readonly getTokenRemainingSeconds: UnwrapRef<typeof import('./src/utils/authHelper')['getTokenRemainingSeconds']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly handleLogOut: UnwrapRef<typeof import('./src/utils/authHelper')['handleLogOut']>

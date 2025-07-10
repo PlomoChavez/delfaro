@@ -254,30 +254,22 @@ exports.estimarCotizaciones = async (req, res) => {
     let data = req.body; // Obtener los datos del cuerpo de la solicitud
     const resultado = [];
 
-    const cotizaciones = Object.entries(data.configuracion.compania);
+    const cotizaciones = Object.entries(data.configuracion.cotizaciones);
 
     // Lanzar procesos con delay de 5 segundos entre cada inicio
     await Promise.all(
       cotizaciones.map(async ([key, cotizacion], idx) => {
         await delay(idx * 5000); // Espera 0ms para el primero, 5s para el segundo, 10s para el tercero, etc.
 
-        let dataCotizacion = {
-          titular: data.configuracion.titular,
-          numeroCotizacion: cotizacion?.numeroCotizacion ?? null,
-          detalles: cotizacion?.detalles ?? {},
-          cotizacion: cotizacion,
-        };
-
-        const detalle = await handleEstimarCotizaciones(dataCotizacion);
+        const detalle = await handleEstimarCotizaciones(cotizacion);
 
         resultado.push({
           ...cotizacion,
-          numeroCotizacion: detalle.numeroCotizacion,
-          detalles: detalle.detalles,
+          ...detalle,
         });
       })
     );
-
+    console.log("Cotizaciones estimadas:", resultado);
     res.json({
       result: true,
       message: "Cotizaciones estimadas con éxito",

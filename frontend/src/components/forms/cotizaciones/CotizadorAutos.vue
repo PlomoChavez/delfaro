@@ -113,7 +113,7 @@ const isEstimadas: any = ref([]);
 const estimaciones: any = ref({});
 
 // prettier-ignore
-const localData: any = ref(props.registro ? { ...props.registro } : { compania: [], titular: {} });
+const localData: any = ref(props.registro ? { ...props.registro } : { companias: [], titular: {} });
 
 const handleStepPrev = () => {
   if (step.value === 1) {
@@ -128,16 +128,39 @@ const handleStepNext = () => {
   handleUpdateCotizacion();
 };
 
+const handleAddCotizacionesEstimadas = async (data: any) => {
+  console.log("handleAddCotizacionesEstimadas", data);
+  data = data.filter((item: any) => {
+    console.log("item", item);
+    const idx = localData.value.configuracion.cotizaciones.findIndex(
+      (c: any) => c.id === item.id
+    );
+    if (idx !== -1) {
+      // Si existe, reemplaza la cotización
+      localData.value.configuracion.cotizaciones[idx] = item;
+      return false; // Elimínala del array data
+    }
+    localData.value.configuracion.cotizaciones.push(item);
+  });
+
+  localData.value.configuracion.cotizaciones.push(...data);
+  console.log(
+    "handleAddCotizacionesEstimadas",
+    localData.value.configuracion.cotizaciones
+  );
+  // await handleUpdateCotizacion();
+};
+
 const handleSelectCompania = (item: any) => {
   item = toRaw(item); // Asegúrate de que el item sea un objeto plano
   console.log("handleSelectCompania", item);
-  if (!Array.isArray(localData.value.configuracion.compania)) {
-    localData.value.configuracion.compania = [];
+  if (!Array.isArray(localData.value.configuracion.companias)) {
+    localData.value.configuracion.companias = [];
   }
-  localData.value.configuracion.compania = toggleItemInArray(
-    localData.value.configuracion.compania,
+  localData.value.configuracion.companias = toggleItemInArray(
+    localData.value.configuracion.companias,
     item,
-    "id"
+    "compania_id"
   );
 };
 
@@ -176,7 +199,18 @@ const getCompanias = async () => {
     },
   });
   if (response.data.result) {
-    companias.value = response.data.data;
+    let tmp: any = [];
+    response.data.data.forEach((item: any) => {
+      tmp.push({
+        compania_id: item.id,
+        companiaCorto: item.nombreCorto,
+        compania: item.nombre,
+        companias_productos: item.companias_productos,
+        ramo: localData.value.ramo,
+        ramo_id: localData.value.ramo_id,
+      });
+    });
+    companias.value = tmp;
   } else {
     showErrorMessage({
       title: "Error",
@@ -197,7 +231,7 @@ const handleUpdateCotizacion = async () => {
     nombre: nombreCompleto,
     configuracion: {
       ...localDataRaw.configuracion,
-      compania : localDataRaw?.configuracion?.compania ?? [],
+      companias : localDataRaw?.configuracion?.companias ?? [],
       step: step.value,
     },
   };
@@ -211,9 +245,7 @@ const updateCotizacion = async (data: any) => {
     method: "POST",
     data: data,
   });
-
   const dataResponse = response.data;
-
   if (dataResponse.result) {
     if (localData.value.id == undefined) {
       localData.value.id = dataResponse.data;
@@ -229,6 +261,45 @@ const updateCotizacion = async (data: any) => {
   }
 };
 
+const handleFiltrandoCotizacionesPorCompania = async () => {
+  // IDs de compañías seleccionadas
+  const companiasIds = localData.value.configuracion.companias.map(
+    (c: any) => c.compania_id
+  );
+
+  // Cotizaciones actuales
+  let cotizacionesActuales = localData.value.configuracion.cotizaciones || [];
+
+  // Filtra las cotizaciones que siguen seleccionadas
+  let cotizacionesFiltradas = cotizacionesActuales.filter((c: any) =>
+    companiasIds.includes(c.compania_id)
+  );
+
+  // Encuentra el id más alto actual
+  let maxId = 0;
+  if (cotizacionesFiltradas.length > 0) {
+    maxId = Math.max(
+      ...cotizacionesFiltradas.map((c: any) => Number(c.id) || 0)
+    );
+  }
+
+  // Agrega nuevas cotizaciones para compañías seleccionadas que no están en cotizacionesFiltradas
+  localData.value.configuracion.companias.forEach((compania: any) => {
+    // prettier-ignore
+    if ( !cotizacionesFiltradas.some((c: any) => c.compania_id === compania.compania_id ) ) {
+      maxId++;
+      cotizacionesFiltradas.push({
+        id: maxId,
+        ...compania,
+        titular: localData.value.configuracion.titular,
+      });
+    }
+  });
+
+  // Actualiza el array final
+  localData.value.configuracion.cotizaciones = cotizacionesFiltradas;
+};
+
 // prettier-ignore
 async function handleCotizacionesEstimadas(arr: any) {
   let tmp = await searchKeysInArray(arr, [{ key: "numeroCotizacion", tipoValidacion: "existe" }]);
@@ -236,9 +307,12 @@ async function handleCotizacionesEstimadas(arr: any) {
 }
 
 // prettier-ignore
-async function handleCotizacionesParaEstimar(arr: any[]) { 
-  let tmp = await searchKeysInArray(arr, [{ key: "esModificado", tipoValidacion: "igual", valor: true }], true);
-  return tmp
+async function handleCotizacionesParaEstimar(arr: any[]) {
+  let tmp = await searchKeysInArray(arr, [
+    { key: "numeroCotizacion"},
+    { key: "detalles"},
+  ], true);
+  return !tmp
 }
 
 const estimarCotizaciones = async () => {
@@ -251,10 +325,10 @@ const estimarCotizaciones = async () => {
   const dataResponse = response.data;
 
   if (dataResponse.result) {
-    localData.value.configuracion.compania = dataResponse.data;
-    // handleStepNext();
+    await handleAddCotizacionesEstimadas(dataResponse.data);
+    localData.value.configuracion.tiempoEstimacion = await getFechaAMPM();
     handleUpdateCotizacion(); // Actualiza la cotización después de estimar
-    await handleCotizacionesEstimadas(localData.configuracion.compania);
+    await handleCotizacionesEstimadas(localData.configuracion.companias);
   } else {
     showErrorMessage({
       title: "Error",
@@ -270,25 +344,26 @@ onMounted(async () => {
 
   step.value = localData.value?.configuracion?.step ?? 1;
 
-  await getCompanias();
+  if (step.value === 1) {
+    await getCompanias();
+  }
 });
 
 watch(step, async (nuevoValor, valorAnterior) => {
-  console.log("Step cambió de", valorAnterior, "a", nuevoValor);
-  // await handleCotizacionesEstimadas(localData.configuracion.compania);
   if (nuevoValor === 3) {
-    // let tmp = await handleCotizacionesParaEstimar(
-    //   localData.configuracion.compania
-    // );
-    // if (tmp) {
-    // estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
-    // }
+    await handleFiltrandoCotizacionesPorCompania();
+    // prettier-ignore
+    let canEstimar = await handleCotizacionesParaEstimar( localData.value.configuracion.cotizaciones );
+    if (canEstimar) {
+      estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
+    }
   }
 });
 </script>
 
 <template>
   <div>
+    <pre>{{ step }}</pre>
     <!-- prettier-ignore -->
     <BtnAtras titulo="Volver a cotizaciones" @atras="handleCancelarCotizacion" />
     <h1 class="module-title">Cotizador de Seguros de Autos</h1>
@@ -318,10 +393,10 @@ watch(step, async (nuevoValor, valorAnterior) => {
             :key="item"
             class="mb-5 card cardCompania"
             @click="handleSelectCompania(item)"
-            :class="{ ' activeItem ': isItemSelected(localData.configuracion.compania, item, 'id') }"
+            :class="{ ' activeItem ': isItemSelected(localData.configuracion.companias, item, 'compania_id') }"
         >
           <!-- prettier-ignore -->
-          <p class="p-0 m-0 fontBold"> {{ item.nombreCorto }} </p>
+          <p class="p-0 m-0 fontBold"> {{ item.companiaCorto }} </p>
         </div>
       </div>
       <div class="d-flex justify-between w-full mt-5">
@@ -336,10 +411,6 @@ watch(step, async (nuevoValor, valorAnterior) => {
     <div v-if="step == 3">
       <h2 class="title wFull text-center">Estimando cotizaciones</h2>
       <div class="divRows mt-3">
-        <!-- prettier-ignore -->
-        <!-- prettier-ignore -->
-        <!-- <pre>isEstimadas {{ isEstimadas ? 'true' : 'false' }}</pre>
-        <pre>isEstimadas {{ companias }}</pre> -->
         <Propuestas
           :configuracion="localData.configuracion"
           @seleccionar="handleSelectCotizacion"
@@ -371,6 +442,8 @@ watch(step, async (nuevoValor, valorAnterior) => {
         <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
       </div>
     </div>
+
+    <pre>{{ localData }}</pre>
   </div>
 </template>
 

@@ -9,25 +9,31 @@
         :class="seleccionadas.includes(item) ? 'activeItem' : ''"
       >
         <div class="propuesta-header-horizontal">
-          <span class="nombre-compania">{{ item.nombreCorto }}</span>
+          <span class="nombre-compania">{{ item.companiaCorto }}</span>
         </div>
         <div class="propuesta-detalles-horizontal">
           <div class="detalle-row">
+            <span class="detalle-key">Núm de Cotizacion:</span>
+            <span class="detalle-value">{{ item.numeroCotizacion }}</span>
+          </div>
+          <div class="detalle-row">
             <span class="detalle-key">Prima neta:</span>
-            <span class="detalle-value">{{ item.detalles.primaneta }}</span>
+            <span class="detalle-value">{{ item.detalles.primaNeta }}</span>
           </div>
           <div class="detalle-row">
             <span class="detalle-key">Derechos de póliza:</span>
-            <span class="detalle-value">{{ item.detalles.derechopoliza }}</span>
+            <span class="detalle-value">{{
+              item.detalles.expedicionPoliza
+            }}</span>
           </div>
           <div class="detalle-row">
             <span class="detalle-key">IVA:</span>
-            <span class="detalle-value">{{ item.detalles.iva }}</span>
+            <span class="detalle-value">{{ item.detalles.iVA }}</span>
           </div>
         </div>
         <div class="propuesta-actions-vertical">
           <a
-            :href="item.detalles.archivo"
+            :href="item.archivo"
             target="_blank"
             rel="noopener"
             class="btn-icon"
@@ -57,7 +63,7 @@ const props = defineProps<{
 const emit = defineEmits(["seleccionar"]);
 
 const seleccionadas = ref<number[]>([]);
-const propuestas = ref<any>(props.configuracion.compania || []);
+const propuestas = ref<any>(props.configuracion.cotizaciones || []);
 
 async function seleccionar(item: any) {
   await toggleItemInArray(seleccionadas.value, item, "id");
