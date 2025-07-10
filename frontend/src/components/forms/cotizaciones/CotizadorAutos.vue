@@ -2,6 +2,7 @@
 // Make sure the file exists at the specified path and extension
 import BtnAtras from "@/components/apps/BtnAtras.vue";
 import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import PropuestaEdit from "@/components/forms/cotizaciones/componentes/autosPropuestaEdit.vue";
 import Propuestas from "@/components/forms/cotizaciones/componentes/autosPropuestas.vue";
 import { deepToRaw, isItemSelected, toggleItemInArray } from "@/utils/helper";
 import { toast } from "vue3-toastify";
@@ -108,9 +109,7 @@ const schemaInicial : any = [
 
 const step = ref(1);
 const companias: any = ref([]);
-const cotizaciones: any = ref([]);
-const isEstimadas: any = ref([]);
-const estimaciones: any = ref({});
+const cotizacion: any = ref(null);
 
 // prettier-ignore
 const localData: any = ref(props.registro ? { ...props.registro } : { companias: [], titular: {} });
@@ -167,14 +166,19 @@ const handleSelectCompania = (item: any) => {
 const handleSelectCotizacion = (item: any) => {
   item = toRaw(item); // Asegúrate de que el item sea un objeto plano
   console.log("handleSelectCotizacion", item);
-  if (!Array.isArray(localData.value.configuracion.cotizacion)) {
-    localData.value.configuracion.cotizacion = [];
+  if (!Array.isArray(localData.value.configuracion.seleccionadas)) {
+    localData.value.configuracion.seleccionadas = [];
   }
-  localData.value.configuracion.cotizacion = toggleItemInArray(
-    localData.value.configuracion.cotizacion,
+  localData.value.configuracion.seleccionadas = toggleItemInArray(
+    localData.value.configuracion.seleccionadas,
     item,
     "id"
   );
+};
+const handleEditarCotizacion = (data: any) => {
+  data = deepToRaw(data); // Asegúrate de que el data sea un objeto plano
+  console.log("handleEditarCotizacion", data);
+  cotizacion.value = data; // Asigna la cotización seleccionada para editar
 };
 
 const handleInicialSubmit = async () => {
@@ -337,6 +341,10 @@ const estimarCotizaciones = async () => {
   }
 };
 
+const handleActualizarCotizacion = async (data: any) => {
+  console.log("handleActualizarCotizacion", data);
+};
+
 onMounted(async () => {
   if (props.registro) {
     localData.value = { ...props.registro };
@@ -399,7 +407,7 @@ watch(step, async (nuevoValor, valorAnterior) => {
           <p class="p-0 m-0 fontBold"> {{ item.companiaCorto }} </p>
         </div>
       </div>
-      <div class="d-flex justify-between w-full mt-5">
+      <div class="d-flex justify-space-between w-100 mt-5">
         <div>
           <VBtn color="dark" variant="outlined" @click="handleStepPrev">
             Anterior
@@ -409,41 +417,61 @@ watch(step, async (nuevoValor, valorAnterior) => {
       </div>
     </div>
     <div v-if="step == 3">
-      <h2 class="title wFull text-center">Estimando cotizaciones</h2>
-      <div class="divRows mt-3">
-        <Propuestas
-          :configuracion="localData.configuracion"
-          @seleccionar="handleSelectCotizacion"
-        />
-      </div>
-      <div class="d-flex justify-between w-full mt-5">
+      <div v-if="!cotizacion">
+        <h2 class="title wFull text-center">Estimando cotizaciones</h2>
         <div>
-          <VBtn color="dark" variant="outlined" @click="handleStepPrev">
-            Anterior
-          </VBtn>
-        </div>
-        <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
-      </div>
-    </div>
-    <div v-if="step == 4">
-      <h2 class="title wFull text-center">Estimando cotizaciones</h2>
-      <div class="divRows mt-3">
-        <Propuestas
-          :configuracion="localData.configuracion"
-          @seleccionar="handleSelectCotizacion"
-        />
-      </div>
-      <div class="d-flex justify-between w-full mt-5">
-        <div>
-          <VBtn color="dark" variant="outlined" @click="handleStepPrev">
-            Anterior
-          </VBtn>
-        </div>
-        <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
-      </div>
-    </div>
+          <div class="card cardForm mx-auto mt-3">
+            <h2 class="w-full mb-2">Detalles de la cotizacion:</h2>
 
-    <pre>{{ localData }}</pre>
+            <!-- prettier-ignore -->
+            <div class="">
+              <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Titular:</span>
+              <span class="font24 ">{{ localData.nombre }}</span>
+            </div>
+            <!-- prettier-ignore -->
+            <div class="">
+              <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Vehiculo:</span>
+              <span class="font24 fontItalic ">{{ localData.configuracion.titular.marca }} - {{ localData.configuracion.titular.modelo }} - {{ localData.configuracion.titular.anio }} - {{ localData.configuracion.titular.version }}</span>
+            </div>
+
+            <!-- prettier-ignore -->
+            <div class="wFull">
+              <p class="p-0 m-0 w-full text-right textSecondary fontItalic">Ultima actualización:  <span class="fontBold">{{ localData.configuracion.tiempoEstimacion }}</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="divRows mt-3">
+          <Propuestas
+            :configuracion="localData.configuracion"
+            @editar="handleEditarCotizacion"
+            @seleccionar="handleSelectCotizacion"
+          />
+        </div>
+
+        <div class="d-flex justify-space-between w-100 mt-5">
+          <div>
+            <VBtn color="dark" variant="outlined" @click="handleStepPrev">
+              Anterior
+            </VBtn>
+          </div>
+          <div>
+            <VBtn
+              :disabled="!(localData.configuracion.seleccionadas || []).length"
+              @click="handleStepNext"
+            >
+              Siguiente
+            </VBtn>
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <PropuestaEdit
+          :cotizacion="cotizacion"
+          @cancelar="() => (cotizacion = null)"
+          @actualizar="handleActualizarCotizacion"
+        />
+      </div>
+    </div>
   </div>
 </template>
 

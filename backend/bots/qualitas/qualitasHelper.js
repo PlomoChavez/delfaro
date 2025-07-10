@@ -99,8 +99,30 @@ async function esperarFilasTablaCotizaciones(driver, timeout = 10000) {
   return false;
 }
 
+async function obtenerFrecuenciasPago(driver) {
+  const resultados = [];
+  // Selecciona todos los divs de tipo paymentTypeItem
+  const items = await driver.findElements(By.css(".paymentTypeItem"));
+
+  for (const item of items) {
+    // Dentro de cada item, busca el monto y el tipo
+    const montoElem = await item.findElement(By.css(".text-secondary.c4.mt-1"));
+    const tipoElem = await item.findElement(
+      By.css(".text-muted.c5.mt-1:not(.d-sm-none)")
+    );
+
+    const monto = await montoElem.getText();
+    const tipo = await tipoElem.getText();
+
+    resultados.push({ tipo, monto });
+  }
+
+  return resultados;
+}
+
 module.exports = {
   handleDescargarPDF,
+  obtenerFrecuenciasPago,
   descargarArchivoHipervinculo,
   esperarFilasTablaCotizaciones,
 };
