@@ -224,3 +224,9 @@
   .col-lg-1  { flex: 0 0 8.3333%;  max-width: 8.3333% !important; }
   .col-lg-0  { flex: 0 0 0%;       max-width: 0% !important; }
 }
+.formInput{
+
+  border: 2px solid #d5d5d5 !important;
+  border-radius: 8px !important;
+}
+

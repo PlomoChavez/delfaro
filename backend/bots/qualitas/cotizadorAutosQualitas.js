@@ -16,16 +16,36 @@ const {
   forzarCierre,
   enableFirstDisabledOption,
   selectInUL,
+  scrollToTop,
   obtenerCantidadFilasTablaCotizaciones,
 } = require("../helpers/seleniumHelper");
 
 const {
+  esperarElementoVisible,
   handleDescargarPDF,
   esperarFilasTablaCotizaciones,
   descargarArchivoHipervinculo,
+  obtenerFrecuenciasPago,
+  buscarFilaCotizacionPorTexto,
+  redireccionarCotizacionGuardada,
+  obtenerNombresCoberturasAccesorias,
+  obtenerCoberturasBasicas,
 } = require("./qualitasHelper");
 
 const { filePathToPublicUrl } = require("../../utils/filesHelper");
+const { deepPrint } = require("../../utils/helper");
+
+// prettier-ignore
+const campos = [
+  { name: "resumenNumCotizacion",   key: "numeroCotizacion" },
+  { name: "resumenPrimerPago",      key: "PrimerPago" },
+  { name: "resumenPagoSubsecuente", key: "PagoSubsecuente" },
+  { name: "resumenPrimaNeta",       key: "PrimaNeta" },
+  { name: "resumenTasaFin",         key: "TasaFin" },
+  { name: "resumenExpedicionPoliza",key: "ExpedicionPoliza" },
+  { name: "resumenIVA",             key: "IVA" },
+  { name: "resumenSubtotal",        key: "Subtotal" },
+];
 
 // prettier-ignore
 async function obtenerValoresPorId(driver, campos) {
@@ -167,13 +187,19 @@ async function generadorCotizacion(driver, data) {
     locator: "ui-id-2",
   });
 
+  console.log("Direcciones encontradas:", direcciones);
+
   await selectInUL(driver, {
     locator: "ui-id-2",
   });
+  await sleep(1000);
 
+  await scrollToBottom(driver);
+
+  await sleep(1000);
   await clickElement(driver, {
     locator: '//*[@id="formDatosDeVehiculo"]/button',
-    sleeptime: 100,
+    sleeptime: 1000,
     by: "xpath",
   });
 
@@ -184,10 +210,11 @@ async function generadorCotizacion(driver, data) {
 
   await sleep(1000);
   await scrollToBottom(driver);
+  await sleep(1000);
 
   await clickElement(driver, {
     locator: '//*[@id="formDatosDeCotizacion"]/button',
-    sleeptime: 100,
+    sleeptime: 1000,
     by: "xpath",
   });
 
@@ -195,18 +222,23 @@ async function generadorCotizacion(driver, data) {
   await scrollToBottom(driver, { locator: "coberturasAccesorias", by: "id" });
   await sleep(1000);
   await scrollToBottom(driver);
-
-  await clickElement(driver, {
-    locator:
-      "//button[contains(@class, 'btn-primary') and contains(@class, 'next') and normalize-space(text())='Siguiente']",
-    by: "xpath",
-  });
-
   await sleep(1000);
+
+  console.log("Esperando ...");
+  await scrollToBottom(driver);
+  console.log("Esperando a que se cargue el botón de siguiente...");
+  await clickElement(driver, {
+    locator: "button.btn.btn-primary.next[type='submit']",
+    by: "css",
+  });
+  console.log("Esperando a que se genere la cotización...");
+  await sleep(1000);
+
   await waitForElement(driver, {
     locator: "resumenNumCotizacion",
   });
 
+  await sleep(1000);
   let detalles = {};
 
   let numeroCotizacion = await getElementText(driver, {
@@ -214,7 +246,9 @@ async function generadorCotizacion(driver, data) {
     by: "id",
   });
 
+  await sleep(1000);
   numeroCotizacion = numeroCotizacion.trim();
+  console.log("Número de cotización:", numeroCotizacion);
 
   await sleep(1000);
   await scrollToBottom(driver);
@@ -243,11 +277,24 @@ async function generadorCotizacion(driver, data) {
     archivo = pathFinal;
   }
 
-  return {
+  await clickElement(driver, {
+    locator:
+      '//span[contains(@class, "edit") and @data-target="#collapseCoberturas" and normalize-space(text())="Editar"]',
+    by: "xpath",
+  });
+
+  data = {
+    ...data,
     numeroCotizacion,
     detalles: detalles,
     archivo: archivo,
   };
+
+  data = await await getDetallesCotizacion(driver, data);
+
+  // deepPrint(data);
+
+  return data;
 }
 
 async function buscarCotizacion(driver, data) {
@@ -274,29 +321,48 @@ async function buscarCotizacion(driver, data) {
   await esperarFilasTablaCotizaciones(driver);
 
   await sleep(1000);
+  let row = await buscarFilaCotizacionPorTexto(driver, data.numeroCotizacion);
 
-  // prettier-ignore
-  let tmp = await handleDescargarPDF(driver, data.numeroCotizacion);
+  await redireccionarCotizacionGuardada(driver, row);
+  await sleep(1000); // opcional, pero no necesario si usas esperarElementoVisible
 
-  if (tmp.status) {
-    let pathFinal = await filePathToPublicUrl(tmp.path);
-    data.detalles.archivo = pathFinal;
-  }
+  await esperarElementoVisible(driver, "#coberturasAccesorias", 30000);
+
+  await sleep(1000); // opcional
+
+  data = await getDetallesCotizacion(driver, data);
+
+  // // prettier-ignore
+  // let tmp = await handleDescargarPDF(driver, data.numeroCotizacion);
+
+  // if (tmp.status) {
+  //   let pathFinal = await filePathToPublicUrl(tmp.path);
+  //   data.detalles.archivo = pathFinal;
+  // }
 
   return data;
 }
 
-// prettier-ignore
-const campos = [
-  { name: "resumenNumCotizacion",   key: "numeroCotizacion" },
-  { name: "resumenPrimerPago",      key: "PrimerPago" },
-  { name: "resumenPagoSubsecuente", key: "PagoSubsecuente" },
-  { name: "resumenPrimaNeta",       key: "PrimaNeta" },
-  { name: "resumenTasaFin",         key: "TasaFin" },
-  { name: "resumenExpedicionPoliza",key: "ExpedicionPoliza" },
-  { name: "resumenIVA",             key: "IVA" },
-  { name: "resumenSubtotal",        key: "Subtotal" },
-];
+async function getDetallesCotizacion(driver, data) {
+  if (!data.detalles) {
+    data.detalles = {};
+  }
+
+  await sleep(1000);
+
+  let frecuenciasPago = await obtenerFrecuenciasPago(driver);
+  data.detalles.frecuenciasPago = frecuenciasPago;
+
+  let accesorios = await obtenerNombresCoberturasAccesorias(driver);
+  data.detalles.accesorios = accesorios;
+
+  let coberturasBasicas = await obtenerCoberturasBasicas(driver);
+  data.detalles.coberturasBasicas = coberturasBasicas;
+
+  // deepPrint(coberturasBasicas);
+
+  return data;
+}
 
 async function ejecutarCotizacionAutos(data) {
   let driver;
@@ -320,7 +386,7 @@ async function ejecutarCotizacionAutos(data) {
 
     return dataResponse;
   } catch (error) {
-    console.error("Error general en la cotización:", error);
+    console.error("Error general en la cotización:", error.message);
   } finally {
     // await sleep(200000);
     if (driver) await driver.quit();

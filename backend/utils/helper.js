@@ -7,5 +7,8 @@ function escaparBarras(obj) {
     }
   }
 }
+function deepPrint(obj) {
+  console.dir(obj, { depth: null, colors: true });
+}
 
-module.exports = { escaparBarras };
+module.exports = { escaparBarras, deepPrint };

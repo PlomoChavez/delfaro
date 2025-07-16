@@ -323,6 +323,40 @@ async function scrollToBottom(driver, options = null) {
   }
 }
 
+async function scrollToTop(driver, options = null) {
+  if (!options) {
+    // Scroll al inicio de la ventana
+    await driver.executeScript("window.scrollTo(0, 0);");
+  } else {
+    const { locator, by = "id" } = options;
+    let script;
+    if (by === "id") {
+      script = `
+        var el = document.getElementById('${locator}');
+        if (el) el.scrollTop = 0;
+      `;
+    } else if (by === "name") {
+      script = `
+        var el = document.getElementsByName('${locator}')[0];
+        if (el) el.scrollTop = 0;
+      `;
+    } else if (by === "css") {
+      script = `
+        var el = document.querySelector('${locator}');
+        if (el) el.scrollTop = 0;
+      `;
+    } else if (by === "xpath") {
+      script = `
+        var el = document.evaluate("${locator}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        if (el) el.scrollTop = 0;
+      `;
+    } else {
+      throw new Error("Tipo de búsqueda no soportado en scrollToTop: " + by);
+    }
+    await driver.executeScript(script);
+  }
+}
+
 async function getAutocompleteOptions(driver, { locator, by = "id" }) {
   const ul = await driver.findElement(getBy(by, locator));
   const divs = await ul.findElements(By.css("li > div.ui-menu-item-wrapper"));
@@ -338,7 +372,7 @@ async function getAutocompleteOptions(driver, { locator, by = "id" }) {
 // prettier-ignore
 async function selectInUL(
   driver,
-  { locator, by = "id", tipo = "numero", value = 1 }
+  { locator, by = "id", tipo = "numero", value = 0 }
 ) {
   const ul = await driver.findElement(getBy(by, locator));
   const divs = await ul.findElements(By.css("li > div.ui-menu-item-wrapper"));
@@ -416,6 +450,7 @@ module.exports = {
   forzarCierre,
   setHover,
   scrollToBottom,
+  scrollToTop,
   enableFirstDisabledOption,
   getSelectOptions,
 };

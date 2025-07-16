@@ -269,7 +269,7 @@ exports.estimarCotizaciones = async (req, res) => {
         });
       })
     );
-    console.log("Cotizaciones estimadas:", resultado);
+
     res.json({
       result: true,
       message: "Cotizaciones estimadas con éxito",

@@ -116,3 +116,46 @@ export async function searchKeysInArray(
 
   return estricto ? arr.every(cumpleReglas) : arr.some(cumpleReglas);
 }
+
+export function isEqual(obj1: any, obj2: any): boolean {
+  // Compara objetos simples y anidados (shallow + deep)
+  try {
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
+  } catch {
+    return false;
+  }
+}
+
+export function diffObjects(obj1: any, obj2: any): any {
+  obj1 = deepToRaw(obj1);
+  obj2 = deepToRaw(obj2);
+
+  if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    // Si son arrays, compara elemento por elemento y devuelve solo los nuevos valores
+    const maxLength = Math.max(obj1.length, obj2.length);
+    const nuevos: any[] = [];
+    for (let i = 0; i < maxLength; i++) {
+      if (!isEqual(obj1[i], obj2[i])) {
+        nuevos.push(obj1[i]);
+      }
+    }
+    return nuevos;
+  } else if (
+    typeof obj1 === "object" &&
+    typeof obj2 === "object" &&
+    obj1 &&
+    obj2
+  ) {
+    const nuevos: Record<string, any> = {};
+    const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+    keys.forEach((key) => {
+      if (!isEqual(obj1[key], obj2[key])) {
+        nuevos[key] = obj1[key];
+      }
+    });
+    return nuevos;
+  } else {
+    // Si son primitivos
+    return isEqual(obj1, obj2) ? null : obj1;
+  }
+}

@@ -110,6 +110,7 @@ const schemaInicial : any = [
 const step = ref(1);
 const companias: any = ref([]);
 const cotizacion: any = ref(null);
+const isEstimando: any = ref(false);
 
 // prettier-ignore
 const localData: any = ref(props.registro ? { ...props.registro } : { companias: [], titular: {} });
@@ -305,9 +306,9 @@ const handleFiltrandoCotizacionesPorCompania = async () => {
 };
 
 // prettier-ignore
-async function handleCotizacionesEstimadas(arr: any) {
-  let tmp = await searchKeysInArray(arr, [{ key: "numeroCotizacion", tipoValidacion: "existe" }]);
-  return tmp;
+async function handleCanEstimar() {
+  let tmp = await searchKeysInArray(localData.value.configuracion.cotizaciones, [{ key: "numeroCotizacion", tipoValidacion: "existe" }]);
+  isEstimando.value = tmp;
 }
 
 // prettier-ignore
@@ -331,8 +332,7 @@ const estimarCotizaciones = async () => {
   if (dataResponse.result) {
     await handleAddCotizacionesEstimadas(dataResponse.data);
     localData.value.configuracion.tiempoEstimacion = await getFechaAMPM();
-    handleUpdateCotizacion(); // Actualiza la cotización después de estimar
-    await handleCotizacionesEstimadas(localData.configuracion.companias);
+    await handleUpdateCotizacion(); // Actualiza la cotización después de estimar
   } else {
     showErrorMessage({
       title: "Error",
@@ -343,6 +343,19 @@ const estimarCotizaciones = async () => {
 
 const handleActualizarCotizacion = async (data: any) => {
   console.log("handleActualizarCotizacion", data);
+};
+const handleRefreshEstimar = async () => {
+  let data = deepToRaw(localData.value);
+
+  data.configuracion.cotizaciones.forEach((c: any) => {
+    delete c.numeroCotizacion;
+    delete c.archivo;
+    delete c.detalles;
+  });
+
+  localData.value.configuracion.cotizaciones = data.configuracion.cotizaciones;
+
+  await estimarCotizaciones();
 };
 
 onMounted(async () => {
@@ -359,13 +372,112 @@ onMounted(async () => {
 
 watch(step, async (nuevoValor, valorAnterior) => {
   if (nuevoValor === 3) {
-    await handleFiltrandoCotizacionesPorCompania();
-    // prettier-ignore
-    let canEstimar = await handleCotizacionesParaEstimar( localData.value.configuracion.cotizaciones );
-    if (canEstimar) {
-      estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
+    let typ = !true;
+    if (typ) {
+      let tmo = {
+        id: 56,
+        nombre: "Jesus Ramon Chavez Quiroz",
+        fechaNacimiento: "1899-11-30T06:36:36.000Z",
+        estatus: "Borrador",
+        configuracion: {
+          titular: {
+            nombre: "Jesus",
+            segundoNombre: "Ramon",
+            apellidoPaterno: "Chavez",
+            apellidoMaterno: "Quiroz",
+            fechaNacimiento: "1994-06-10",
+            sexo: {
+              label: "Hombre",
+              id: "Hombre",
+            },
+            telefono: "7442077733",
+            correo: "jesus@gmail.com",
+            marca: "HONDA",
+            modelo: "CR-V",
+            anio: "2020",
+            version: "Extendida",
+          },
+          companias: [
+            {
+              compania_id: 10,
+              companiaCorto: "QUALITAS",
+              compania: "QUALITAS",
+              companias_productos: [
+                {
+                  id: 13,
+                  compania_id: 10,
+                  ramo_id: 3,
+                  nombre: "AUTOS INDIVIDUAL",
+                  created_at: "2025-07-02T07:02:03.000Z",
+                  updated_at: "2025-07-02T07:02:03.000Z",
+                  estatus: 1,
+                },
+              ],
+              ramo: "AUTOS",
+              ramo_id: 3,
+            },
+          ],
+          step: 3,
+          cotizaciones: [
+            {
+              id: 1,
+              compania_id: 10,
+              companiaCorto: "QUALITAS",
+              compania: "QUALITAS",
+              companias_productos: [
+                {
+                  id: 13,
+                  compania_id: 10,
+                  ramo_id: 3,
+                  nombre: "AUTOS INDIVIDUAL",
+                  created_at: "2025-07-02T07:02:03.000Z",
+                  updated_at: "2025-07-02T07:02:03.000Z",
+                  estatus: 1,
+                },
+              ],
+              ramo: "AUTOS",
+              ramo_id: 3,
+              titular: {
+                nombre: "Jesus",
+                segundoNombre: "Ramon",
+                apellidoPaterno: "Chavez",
+                apellidoMaterno: "Quiroz",
+                fechaNacimiento: "1994-06-10",
+                sexo: {
+                  label: "Hombre",
+                  id: "Hombre",
+                },
+                telefono: "7442077733",
+                correo: "jesus@gmail.com",
+                marca: "HONDA",
+                modelo: "CR-V",
+                anio: "2020",
+                version: "Extendida",
+              },
+            },
+          ],
+          tiempoEstimacion: "10-07-2025 / 4:04:24 PM",
+        },
+        documentos: null,
+        created_at: "10/07/2025 2:55 PM",
+        updated_at: "2025-07-10T22:04:24.000Z",
+        ramo: "AUTOS",
+        ramo_id: 3,
+      };
+
+      await updateCotizacion(tmo);
+    } else {
+      await handleFiltrandoCotizacionesPorCompania();
+      // prettier-ignore
+      let canEstimar = await handleCotizacionesParaEstimar( localData.value.configuracion.cotizaciones );
+      if (canEstimar) {
+        estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
+      }
     }
   }
+});
+watch(localData, async (nuevoValor, valorAnterior) => {
+  await handleCanEstimar();
 });
 </script>
 
@@ -416,8 +528,37 @@ watch(step, async (nuevoValor, valorAnterior) => {
         <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
       </div>
     </div>
+    <div v-if="step == 4">
+      <pre>{{ localData.configuracion.cotizaciones }}</pre>
+      <div>
+        <VBtn color="dark" variant="outlined" @click="handleRefreshEstimar">
+          Refrescar estimación
+        </VBtn>
+      </div>
+    </div>
     <div v-if="step == 3">
       <div v-if="!cotizacion">
+        <div>
+          <VBtn
+            color="dark"
+            variant="outlined"
+            @click="handleRefreshEstimar"
+            class="mr-4"
+          >
+            Refrescar estimación
+          </VBtn>
+          <VBtn
+            color="dark"
+            variant="outlined"
+            @click="
+              () => {
+                console.log(deepToRaw(localData.configuracion.cotizaciones));
+              }
+            "
+          >
+            Print cotizaciones
+          </VBtn>
+        </div>
         <h2 class="title wFull text-center">Estimando cotizaciones</h2>
         <div>
           <div class="card cardForm mx-auto mt-3">
