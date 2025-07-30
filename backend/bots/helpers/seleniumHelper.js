@@ -1,6 +1,8 @@
 const { Builder, By, until, Actions } = require("selenium-webdriver");
 const chrome = require("selenium-webdriver/chrome");
-const fs = require("fs").promises;
+const fs = require("fs");
+const fsPromises = require("fs").promises;
+const path = require("path");
 
 function getBy(by, locator) {
   switch (by) {
@@ -57,11 +59,23 @@ async function setInputValue(driver, {
     value, 
     by = "id", 
     sleeptime = 0, 
-    changeFocus = true
+    changeFocus = true,
+    clearInput = false
   }) {
   if (sleeptime > 0) await sleep(sleeptime);
-  const input = await driver.wait( until.elementLocated(getBy(by, locator)), 10000 );
-  await input.sendKeys(value);
+  const input = await driver.wait(until.elementLocated(getBy(by, locator)), 10000);
+
+  // Validar el tipo de input
+  const inputType = await input.getAttribute("type");
+  let valueToSend = value;
+  if (inputType === "number") {
+    valueToSend = Number(value);
+  }
+
+  if (clearInput) {
+    await input.clear();
+  }
+  await input.sendKeys(valueToSend);
   if (changeFocus) {
     await input.sendKeys('\uE004'); // '\uE004' es la tecla TAB en WebDriver
   }
@@ -72,6 +86,17 @@ async function getElement(driver, { locator, by = "id", multiple = false }) {
     return driver.findElements(getBy(by, locator));
   }
   return driver.findElement(getBy(by, locator));
+}
+
+// prettier-ignore
+async function acercarHaElemento(driver, { 
+  locator, 
+  by = "id", 
+  timeout = 10000 
+}) {
+  const seleniumBy = getBy(by, locator);
+  const element = await driver.wait(until.elementLocated(seleniumBy), timeout);
+  await driver.executeScript("arguments[0].scrollIntoView(true);", element);
 }
 
 // prettier-ignore
@@ -89,6 +114,7 @@ async function clickElement(driver, {
     await element.click();
   } catch (error) {
     console.log(`No se encontró el elemento para hacer click: ${by} -> ${locator}`);
+    await sleep(100000); // Espera un segundo antes de lanzar el error
   }
 }
 
@@ -420,6 +446,7 @@ async function selectInUL(
 
   await targetDiv.click();
 }
+
 async function obtenerCantidadFilasTablaCotizaciones(
   driver,
   idElemento = "tableCotizaciones_wrapper"
@@ -428,7 +455,52 @@ async function obtenerCantidadFilasTablaCotizaciones(
   const filas = await tbody.findElements(By.css("tr"));
   return filas.length;
 }
+
+async function guardarEnArchivo(data, filename = null, directory = null) {
+  try {
+    // Directorio por defecto
+    const defaultDirectory = path.join(__dirname, "../../logs/cotizaciones");
+    const targetDirectory = directory || defaultDirectory;
+
+    // Crear directorio si no existe
+    if (!fs.existsSync(targetDirectory)) {
+      fs.mkdirSync(targetDirectory, { recursive: true });
+    }
+
+    // Generar nombre de archivo con timestamp si no se proporciona
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const defaultFilename = `cotizacion_${timestamp}.json`;
+    const finalFilename = filename || defaultFilename;
+
+    // Ruta completa del archivo
+    const filePath = path.join(targetDirectory, finalFilename);
+
+    // Preparar datos con metadata
+    const dataToSave = {
+      timestamp: new Date().toISOString(),
+      data: data,
+    };
+
+    // Guardar archivo usando fs síncrono
+    fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2), "utf8");
+
+    console.log(`Archivo guardado exitosamente: ${filePath}`);
+    return {
+      status: true,
+      path: filePath,
+      filename: finalFilename,
+    };
+  } catch (error) {
+    console.error("Error al guardar archivo:", error.message);
+    return {
+      status: false,
+      error: error.message,
+    };
+  }
+}
 module.exports = {
+  acercarHaElemento,
+  guardarEnArchivo,
   obtenerCantidadFilasTablaCotizaciones,
   selectInUL,
   getAutocompleteOptions,

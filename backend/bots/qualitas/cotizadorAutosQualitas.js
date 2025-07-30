@@ -1,3 +1,5 @@
+const { until, By } = require("selenium-webdriver");
+
 const {
   openPage,
   waitForElement,
@@ -9,8 +11,8 @@ const {
   switchToWindow,
   getElement,
   getElementText,
-  clickInElementNotClickeable,
   selectOptionInSelect,
+  clickInElementNotClickeable,
   getSelectOptions,
   getAutocompleteOptions,
   forzarCierre,
@@ -18,6 +20,8 @@ const {
   selectInUL,
   scrollToTop,
   obtenerCantidadFilasTablaCotizaciones,
+  acercarHaElemento,
+  guardarEnArchivo,
 } = require("../helpers/seleniumHelper");
 
 const {
@@ -30,6 +34,7 @@ const {
   redireccionarCotizacionGuardada,
   obtenerNombresCoberturasAccesorias,
   obtenerCoberturasBasicas,
+  esperarQueNoExistaModalError,
 } = require("./qualitasHelper");
 
 const { filePathToPublicUrl } = require("../../utils/filesHelper");
@@ -298,6 +303,8 @@ async function generadorCotizacion(driver, data) {
 }
 
 async function buscarCotizacion(driver, data) {
+  delete data.msgError;
+
   await clickElement(driver, {
     locator: '//*[@id="menu"]/div[3]/div[1]/a[2]',
     by: "xpath",
@@ -327,39 +334,265 @@ async function buscarCotizacion(driver, data) {
   await sleep(1000); // opcional, pero no necesario si usas esperarElementoVisible
 
   await esperarElementoVisible(driver, "#coberturasAccesorias", 30000);
+  if (data.cambios.version || data.cambios.direccion) {
+    if (data.cambios.version) {
+      console.log("Esperando a editar");
+      await waitForElement(driver, {
+        locator: "paymentTypeArrangement",
+        timeout: 10000,
+      });
+      await sleep(3000);
+      console.log("Hay cambios de direccion y/o version");
+      await clickElement(driver, {
+        locator:
+          "//span[@class='edit collapsed' and @data-target='#collapseDatosDeVehiculo' and text()='Editar']",
+        timeout: 1000,
+        by: "xpath",
+      });
 
-  await sleep(1000); // opcional
+      await waitForElement(driver, {
+        locator: "selectVersion",
+        timeout: 10000,
+        by: "id",
+      });
 
-  data = await getDetallesCotizacion(driver, data);
+      // Aquí puedes comparar manualmente el texto que buscas
+      console.log("Buscando opción:", data.cambios.version.label);
 
-  // // prettier-ignore
-  // let tmp = await handleDescargarPDF(driver, data.numeroCotizacion);
+      // Luego selecciona
+      await selectOptionInSelect(driver, {
+        esperarHabilitado: true,
+        locator: "selectVersion",
+        tipoValor: "label",
+        sleeptime: 1000,
+        value: data.cambios.version.label,
+        by: "id",
+      });
+    }
 
-  // if (tmp.status) {
-  //   let pathFinal = await filePathToPublicUrl(tmp.path);
-  //   data.detalles.archivo = pathFinal;
-  // }
+    if (data.cambios.direccion) {
+      await sleep(1000);
+      let inputCP = await getElement(driver, {
+        locator: "postalCode",
+      });
+      await inputCP.clear();
+
+      const cp = data.titular?.codigoPostal ?? "39600"; // Default postal code if not provided
+      await sleep(1000);
+      for (const digito of cp) {
+        await setInputValue(driver, {
+          locator: "postalCode",
+          changeFocus: false,
+          sleeptime: 10,
+          value: digito,
+        });
+      }
+
+      await sleep(1000);
+      const direcciones = await getAutocompleteOptions(driver, {
+        locator: "ui-id-2",
+      });
+
+      // prettier-ignore
+      let direccionEncontrada = direcciones.findIndex((direccion) => direccion.value === data.cambios.direccion.label );
+      await selectInUL(driver, {
+        locator: "ui-id-2",
+        value: direccionEncontrada,
+      });
+    }
+
+    await scrollToBottom(driver);
+
+    await sleep(1000);
+    await clickElement(driver, {
+      locator: '//*[@id="formDatosDeVehiculo"]/button',
+      sleeptime: 1000,
+      by: "xpath",
+    });
+
+    await waitForElement(driver, {
+      locator: '//*[@id="formDatosDeCotizacion"]/button',
+      by: "xpath",
+    });
+
+    await sleep(1000);
+    await scrollToBottom(driver);
+    await sleep(1000);
+
+    await clickElement(driver, {
+      locator: '//*[@id="formDatosDeCotizacion"]/button',
+      sleeptime: 1000,
+      by: "xpath",
+    });
+  }
+
+  if (data.cambios.frecuenciaPago) {
+    let frecuenciaPago = data.cambios.frecuenciaPago.tipo;
+    frecuenciaPago = "Contado"; // Forzar a mensual por ahora
+
+    // prettier-ignore
+    await waitForElement(driver, {
+      locator: "//p[contains(@class, 'text-muted') and contains(@class, 'c5') and contains(@class, 'mt-1') and normalize-space(text())='" + frecuenciaPago + "']",
+      by: "xpath",
+    });
+
+    // prettier-ignore
+    await acercarHaElemento(driver, {
+      locator: "//p[contains(@class, 'text-muted') and contains(@class, 'c5') and contains(@class, 'mt-1') and normalize-space(text())='" + frecuenciaPago + "']",
+      by: "xpath",
+    });
+    // prettier-ignore
+    await clickElement(driver, {
+      locator: "//p[contains(@class, 'text-muted') and contains(@class, 'c5') and contains(@class, 'mt-1') and normalize-space(text())='" + frecuenciaPago + "']",
+      sleeptime: 1000,
+      by: "xpath",
+    });
+  }
+
+  if (data.cambios.accesorios && data.cambios.accesorios.length > 0) {
+    await scrollToBottom(driver);
+    await sleep(1000);
+    await scrollToBottom(driver);
+    await sleep(1000);
+    const labels = await getElement(driver, {
+      locator: "#coberturasAccesoriasItems label",
+      multiple: true,
+      by: "css",
+    });
+
+    for (const label of labels) {
+      const idLabel = await label.getAttribute("for");
+      let accesorio = data.cambios.accesorios.find(
+        (accesorio) => accesorio.label_id === idLabel
+      );
+      if (accesorio) {
+        await driver.executeScript("arguments[0].scrollIntoView(true);", label);
+        await driver.sleep(500);
+        await driver.executeScript("arguments[0].click();", label);
+        await driver.sleep(300);
+        for (const hijo of accesorio.hijos) {
+          if (!hijo.tag) continue;
+          switch (hijo.tag) {
+            case "input":
+              await setInputValue(driver, {
+                locator: hijo.id,
+                clearInput: true,
+                value: hijo.valor,
+                sleeptime: 1000,
+                by: "id",
+              });
+              break;
+            case "select":
+              await selectOptionInSelect(driver, {
+                esperarHabilitado: true,
+                value: hijo.valor.texto,
+                tipoValor: "label",
+                locator: hijo.name,
+                sleeptime: 1000,
+                by: "name",
+              });
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  if (data.cambios && data.cambios.coberturas) {
+    for (const cobertura of data.cambios.coberturas) {
+      await changeInputsCobertura(driver, cobertura.sumaSegura);
+      await changeInputsCobertura(driver, cobertura.deducible);
+      await changeInputsCobertura(driver, cobertura.prima);
+    }
+  }
+
+  await scrollToBottom(driver);
+  await clickElement(driver, {
+    locator: "button.btn.btn-primary.saveChanges[type='submit']",
+    by: "css",
+  });
+
+  const mensajeError = await esperarQueNoExistaModalError(driver, 15000, 1000);
+  if (mensajeError) {
+    let tmp = { ...data, msgError: mensajeError };
+    return tmp;
+  }
+  console.log("Esperando detalles de la cotización...");
+  data = await await getDetallesCotizacion(driver, data, false);
+  await guardarEnArchivo(data, "mi_cotizacion.json");
+  await sleep(1000000);
+
+  // prettier-ignore
+  let tmp = await handleDescargarPDF(driver, data.numeroCotizacion);
+
+  if (tmp.status) {
+    let pathFinal = await filePathToPublicUrl(tmp.path);
+    data.detalles.archivo = pathFinal;
+  }
 
   return data;
 }
+async function changeInputsCobertura(driver, cobertura) {
+  let coberturas = Array.isArray(cobertura) ? cobertura : [cobertura];
+  for (const cobertura of coberturas) {
+    if (!cobertura.tag) continue;
+    switch (cobertura.tag) {
+      case "input":
+        if (cobertura.tipo && cobertura.disabled == false) {
+          await acercarHaElemento(driver, {
+            locator: cobertura.id,
+            by: "id",
+          });
 
-async function getDetallesCotizacion(driver, data) {
+          await setInputValue(driver, {
+            locator: cobertura.id,
+            clearInput: true,
+            value: cobertura.valor,
+            sleeptime: 1000,
+            by: "id",
+          });
+        }
+        break;
+      case "select":
+        await acercarHaElemento(driver, {
+          locator: cobertura.name,
+          by: "name",
+        });
+
+        await selectOptionInSelect(driver, {
+          esperarHabilitado: true,
+          value: cobertura.valor.texto,
+          tipoValor: "label",
+          locator: cobertura.name,
+          sleeptime: 1000,
+          by: "name",
+        });
+        break;
+    }
+  }
+}
+
+async function getDetallesCotizacion(driver, data, darClick = true) {
   if (!data.detalles) {
     data.detalles = {};
   }
 
   await sleep(1000);
 
+  console.log("Obteniendo frecuencia de pago...");
   let frecuenciasPago = await obtenerFrecuenciasPago(driver);
   data.detalles.frecuenciasPago = frecuenciasPago;
+  // deepPrint(frecuenciasPago);
 
-  let accesorios = await obtenerNombresCoberturasAccesorias(driver);
+  console.log("Obteniendo coberturas de accesorios ...");
+  let accesorios = await obtenerNombresCoberturasAccesorias(driver, darClick);
   data.detalles.accesorios = accesorios;
+  // deepPrint(accesorios);
 
+  console.log("Obteniendo coberturas básicas ...");
   let coberturasBasicas = await obtenerCoberturasBasicas(driver);
   data.detalles.coberturasBasicas = coberturasBasicas;
-
-  // deepPrint(coberturasBasicas);
+  deepPrint(coberturasBasicas);
 
   return data;
 }

@@ -6,74 +6,84 @@
         <div v-for="item in propuestas" :key="item.id">
           <!-- prettier-ignore -->
           <div
-            class="propuesta-card-horizontal card"
+            class="propuesta-card  card"
             :class="{ ' activeItem ': isItemSelected(seleccionadas, item, 'id') }"
           >
-            <!-- Columna 1: Checkbox -->
-            <div class="col-check">
-              <input
-                type="checkbox"
-                :checked="seleccionadas.includes(item.id)"
-                @change="seleccionar(item)"
-                class="custom-checkbox"
-              />
+            <div v-if="item.msgError" class="detalle-row error-row">
+              <span class="detalle-key text-danger">Error:</span>
+              <span class="detalle-value text-danger">{{ item.msgError }}</span>
             </div>
-            <!-- Columna 2: Datos (diseño original) -->
-            <div class="col-datos flex-grow-1">
-              <div class="propuesta-header-horizontal">
-                <span class="nombre-compania">{{ item.companiaCorto }}</span>
+            <div class="propuesta-card-horizontal">
+              <!-- Columna 1: Checkbox -->
+              <div class="col-check">
+                <input
+                  type="checkbox"
+                  :checked="seleccionadas.includes(item.id)"
+                  @change="seleccionar(item)"
+                  class="custom-checkbox"
+                />
               </div>
-              <div class="propuesta-detalles-horizontal">
-                <div class="detalle-row">
-                  <span class="detalle-key">Núm de Cotizacion:</span>
-                  <span class="detalle-value">{{ item.numeroCotizacion }}</span>
+              <!-- Columna 2: Datos (diseño original) -->
+              <div class="col-datos flex-grow-1">
+                <div class="propuesta-header-horizontal">
+                  <span class="nombre-compania">{{ item.companiaCorto }}</span>
                 </div>
-                <div class="detalle-row">
-                  <span class="detalle-key">Prima neta:</span>
-                  <span class="detalle-value">{{
-                    item.detalles.primaNeta
-                  }}</span>
-                </div>
-                <div class="detalle-row">
-                  <span class="detalle-key">Derechos de póliza:</span>
-                  <span class="detalle-value">{{
-                    item.detalles.expedicionPoliza
-                  }}</span>
-                </div>
-                <div class="detalle-row">
-                  <span class="detalle-key">IVA:</span>
-                  <span class="detalle-value">{{ item.detalles.iVA }}</span>
+                <div class="propuesta-detalles-horizontal">
+                  <div class="detalle-row">
+                    <span class="detalle-key">Núm de Cotizacion:</span>
+                    <span class="detalle-value">{{
+                      item.numeroCotizacion
+                    }}</span>
+                  </div>
+                  <div class="detalle-row">
+                    <span class="detalle-key">Prima neta:</span>
+                    <span class="detalle-value">{{
+                      item.detalles.primaNeta
+                    }}</span>
+                  </div>
+                  <div class="detalle-row">
+                    <span class="detalle-key">Derechos de póliza:</span>
+                    <span class="detalle-value">{{
+                      item.detalles.expedicionPoliza
+                    }}</span>
+                  </div>
+                  <div class="detalle-row">
+                    <span class="detalle-key">IVA:</span>
+                    <span class="detalle-value">{{ item.detalles.iVA }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <!-- Columna 3: Iconos -->
-            <div class="col-iconos">
-              <i
-                class="fa fa-exclamation-circle font22 icono-accion text-info"
-                :title="
-                  abiertos.includes(item.id) ? 'Ocultar detalle' : 'Ver detalle'
-                "
-                @click="toggleAcordeon(item.id)"
-                style="cursor: pointer"
-              />
-              <a
-                :href="item.archivo"
-                target="_blank"
-                rel="noopener"
-                class="btn-icon"
-                :title="'Descargar PDF'"
-              >
+              <!-- Columna 3: Iconos -->
+              <div class="col-iconos">
                 <i
-                  class="fa fa-download font22 text-secondary"
+                  class="fa fa-exclamation-circle font22 icono-accion text-info"
+                  :title="
+                    abiertos.includes(item.id)
+                      ? 'Ocultar detalle'
+                      : 'Ver detalle'
+                  "
+                  @click="toggleAcordeon(item.id)"
+                  style="cursor: pointer"
+                />
+                <a
+                  :href="item.archivo"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn-icon"
+                  :title="'Descargar PDF'"
+                >
+                  <i
+                    class="fa fa-download font22 text-secondary"
+                    aria-hidden="true"
+                  ></i>
+                </a>
+                <i
+                  class="fa fa-pencil font22 icono-accion text-warning"
                   aria-hidden="true"
-                ></i>
-              </a>
-              <i
-                class="fa fa-pencil font22 icono-accion text-warning"
-                aria-hidden="true"
-                title="Editar"
-                @click="editarPropuesta(item)"
-              />
+                  title="Editar"
+                  @click="editarPropuesta(item)"
+                />
+              </div>
             </div>
           </div>
           <!-- Acordeón de detalle -->
@@ -127,6 +137,16 @@ function toggleAcordeon(id: number) {
 </script>
 
 <style scoped>
+.error-row {
+  background: #ffeaea;
+  border-left: 4px solid #e53935;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+}
+.text-danger {
+  color: #e53935;
+  font-weight: bold;
+}
 .acordeon-enter-active,
 .acordeon-leave-active {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -171,10 +191,7 @@ function toggleAcordeon(id: number) {
   align-items: stretch;
   margin-top: 2rem;
 }
-.propuesta-card-horizontal {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+.propuesta-card {
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fff;
@@ -186,6 +203,11 @@ function toggleAcordeon(id: number) {
   margin: 0 auto;
   position: relative;
   z-index: 2;
+}
+.propuesta-card-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 .col-check {
   display: flex;

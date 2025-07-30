@@ -111,6 +111,7 @@ const step = ref(1);
 const companias: any = ref([]);
 const cotizacion: any = ref(null);
 const isEstimando: any = ref(false);
+const estimando: any = ref(false);
 
 // prettier-ignore
 const localData: any = ref(props.registro ? { ...props.registro } : { companias: [], titular: {} });
@@ -176,6 +177,7 @@ const handleSelectCotizacion = (item: any) => {
     "id"
   );
 };
+
 const handleEditarCotizacion = (data: any) => {
   data = deepToRaw(data); // Asegúrate de que el data sea un objeto plano
   console.log("handleEditarCotizacion", data);
@@ -244,7 +246,7 @@ const handleUpdateCotizacion = async () => {
   await updateCotizacion(tmp);
 };
 
-const updateCotizacion = async (data: any) => {
+const updateCotizacion = async (data: any, editando = false) => {
   const response = await customRequest({
     url: "/api/cotizaciones/update",
     method: "POST",
@@ -255,9 +257,13 @@ const updateCotizacion = async (data: any) => {
     if (localData.value.id == undefined) {
       localData.value.id = dataResponse.data;
     }
-    toast.success("¡Cotización guardada!", {
-      theme: "dark", // Activa el tema oscuro
-    });
+
+    if (editando) {
+      console.log("Cotización actualizada:", dataResponse.data);
+    }
+
+    // prettier-ignore
+    toast.success("¡Cotización guardada!", { theme: "dark",});
   } else {
     showErrorMessage({
       title: "Error",
@@ -320,17 +326,25 @@ async function handleCotizacionesParaEstimar(arr: any[]) {
   return !tmp
 }
 
-const estimarCotizaciones = async () => {
+const estimarCotizaciones = async (data = null, flujoNormal = false) => {
+  estimando.value = true; // Indica que se está estimando
+  let localDataEstimacion = data || deepToRaw(localData.value);
   const response = await customRequest({
     url: "/api/cotizaciones/estimar",
     method: "POST",
-    data: localData.value,
+    data: localDataEstimacion,
   });
+
+  estimando.value = false; // Finaliza la estimación
 
   const dataResponse = response.data;
 
   if (dataResponse.result) {
-    await handleAddCotizacionesEstimadas(dataResponse.data);
+    if (flujoNormal) {
+      localData.value.configuracion.cotizaciones = dataResponse.data;
+    } else {
+      await handleAddCotizacionesEstimadas(dataResponse.data);
+    }
     localData.value.configuracion.tiempoEstimacion = await getFechaAMPM();
     await handleUpdateCotizacion(); // Actualiza la cotización después de estimar
   } else {
@@ -341,9 +355,23 @@ const estimarCotizaciones = async () => {
   }
 };
 
-const handleActualizarCotizacion = async (data: any) => {
-  console.log("handleActualizarCotizacion", data);
+const handleActualizarCotizacion = async (cotizacionData: any) => {
+  cotizacion.value = null;
+  // prettier-ignore
+  const cotizacionesClon = deepClone( localData.value.configuracion.cotizaciones || []);
+  const idx = cotizacionesClon.findIndex(
+    (c: any) => c.id === cotizacionData.id
+  );
+  if (idx !== -1) {
+    cotizacionesClon[idx] = cotizacionData;
+  }
+
+  // Clona el registro y actualiza las cotizaciones
+  const tmpRegistro = deepClone(localData.value);
+  tmpRegistro.configuracion.cotizaciones = cotizacionesClon;
+  await estimarCotizaciones(tmpRegistro, true);
 };
+
 const handleRefreshEstimar = async () => {
   let data = deepToRaw(localData.value);
 
@@ -476,6 +504,7 @@ watch(step, async (nuevoValor, valorAnterior) => {
     }
   }
 });
+
 watch(localData, async (nuevoValor, valorAnterior) => {
   await handleCanEstimar();
 });
@@ -537,6 +566,7 @@ watch(localData, async (nuevoValor, valorAnterior) => {
       </div>
     </div>
     <div v-if="step == 3">
+      <pre>Estimando: {{ estimando ? "Sí" : "No" }}</pre>
       <div v-if="!cotizacion">
         <div>
           <VBtn
@@ -552,7 +582,7 @@ watch(localData, async (nuevoValor, valorAnterior) => {
             variant="outlined"
             @click="
               () => {
-                console.log(deepToRaw(localData.configuracion.cotizaciones));
+                console.log(deepToRaw(localData));
               }
             "
           >
@@ -566,47 +596,55 @@ watch(localData, async (nuevoValor, valorAnterior) => {
 
             <!-- prettier-ignore -->
             <div class="">
-              <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Titular:</span>
-              <span class="font24 ">{{ localData.nombre }}</span>
-            </div>
+                <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Titular:</span>
+                <span class="font24 ">{{ localData.nombre }}</span>
+              </div>
             <!-- prettier-ignore -->
             <div class="">
-              <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Vehiculo:</span>
-              <span class="font24 fontItalic ">{{ localData.configuracion.titular.marca }} - {{ localData.configuracion.titular.modelo }} - {{ localData.configuracion.titular.anio }} - {{ localData.configuracion.titular.version }}</span>
-            </div>
+                <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Vehiculo:</span>
+                <span class="font24 fontItalic ">{{ localData.configuracion.titular.marca }} - {{ localData.configuracion.titular.modelo }} - {{ localData.configuracion.titular.anio }} - {{ localData.configuracion.titular.version }}</span>
+              </div>
 
             <!-- prettier-ignore -->
             <div class="wFull">
-              <p class="p-0 m-0 w-full text-right textSecondary fontItalic">Ultima actualización:  <span class="fontBold">{{ localData.configuracion.tiempoEstimacion }}</span></p>
-            </div>
+                <p class="p-0 m-0 w-full text-right textSecondary fontItalic">Ultima actualización:  <span class="fontBold">{{ localData.configuracion.tiempoEstimacion }}</span></p>
+              </div>
           </div>
         </div>
-        <div class="divRows mt-3">
-          <Propuestas
-            :configuracion="localData.configuracion"
-            @editar="handleEditarCotizacion"
-            @seleccionar="handleSelectCotizacion"
-          />
+        <div v-if="estimando">
+          <h1 class="wFull text-center mt-5">Estimando cotizaciones...</h1>
         </div>
+        <div v-else>
+          <div class="divRows mt-3">
+            <Propuestas
+              :configuracion="localData.configuracion"
+              @editar="handleEditarCotizacion"
+              @seleccionar="handleSelectCotizacion"
+            />
+          </div>
 
-        <div class="d-flex justify-space-between w-100 mt-5">
-          <div>
-            <VBtn color="dark" variant="outlined" @click="handleStepPrev">
-              Anterior
-            </VBtn>
-          </div>
-          <div>
-            <VBtn
-              :disabled="!(localData.configuracion.seleccionadas || []).length"
-              @click="handleStepNext"
-            >
-              Siguiente
-            </VBtn>
+          <div class="d-flex justify-space-between w-100 mt-5">
+            <div>
+              <VBtn color="dark" variant="outlined" @click="handleStepPrev">
+                Anterior
+              </VBtn>
+            </div>
+            <div>
+              <VBtn
+                :disabled="
+                  !(localData.configuracion.seleccionadas || []).length
+                "
+                @click="handleStepNext"
+              >
+                Siguiente
+              </VBtn>
+            </div>
           </div>
         </div>
       </div>
       <div v-else>
         <PropuestaEdit
+          :registro="localData"
           :cotizacion="cotizacion"
           @cancelar="() => (cotizacion = null)"
           @actualizar="handleActualizarCotizacion"

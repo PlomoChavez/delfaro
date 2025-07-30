@@ -36,6 +36,7 @@ const handleActionsEdit = (dataRow: any) => {
   }
 
   dataLocal.value = tmp;
+  console.log("dataLocal", tmp);
   showWizard.value = true;
 };
 

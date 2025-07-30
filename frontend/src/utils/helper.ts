@@ -126,6 +126,10 @@ export function isEqual(obj1: any, obj2: any): boolean {
   }
 }
 
+export function deepClone(obj: any): any {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 export function diffObjects(obj1: any, obj2: any): any {
   obj1 = deepToRaw(obj1);
   obj2 = deepToRaw(obj2);

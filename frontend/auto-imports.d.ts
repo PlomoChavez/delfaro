@@ -45,6 +45,7 @@ declare global {
   const debouncedRef: typeof import('@vueuse/core')['debouncedRef']
   const debouncedWatch: typeof import('@vueuse/core')['debouncedWatch']
   const decryptToken: typeof import('./src/utils/authHelper')['decryptToken']
+  const deepClone: typeof import('./src/utils/helper')['deepClone']
   const deepToRaw: typeof import('./src/utils/helper')['deepToRaw']
   const defineAsyncComponent: typeof import('vue')['defineAsyncComponent']
   const defineComponent: typeof import('vue')['defineComponent']
@@ -432,6 +433,7 @@ declare module 'vue' {
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
     readonly decryptToken: UnwrapRef<typeof import('./src/utils/authHelper')['decryptToken']>
+    readonly deepClone: UnwrapRef<typeof import('./src/utils/helper')['deepClone']>
     readonly deepToRaw: UnwrapRef<typeof import('./src/utils/helper')['deepToRaw']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>

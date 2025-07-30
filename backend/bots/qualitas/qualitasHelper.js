@@ -2,6 +2,7 @@ const { until, By } = require("selenium-webdriver");
 const { descargarConCookies } = require("../helpers/GeneralHelper");
 const { getPathFolderCotizaciones } = require("../../utils/filesHelper");
 const { deepPrint } = require("../../utils/helper");
+const { sleep } = require("../helpers/seleniumHelper");
 
 /**
  * Busca un <a> cuyo <u> contiene el texto indicado (en cualquier columna), abre el href en una nueva pestaña y cambia el foco.
@@ -190,7 +191,7 @@ async function esperarElementoVisible(driver, selector, timeout = 20000) {
   return element;
 }
 
-async function obtenerNombresCoberturasAccesorias(driver) {
+async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
   // prettier-ignore
   const labels = await driver.findElements(By.css("#coberturasAccesoriasItems label"));
 
@@ -199,8 +200,17 @@ async function obtenerNombresCoberturasAccesorias(driver) {
   for (const label of labels) {
     await driver.executeScript("arguments[0].scrollIntoView(true);", label);
     await driver.sleep(500);
-    await driver.executeScript("arguments[0].click();", label);
-    await driver.sleep(300);
+    if (darClick) {
+      // Obtener el id del input asociado al label
+      const inputId = await label.getAttribute("for");
+      const checkbox = await driver.findElement(By.id(inputId));
+      const isChecked = await checkbox.isSelected();
+
+      if (!isChecked) {
+        await driver.executeScript("arguments[0].click();", label);
+        await driver.sleep(300);
+      }
+    }
 
     const idLabel = await label.getAttribute("for");
     let nombre = null;
@@ -435,7 +445,34 @@ async function obtenerCoberturasBasicas(driver) {
 
   return resultado;
 }
+
+async function esperarQueNoExistaModalError(
+  driver,
+  timeoutMs = 60000,
+  intervaloMs = 1000
+) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      // Busca el modal por id
+      const modal = await driver.findElement(By.id("modalError01"));
+      const isDisplayed = await modal.isDisplayed();
+      if (isDisplayed) {
+        // Si existe, obtiene el mensaje y lo retorna
+        const mensajeElem = await driver.findElement(By.id("msjMGErr"));
+        const mensaje = await mensajeElem.getText();
+        return mensaje;
+      }
+    } catch (e) {
+      // Si no existe el modal, Selenium lanza error y seguimos esperando
+    }
+    await sleep(intervaloMs);
+  }
+  // Si nunca apareció el modal, retorna null
+  return null;
+}
 module.exports = {
+  esperarQueNoExistaModalError,
   obtenerCoberturasBasicas,
   obtenerNombresCoberturasAccesorias,
   esperarElementoVisible,

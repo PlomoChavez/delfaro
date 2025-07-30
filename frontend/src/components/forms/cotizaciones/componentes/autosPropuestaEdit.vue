@@ -9,42 +9,29 @@
       <!-- prettier-ignore -->
       <div v-if="props.cotizacion.compania == 'QUALITAS' || props.cotizacion.ramo == 'AUTOS'" >
         <EditQualitas
+          :registro="props.registro"
           :cotizacion="props.cotizacion"
-          @actualizar="handleCanActualizar"
+          @cancelar="emit('cancelar')"
+          @actualizar="handleActualizar"
         />
-      </div>
-    </div>
-    <div class="d-flex justify-space-between w-100 mt-5">
-      <div>
-        <VBtn color="dark" outlined @click="handleCancelar"> Cancelar </VBtn>
-      </div>
-      <div>
-        <VBtn color="warning" :disabled="!canActualizar"> Actualizar </VBtn>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps, ref } from "vue";
+import { defineEmits, defineProps } from "vue";
 import EditQualitas from "./autosPropuestaEditQualitas.vue";
 
 const props = defineProps<{
   cotizacion: any;
+  registro: any;
 }>();
 
 const emit = defineEmits(["cancelar", "actualizar"]);
-const localData: any = ref(null);
 
-const canActualizar = ref<boolean>(false);
-function handleCancelar() {
-  emit("cancelar");
-}
-function handleActualizar() {
-  emit("actualizar");
-}
-function handleCanActualizar(value: boolean) {
-  canActualizar.value = value;
+async function handleActualizar(cotizacion: any) {
+  emit("actualizar", cotizacion);
 }
 </script>
 

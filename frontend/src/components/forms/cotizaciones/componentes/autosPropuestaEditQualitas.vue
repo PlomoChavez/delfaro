@@ -317,17 +317,28 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
+
+    <div class="d-flex justify-space-between w-100 mt-5">
+      <div>
+        <VBtn color="dark" outlined @click="handleCancelar"> Cancelar </VBtn>
+      </div>
+      <div>
+        <!-- prettier-ignore -->
+        <VBtn color="warning" :disabled="!canActualizar" @click="handleActualizar"> Actualizar </VBtn>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { deepToRaw, diffObjects, isEqual } from "@/utils/helper";
+import { deepClone, deepToRaw, diffObjects } from "@/utils/helper";
 import { defineEmits, defineProps, onMounted, ref } from "vue";
 // Devuelve las diferencias entre dos objetos o arrays
 // diffObjects ahora devuelve solo los nuevos valores (valor1) de los elementos que cambiaron
 
 const props = defineProps<{
   cotizacion: any;
+  registro: any;
 }>();
 
 const emit = defineEmits(["cancelar", "actualizar"]);
@@ -344,6 +355,72 @@ const frecuenciasPago = ref<any[]>([]);
 const selectedFrecuencia = ref<string | null>(null);
 const selectedAccesorios = ref<number[]>([]);
 const hayCambiosCoberturas: any = ref(false);
+const hayCambios: any = ref(false);
+
+const canActualizar = computed(() => {
+  return (
+    hayCambios.value ||
+    hayCambiosCoberturas.value ||
+    selectedAccesorios.value.length > 0
+  );
+});
+
+function handleCancelar() {
+  emit("cancelar");
+}
+
+function handleActualizar() {
+  // Clona los accesorios y seleccionados para evitar referencias
+  const coberturasTmp = deepClone(coberturas.value || []);
+  // prettier-ignore
+  const cambiosCoberturas = diffObjects(coberturasTmp, coberturasInicial.value || {});
+  const accesoriosClon = deepClone(accesorios.value || []);
+  const seleccionadosClon = deepClone(selectedAccesorios.value || []);
+
+  // Obtiene los accesorios seleccionados por índice
+  const tmpAccesorios = accesoriosClon.filter((_: any, idx: any) =>
+    seleccionadosClon.includes(idx)
+  );
+
+  // Prepara los cambios finales
+  let cambiosFinales = {
+    ...deepClone(cambios.value),
+    coberturas: cambiosCoberturas,
+  };
+
+  if (tmpAccesorios.length > 0) {
+    cambiosFinales.accesorios = tmpAccesorios;
+  }
+
+  if (cambiosCoberturas.length > 0) {
+    cambiosFinales.coberturas = cambiosCoberturas;
+  }
+
+  // Clona la cotización y actualiza los cambios
+  const tmpCotizacion = {
+    ...deepClone(props.cotizacion),
+    estimar: true,
+    cambios: cambiosFinales,
+  };
+
+  // // Clona el array de cotizaciones y reemplaza la cotización por id
+  // // prettier-ignore
+  // const cotizacionesClon = deepClone( props.registro.configuracion.cotizaciones || []);
+  // const idx = cotizacionesClon.findIndex((c: any) => c.id === tmpCotizacion.id);
+  // if (idx !== -1) {
+  //   cotizacionesClon[idx] = tmpCotizacion;
+  // }
+
+  // // Clona el registro y actualiza las cotizaciones
+  // const tmpRegistro = deepClone(props.registro);
+  // tmpRegistro.configuracion.cotizaciones = cotizacionesClon;
+
+  // Debug
+  // console.log("Cambios finales:");
+  // console.log(tmpRegistro);
+
+  emit("actualizar", tmpCotizacion);
+}
 
 function getPrimeraOpcionValida(arr: any[], prop: string): string | null {
   return Array.isArray(arr)
@@ -408,8 +485,9 @@ onMounted(() => {
       version: primeraVersion ? { label: primeraVersion, value: primeraVersion } : null,
       direccion: primeraDireccion ? { label: primeraDireccion, value: primeraDireccion } : null,
     };
-    cambios.value = tmpCambios;
-    cambiosInicial.value = tmpCambios;
+    // SOLUCIÓN: Clona el objeto para evitar referencias compartidas
+    cambios.value = deepClone(tmpCambios);
+    cambiosInicial.value = deepClone(tmpCambios);
 
     // Asigna frecuencias de pago si existen
     frecuenciasPago.value = tmp.detalles.frecuenciasPago || [];
@@ -443,33 +521,24 @@ onMounted(() => {
   }
 });
 
-const canActualizar = computed(() => {
-  let response = false;
-  if (!response) {
-    response = !isEqual(cambios.value, cambiosInicial.value);
-  }
-
-  if (!response) {
-    response = hayCambiosCoberturas.value;
-  }
-
-  if (!response) {
-    response = selectedAccesorios.value.length > 0;
-  }
-
-  return response;
-});
-
 // prettier-ignore
 watch( coberturas, () => {
     let tmpCambios = diffObjects(coberturas.value, coberturasInicial.value);
     hayCambiosCoberturas.value = Object.keys(tmpCambios).length > 0;
   },
   { deep: true }
-); // prettier-ignore
-watch(canActualizar, () => {
-  emit("actualizar", canActualizar.value);
-});
+);
+// prettier-ignore
+watch( cambios, () => {
+    const cambiosDetectados = diffObjects(cambios.value, cambiosInicial.value);
+    hayCambios.value = Object.keys(cambiosDetectados).length > 0;
+
+    if (hayCambios.value) {
+      console.log("Cambios detectados en formulario:", cambiosDetectados);
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>

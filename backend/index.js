@@ -4,15 +4,13 @@ const app = express();
 const port = 3000;
 const cors = require("cors");
 app.use(cors());
-
-app.use(express.json());
+// Si usas express.json()
+app.use(express.json({ limit: "10mb" }));
 
 // Importa las rutas
-const procesosAutomatizadosRoutes = require("./routes/procesosAutomatizadosRoutes");
 const apisRoutes = require("./routes/apisRoutes");
 
 // Usa las rutas
-app.use(procesosAutomatizadosRoutes);
 app.use(apisRoutes);
 
 app.use("/files", express.static(path.join(__dirname, "files")));
