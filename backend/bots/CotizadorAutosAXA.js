@@ -202,7 +202,9 @@ async function ejecutarCotizacion(data) {
     // });
     // console.log("Número de cotización:", numCotizacion);
   } catch (error) {
-    console.error("Error general en la cotización:", error);
+    console.log("Error general en la cotización:", error);
+    data.msgError = "Error general en la cotización: " + error;
+    return data;
   } finally {
     // await sleep(200000);
     // if (driver) await driver.quit();

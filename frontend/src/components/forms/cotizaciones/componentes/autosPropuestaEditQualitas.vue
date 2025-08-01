@@ -8,18 +8,22 @@
         Print cambios
       </VBtn>
     </div>
-    <div class="mt-4" v-if="cambios != null">
+    <div class="mt-4">
       <FormFactory
         :schema="schemaInicial"
         :formLive="true"
-        :modelValue="cambios"
+        :modelValue="cambios || {}"
         @update:modelValue="(val) => (cambios = val)"
         :textButtonSubmit="'Empezar cotización'"
         :showButtonSubmit="false"
         :showButtonCancel="false"
       />
     </div>
-    <v-expansion-panels v-model="panelActivo" multiple>
+    <v-expansion-panels
+      v-if="!cotizacion.inicial"
+      v-model="panelActivo"
+      multiple
+    >
       <v-expansion-panel>
         <v-expansion-panel-title>Frecuencias de pago</v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -343,7 +347,90 @@ const props = defineProps<{
 
 const emit = defineEmits(["cancelar", "actualizar"]);
 // Controla los paneles abiertos del acordeón (soporta múltiples)
-let schemaInicial: any = null;
+// prettier-ignore
+let schemaInicial : any = [
+  {
+    label: "Nombre",
+    type: "text",
+    model: "nombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Segundo nombre",
+    type: "text",
+    model: "segundoNombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido paterno",
+    type: "text",
+    model: "apellidoPaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido materno",
+    type: "text",
+    model: "apellidoMaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Fecha de nacimiento",
+    type: "date",
+    model: "fechaNacimiento",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
+  },
+  {
+    label: "Sexo",
+    type: "select",
+    model: "sexo",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
+      options: [
+      {label:"Hombre",id:"Hombre"},
+      {label:"Mujer",id:"Mujer"}
+    ]
+  },
+  {
+    label: "Telefono",
+    type: "text",
+    model: "telefono",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Correo electronico",
+    type: "text",
+    model: "correo",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Datos del auto",
+    type: "separador",
+    classElement: " col-12 ",
+  },
+  {
+    label: "Marca",
+    type: "text",
+    model: "marca",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Modelo",
+    type: "text",
+    model: "modelo",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Año",
+    type: "text",
+    model: "anio",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Codigo Postal",
+    type: "text",
+    model: "codigoPostal",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+];
 const panelActivo = ref([0]); // Por defecto solo el primero abierto
 const accesorios: any = ref(null);
 const cambios: any = ref(null);
@@ -368,6 +455,17 @@ const canActualizar = computed(() => {
 function handleCancelar() {
   emit("cancelar");
 }
+
+const hadDetalles = computed(() => {
+  return (item: any): boolean => {
+    return (
+      item &&
+      item.detalles &&
+      typeof item.detalles === "object" &&
+      Object.keys(item.detalles).length > 0
+    );
+  };
+});
 
 function handleActualizar() {
   // Clona los accesorios y seleccionados para evitar referencias
@@ -395,29 +493,35 @@ function handleActualizar() {
   if (cambiosCoberturas.length > 0) {
     cambiosFinales.coberturas = cambiosCoberturas;
   }
+  // Clona el titular original
+  let tmpTitular = deepClone(props.cotizacion.titular || {});
+
+  // Buscar y mover propiedades del titular desde cambiosFinales
+  if (props.cotizacion.titular) {
+    const titularKeys = Object.keys(props.cotizacion.titular);
+
+    titularKeys.forEach((key) => {
+      if (cambiosFinales.hasOwnProperty(key)) {
+        // Guardar/reemplazar en tmpTitular
+        tmpTitular[key] = cambiosFinales[key];
+        // Eliminar de cambiosFinales
+        delete cambiosFinales[key];
+      }
+    });
+  }
+
+  if (cambiosFinales.codigoPostal) {
+    tmpTitular.codigoPostal = cambiosFinales.codigoPostal;
+    delete cambiosFinales.codigoPostal;
+  }
 
   // Clona la cotización y actualiza los cambios
   const tmpCotizacion = {
     ...deepClone(props.cotizacion),
     estimar: true,
     cambios: cambiosFinales,
+    titular: tmpTitular, // Titular actualizado
   };
-
-  // // Clona el array de cotizaciones y reemplaza la cotización por id
-  // // prettier-ignore
-  // const cotizacionesClon = deepClone( props.registro.configuracion.cotizaciones || []);
-  // const idx = cotizacionesClon.findIndex((c: any) => c.id === tmpCotizacion.id);
-  // if (idx !== -1) {
-  //   cotizacionesClon[idx] = tmpCotizacion;
-  // }
-
-  // // Clona el registro y actualiza las cotizaciones
-  // const tmpRegistro = deepClone(props.registro);
-  // tmpRegistro.configuracion.cotizaciones = cotizacionesClon;
-
-  // Debug
-  // console.log("Cambios finales:");
-  // console.log(tmpRegistro);
 
   emit("actualizar", tmpCotizacion);
 }
@@ -456,70 +560,53 @@ const handleItem = (idx: number, item: any) => {
 
 onMounted(() => {
   if (props.cotizacion) {
-    let tmp = deepToRaw(props.cotizacion);
-    let direcciones = tmp.detalles.direcciones;
-    let versiones = tmp.detalles.versiones;
+    let cotizacionTMP = deepToRaw(props.cotizacion);
+    let tmpCambios = {};
 
-    schemaInicial = [
-      {
-        label: "Dirección",
-        type: "select",
-        model: "direccion",
-        classElement: " col-sm-12 col-md-6  col-lg-6 ",
-        options: filtrarOpcionesValidas(direcciones, "value"),
-      },
-      {
-        label: "Version",
-        type: "select",
-        model: "version",
-        classElement: " col-sm-12 col-md-6  col-lg-6 ",
-        options: filtrarOpcionesValidas(versiones, "label"),
-      },
-    ];
-    // prettier-ignore
-    const primeraVersion = getPrimeraOpcionValida(versiones, "label");
-    const primeraDireccion = getPrimeraOpcionValida(direcciones, "value");
+    console.log("onMounted:", cotizacionTMP);
+    if (cotizacionTMP.inicial) {
+      if (cotizacionTMP.titular.direcciones) {
+        console.log("Direcciones del titular:");
+        let direcciones = cotizacionTMP.titular.direcciones;
+        schemaInicial.push({
+          label: "Direccion",
+          type: "select",
+          model: "direccion",
+          classElement: " col-sm-12 col-md-6  col-lg-6 ",
+          options: filtrarOpcionesValidas(direcciones, "value"),
+        });
+      }
 
-    // prettier-ignore
-    let tmpCambios = {
-      version: primeraVersion ? { label: primeraVersion, value: primeraVersion } : null,
-      direccion: primeraDireccion ? { label: primeraDireccion, value: primeraDireccion } : null,
-    };
-    // SOLUCIÓN: Clona el objeto para evitar referencias compartidas
+      tmpCambios = {
+        ...(cotizacionTMP.titular || {}),
+        ...(cotizacionTMP.vehiculo || {}),
+      };
+    }
+
     cambios.value = deepClone(tmpCambios);
     cambiosInicial.value = deepClone(tmpCambios);
+    console.log("schemaInicial ", deepToRaw(schemaInicial));
+  }
+});
 
-    // Asigna frecuencias de pago si existen
-    frecuenciasPago.value = tmp.detalles.frecuenciasPago || [];
-    // Al inicializar coberturas, si deducible es select y valor es string, lo convertimos al objeto completo
-    function mapDeducibleValorToObject(arr: any[]): any[] {
-      return arr.map((row: any) => {
-        // prettier-ignore
-        // Deducible
-        if ( row.deducible && row.deducible.tag === "select" && typeof row.deducible.valor === "string" ) {
+function mapDeducibleValorToObject(arr: any[]): any[] {
+  return arr.map((row: any) => {
+    // prettier-ignore
+    // Deducible
+    if ( row.deducible && row.deducible.tag === "select" && typeof row.deducible.valor === "string" ) {
           const found = (row.deducible.opciones || []).find( (opt: any) => opt.value === row.deducible.valor );
           if (found) row.deducible.valor = found;
         }
 
-        // prettier-ignore
-        // SumaSegura
-        if ( row.sumaSegura && row.sumaSegura.tag === "select" && typeof row.sumaSegura.valor === "string" ) {
+    // prettier-ignore
+    // SumaSegura
+    if ( row.sumaSegura && row.sumaSegura.tag === "select" && typeof row.sumaSegura.valor === "string" ) {
           const found = (row.sumaSegura.opciones || []).find( (opt: any) => opt.value === row.sumaSegura.valor );
           if (found) row.sumaSegura.valor = found;
         }
-        return row;
-      });
-    }
-
-    // prettier-ignore
-    coberturas.value = mapDeducibleValorToObject( JSON.parse(JSON.stringify(tmp.detalles.coberturasBasicas || [])) );
-    // prettier-ignore
-    coberturasInicial.value = mapDeducibleValorToObject( JSON.parse(JSON.stringify(tmp.detalles.coberturasBasicas || [])));
-
-    let tmpAccesorios = tmp.detalles.accesorios || [];
-    accesorios.value = tmpAccesorios;
-  }
-});
+    return row;
+  });
+}
 
 // prettier-ignore
 watch( coberturas, () => {

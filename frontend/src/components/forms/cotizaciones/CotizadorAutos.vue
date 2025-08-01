@@ -100,9 +100,9 @@ const schemaInicial : any = [
     classElement: " col-sm-12 col-md-6  col-lg-3 ",
   },
   {
-    label: "Version",
+    label: "Codigo Postal",
     type: "text",
-    model: "version",
+    model: "codigoPostal",
     classElement: " col-sm-12 col-md-6  col-lg-3 ",
   },
 ];
@@ -181,7 +181,7 @@ const handleSelectCotizacion = (item: any) => {
 const handleEditarCotizacion = (data: any) => {
   data = deepToRaw(data); // Asegúrate de que el data sea un objeto plano
   console.log("handleEditarCotizacion", data);
-  cotizacion.value = data; // Asigna la cotización seleccionada para editar
+  cotizacion.value = deepClone(data); // Asigna la cotización seleccionada para editar
 };
 
 const handleInicialSubmit = async () => {
@@ -322,6 +322,7 @@ async function handleCotizacionesParaEstimar(arr: any[]) {
   let tmp = await searchKeysInArray(arr, [
     { key: "numeroCotizacion"},
     { key: "detalles"},
+    { key: "msgError"},
   ], true);
   return !tmp
 }
@@ -338,6 +339,7 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
   estimando.value = false; // Finaliza la estimación
 
   const dataResponse = response.data;
+  console.log("dataResponse", deepToRaw(dataResponse));
 
   if (dataResponse.result) {
     if (flujoNormal) {
@@ -498,6 +500,8 @@ watch(step, async (nuevoValor, valorAnterior) => {
       await handleFiltrandoCotizacionesPorCompania();
       // prettier-ignore
       let canEstimar = await handleCotizacionesParaEstimar( localData.value.configuracion.cotizaciones );
+      console.log(deepToRaw(localData.value.configuracion.cotizaciones));
+      console.log("canEstimar", canEstimar);
       if (canEstimar) {
         estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
       }
@@ -506,7 +510,7 @@ watch(step, async (nuevoValor, valorAnterior) => {
 });
 
 watch(localData, async (nuevoValor, valorAnterior) => {
-  await handleCanEstimar();
+  // await handleCanEstimar();
 });
 </script>
 

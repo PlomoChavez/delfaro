@@ -113,7 +113,6 @@ async function clickElement(driver, {
     await driver.wait(until.elementIsEnabled(element), timeout);
     await element.click();
   } catch (error) {
-    console.log(`No se encontró el elemento para hacer click: ${by} -> ${locator}`);
     await sleep(100000); // Espera un segundo antes de lanzar el error
   }
 }
@@ -146,7 +145,8 @@ async function enableFirstDisabledOption(driver, selectId) {
   `);
 }
 
-async function getSelectOptions(driver, { locator, by = "id" }) {
+async function getSelectOptions(driver, { locator, by = "id", sleeptime = 0 }) {
+  if (sleeptime > 0) await sleep(sleeptime);
   const select = await driver.findElement(getBy(by, locator));
   const options = await select.findElements(By.tagName("option"));
   const result = [];
@@ -154,7 +154,9 @@ async function getSelectOptions(driver, { locator, by = "id" }) {
     const value = await option.getAttribute("value");
     const label = await option.getText();
     const selected = await option.isSelected();
-    result.push({ value, label, selected });
+    if (value !== "") {
+      result.push({ value, label, selected });
+    }
   }
   return result;
 }
@@ -383,14 +385,23 @@ async function scrollToTop(driver, options = null) {
   }
 }
 
-async function getAutocompleteOptions(driver, { locator, by = "id" }) {
+// prettier-ignore
+async function getAutocompleteOptions(driver,{ 
+  locator, 
+  sleeptime = 0, 
+  by = "id" 
+}) {
+  if (sleeptime > 0) await sleep(sleeptime);
   const ul = await driver.findElement(getBy(by, locator));
   const divs = await ul.findElements(By.css("li > div.ui-menu-item-wrapper"));
   const result = [];
   for (const div of divs) {
     const value = await div.getText();
     const id = await div.getAttribute("id");
-    result.push({ value, id });
+    // Solo agregar si el value no es string vacío
+    if (value !== "") {
+      result.push({ value, id });
+    }
   }
   return result;
 }
@@ -498,31 +509,226 @@ async function guardarEnArchivo(data, filename = null, directory = null) {
     };
   }
 }
+async function getElementValue(
+  driver,
+  { locator, by = "id", timeout = 10000, selectReturnType = "value" }
+) {
+  try {
+    const elementBy = getBy(by, locator);
+    const element = await driver.wait(until.elementLocated(elementBy), timeout);
+
+    // Obtener el tipo de elemento para determinar cómo extraer el valor
+    const tagName = await element.getTagName();
+    const inputType = await element.getAttribute("type");
+
+    let value;
+
+    switch (tagName.toLowerCase()) {
+      case "input":
+        if (inputType === "checkbox" || inputType === "radio") {
+          // Para checkboxes y radio buttons, devolver si están seleccionados
+          value = await element.isSelected();
+        } else {
+          // Para otros tipos de input, devolver el valor
+          value = await element.getAttribute("value");
+        }
+        break;
+
+      case "select":
+        try {
+          const selectedOption = await element.findElement(
+            By.css("option:checked")
+          );
+
+          switch (selectReturnType.toLowerCase()) {
+            case "value":
+              value = await selectedOption.getAttribute("value");
+              break;
+            case "text":
+            case "label":
+              value = await selectedOption.getText();
+              break;
+            case "index":
+              // Obtener el índice de la opción seleccionada
+              const allOptions = await element.findElements(
+                By.tagName("option")
+              );
+              for (let i = 0; i < allOptions.length; i++) {
+                const isSelected = await allOptions[i].isSelected();
+                if (isSelected) {
+                  value = i;
+                  break;
+                }
+              }
+              break;
+            case "both":
+              const optionValue = await selectedOption.getAttribute("value");
+              const optionText = await selectedOption.getText();
+              value = { value: optionValue, text: optionText };
+              break;
+            case "all":
+              const optionValueAll = await selectedOption.getAttribute("value");
+              const optionTextAll = await selectedOption.getText();
+              const allOptionsAll = await element.findElements(
+                By.tagName("option")
+              );
+              let optionIndex = -1;
+              for (let i = 0; i < allOptionsAll.length; i++) {
+                const isSelected = await allOptionsAll[i].isSelected();
+                if (isSelected) {
+                  optionIndex = i;
+                  break;
+                }
+              }
+              const selectName = await element.getAttribute("name");
+              const selectId = await element.getAttribute("id");
+              value = {
+                value: optionValueAll,
+                text: optionTextAll,
+                index: optionIndex,
+                name: selectName,
+                id: selectId,
+              };
+              break;
+            case "options":
+              // Obtener todas las opciones disponibles
+              const allOptionsArray = await element.findElements(
+                By.tagName("option")
+              );
+              value = [];
+              for (const opt of allOptionsArray) {
+                const optVal = await opt.getAttribute("value");
+                const optText = await opt.getText();
+                const optSelected = await opt.isSelected();
+                value.push({
+                  value: optVal,
+                  text: optText,
+                  selected: optSelected,
+                });
+              }
+              break;
+            default:
+              console.warn(
+                `selectReturnType "${selectReturnType}" no reconocido para select, usando "value"`
+              );
+              value = await selectedOption.getAttribute("value");
+          }
+        } catch (selectError) {
+          console.warn(
+            `No se encontró opción seleccionada en select ${locator}:`,
+            selectError.message
+          );
+          // Retornar valor por defecto según el tipo solicitado
+          switch (selectReturnType.toLowerCase()) {
+            case "both":
+              value = { value: "", text: "" };
+              break;
+            case "all":
+              value = { value: "", text: "", index: -1, name: "", id: "" };
+              break;
+            case "index":
+              value = -1;
+              break;
+            case "options":
+              value = [];
+              break;
+            default:
+              value = "";
+          }
+        }
+        break;
+
+      case "textarea":
+        // Para textareas, obtener el valor
+        value = await element.getAttribute("value");
+        break;
+
+      default:
+        // Para otros elementos, obtener el texto interno
+        value = await element.getText();
+        break;
+    }
+
+    return value || "";
+  } catch (error) {
+    console.error(
+      `Error al obtener valor del elemento ${by}="${locator}":`,
+      error.message
+    );
+    throw error;
+  }
+}
+
+async function esperarElementosAlternativosCustom(driver, options = {}) {
+  const {
+    errorSelector = "modalErrorWithQuoteInfo",
+    successSelector = "coberturasAccesorias",
+    errorBy = "id",
+    successBy = "id",
+    timeout = 120000,
+    pollInterval = 500,
+  } = options;
+
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeout) {
+    try {
+      // Verificar elemento de error
+      const errorBy_ = getBy(errorBy, errorSelector);
+      const errorElements = await driver.findElements(errorBy_);
+      if (errorElements.length > 0) {
+        const isVisible = await errorElements[0].isDisplayed();
+        if (isVisible) {
+          return false;
+        }
+      }
+
+      // Verificar elemento de éxito
+      const successBy_ = getBy(successBy, successSelector);
+      const successElements = await driver.findElements(successBy_);
+      if (successElements.length > 0) {
+        const isVisible = await successElements[0].isDisplayed();
+        if (isVisible) {
+          return true;
+        }
+      }
+
+      await sleep(pollInterval);
+    } catch (error) {
+      console.warn("⚠️ Error menor en la búsqueda:", error.message);
+      await sleep(pollInterval);
+    }
+  }
+
+  return false; // Tiempo de espera agotado sin encontrar elementos
+}
 module.exports = {
   acercarHaElemento,
-  guardarEnArchivo,
-  obtenerCantidadFilasTablaCotizaciones,
-  selectInUL,
-  getAutocompleteOptions,
   openPage,
+  switchToWindow,
   waitForElement,
+  esperarElementosAlternativosCustom,
   sleep,
   setInputValue,
+  selectInUL,
   selectMatOption,
-  switchToWindow,
+  selectOptionInSelect,
+  getElementText,
+  getSelectOptions,
   getElement,
+  getElementValue,
+  getAutocompleteOptions,
   clickElement,
   clickInElementNotClickeable,
   demo,
-  saveCurrentHtmlToTxt,
   printWindowTitles,
   printCurrentWindowTitle,
-  selectOptionInSelect,
-  getElementText,
   forzarCierre,
   setHover,
   scrollToBottom,
   scrollToTop,
   enableFirstDisabledOption,
-  getSelectOptions,
+  obtenerCantidadFilasTablaCotizaciones,
+  guardarEnArchivo,
+  saveCurrentHtmlToTxt,
 };

@@ -20,8 +20,10 @@ const {
   selectInUL,
   scrollToTop,
   obtenerCantidadFilasTablaCotizaciones,
+  esperarElementosAlternativosCustom,
   acercarHaElemento,
   guardarEnArchivo,
+  getElementValue,
 } = require("../helpers/seleniumHelper");
 
 const {
@@ -38,7 +40,11 @@ const {
 } = require("./qualitasHelper");
 
 const { filePathToPublicUrl } = require("../../utils/filesHelper");
-const { deepPrint } = require("../../utils/helper");
+const {
+  deepPrint,
+  formatearData,
+  traducirError,
+} = require("../../utils/helper");
 
 // prettier-ignore
 const campos = [
@@ -106,205 +112,7 @@ async function redireccionarMenuCotizaciones(driver, data) {
   });
 }
 
-async function generadorCotizacion(driver, data) {
-  await clickElement(driver, {
-    locator: '//*[@id="menu"]/div[3]/div[1]/a[1]',
-    by: "xpath",
-  });
-  // prettier-ignore
-  await clickElement(driver, {
-      locator: "//div[contains(@class, 'col-4') and .//p[normalize-space(text())='Residentes']]",
-      by: "xpath",
-    });
-
-  // prettier-ignore
-  await clickElement(driver, {
-      locator: "//div[contains(@class, 'col-4') and .//p[normalize-space(text())='Autos']]",
-      by: "xpath",
-    });
-
-  await scrollToBottom(driver);
-
-  await clickElement(driver, {
-    locator: "buttonOrigenYUso",
-    sleeptime: 1000,
-  });
-
-  await waitForElement(driver, {
-    locator: "selectYear",
-  });
-
-  await enableFirstDisabledOption(driver, "selectYear");
-
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectYear",
-    sleeptime: 1000,
-    value: "2020",
-    by: "id",
-  });
-
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectBrand",
-    tipoValor: "label",
-    sleeptime: 1000,
-    value: "HONDA",
-    by: "id",
-  });
-
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectType",
-    tipoValor: "label",
-    sleeptime: 1000,
-    value: "CR-V",
-    by: "id",
-  });
-
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectVersion",
-    tipoValor: "numero",
-    sleeptime: 1000,
-    value: 1,
-    by: "id",
-  });
-
-  let versiones = await getSelectOptions(driver, {
-    locator: "selectVersion",
-  });
-
-  await sleep(1000);
-
-  const cp = "39600";
-  for (const digito of cp) {
-    await setInputValue(driver, {
-      locator: "postalCode",
-      changeFocus: false,
-      sleeptime: 10,
-      value: digito,
-    });
-  }
-
-  await sleep(1000);
-  const direcciones = await getAutocompleteOptions(driver, {
-    locator: "ui-id-2",
-  });
-
-  console.log("Direcciones encontradas:", direcciones);
-
-  await selectInUL(driver, {
-    locator: "ui-id-2",
-  });
-  await sleep(1000);
-
-  await scrollToBottom(driver);
-
-  await sleep(1000);
-  await clickElement(driver, {
-    locator: '//*[@id="formDatosDeVehiculo"]/button',
-    sleeptime: 1000,
-    by: "xpath",
-  });
-
-  await waitForElement(driver, {
-    locator: '//*[@id="formDatosDeCotizacion"]/button',
-    by: "xpath",
-  });
-
-  await sleep(1000);
-  await scrollToBottom(driver);
-  await sleep(1000);
-
-  await clickElement(driver, {
-    locator: '//*[@id="formDatosDeCotizacion"]/button',
-    sleeptime: 1000,
-    by: "xpath",
-  });
-
-  await sleep(1000);
-  await scrollToBottom(driver, { locator: "coberturasAccesorias", by: "id" });
-  await sleep(1000);
-  await scrollToBottom(driver);
-  await sleep(1000);
-
-  console.log("Esperando ...");
-  await scrollToBottom(driver);
-  console.log("Esperando a que se cargue el botón de siguiente...");
-  await clickElement(driver, {
-    locator: "button.btn.btn-primary.next[type='submit']",
-    by: "css",
-  });
-  console.log("Esperando a que se genere la cotización...");
-  await sleep(1000);
-
-  await waitForElement(driver, {
-    locator: "resumenNumCotizacion",
-  });
-
-  await sleep(1000);
-  let detalles = {};
-
-  let numeroCotizacion = await getElementText(driver, {
-    locator: "resumenNumCotizacion",
-    by: "id",
-  });
-
-  await sleep(1000);
-  numeroCotizacion = numeroCotizacion.trim();
-  console.log("Número de cotización:", numeroCotizacion);
-
-  await sleep(1000);
-  await scrollToBottom(driver);
-  await sleep(1000);
-  await scrollToBottom(driver);
-
-  let tmp = await obtenerValoresPorId(driver, campos);
-
-  detalles = {
-    ...detalles,
-    ...tmp,
-  };
-
-  detalles.direcciones = direcciones;
-  detalles.versiones = versiones;
-
-  let btnDownload = await getElement(driver, { locator: "descargarPDF" });
-  let href = await btnDownload.getAttribute("href");
-
-  // prettier-ignore
-  let responseFile = await descargarArchivoHipervinculo( driver,href,"cotizacion_" + numeroCotizacion);
-  let archivo = null;
-
-  if (responseFile.status) {
-    let pathFinal = await filePathToPublicUrl(responseFile.path);
-    archivo = pathFinal;
-  }
-
-  await clickElement(driver, {
-    locator:
-      '//span[contains(@class, "edit") and @data-target="#collapseCoberturas" and normalize-space(text())="Editar"]',
-    by: "xpath",
-  });
-
-  data = {
-    ...data,
-    numeroCotizacion,
-    detalles: detalles,
-    archivo: archivo,
-  };
-
-  data = await await getDetallesCotizacion(driver, data);
-
-  // deepPrint(data);
-
-  return data;
-}
-
 async function buscarCotizacion(driver, data) {
-  delete data.msgError;
-
   await clickElement(driver, {
     locator: '//*[@id="menu"]/div[3]/div[1]/a[2]',
     by: "xpath",
@@ -532,6 +340,7 @@ async function buscarCotizacion(driver, data) {
 
   return data;
 }
+
 async function changeInputsCobertura(driver, cobertura) {
   let coberturas = Array.isArray(cobertura) ? cobertura : [cobertura];
   for (const cobertura of coberturas) {
@@ -599,30 +408,315 @@ async function getDetallesCotizacion(driver, data, darClick = true) {
 
 async function ejecutarCotizacionAutos(data) {
   let driver;
-  let dataResponse = {};
+
+  let dataResponse = await preparacionData(data);
+
   try {
     // prettier-ignore
     driver = await openPage("https://agentes360.qualitas.com.mx/", {
       headless: false,
     });
+
     await iniciarSesion(driver, data);
 
     await redireccionarMenuCotizaciones(driver, data);
 
-    if (data.numeroCotizacion) {
-      // prettier-ignore
-      dataResponse = await buscarCotizacion(driver, data);
-    } else {
-      // prettier-ignore
-      dataResponse = await generadorCotizacion(driver, data);
-    }
+    // prettier-ignore
+    dataResponse = await generadorCotizacion(driver, data);
+    // let tmp = await formatearData(dataResponse);
 
-    return dataResponse;
+    dataResponse.estimar = false;
+    return await formatearData(dataResponse);
   } catch (error) {
-    console.error("Error general en la cotización:", error.message);
+    error = traducirError(error, "Error general en la cotización: ");
+    console.log(error);
+    data.msgError = error;
+    data.estimar = false;
+    return await formatearData(data);
   } finally {
     // await sleep(200000);
     if (driver) await driver.quit();
   }
+}
+
+async function generadorCotizacion(driver, data) {
+  await clickElement(driver, {
+    locator: '//*[@id="menu"]/div[3]/div[1]/a[1]',
+    by: "xpath",
+  });
+
+  // prettier-ignore
+  await clickElement(driver, {
+    locator: "//div[contains(@class, 'col-4') and .//p[normalize-space(text())='Residentes']]",
+    by: "xpath",
+  });
+
+  // prettier-ignore
+  await clickElement(driver, {
+    locator: "//div[contains(@class, 'col-4') and .//p[normalize-space(text())='Autos']]",
+    by: "xpath",
+  });
+
+  await scrollToBottom(driver);
+
+  await clickElement(driver, {
+    locator: "buttonOrigenYUso",
+    sleeptime: 1000,
+  });
+
+  await waitForElement(driver, {
+    locator: "selectYear",
+  });
+  console.log("Esperando a que se cargue el formulario de cotización...");
+  // prettier-ignore
+  console.log(data.vehiculo.marca + " " + data.vehiculo.modelo + " " + data.vehiculo.anio);
+  // prettier-ignore
+  await setInputValue(driver, {
+    value: data.vehiculo.marca + " " + data.vehiculo.modelo + " " + data.vehiculo.anio,
+    locator: "queryVehiculo",
+    esperarHabilitado: true,
+    sleeptime: 1000,
+  });
+
+  const vehiculos = await getAutocompleteOptions(driver, {
+    sleeptime: 1000,
+    locator: "ui-id-1",
+  });
+
+  if (vehiculos.length == 0) {
+    data.msgError = "No se encontraron vehículos con los datos proporcionados.";
+    return data;
+  }
+
+  // Se selecciona el primer vehiculo en la lista
+  await selectInUL(driver, {
+    locator: "ui-id-1",
+  });
+
+  // Se obtiene las versiones de vehiculo seleccionado
+  let versiones = await getSelectOptions(driver, {
+    locator: "selectVersion",
+    sleeptime: 1000,
+  });
+
+  // Se obtiene el anio del vehiculo seleccionado
+  data.vehiculo.anio = await getElementValue(driver, {
+    selectReturnType: "label",
+    locator: "selectYear",
+  });
+
+  // Se obtiene la marca del vehiculo seleccionado
+  data.vehiculo.marca = await getElementValue(driver, {
+    selectReturnType: "label",
+    locator: "selectBrand",
+  });
+
+  // Se obtiene el modelo del vehiculo seleccionado
+  data.vehiculo.modelo = await getElementValue(driver, {
+    selectReturnType: "label",
+    locator: "selectType",
+  });
+
+  // Se obtiene la version del vehiculo seleccionado
+  data.vehiculo.version = versiones[0].label;
+
+  // Se selecciona la version del vehiculo
+  await selectOptionInSelect(driver, {
+    esperarHabilitado: true,
+    locator: "selectVersion",
+    tipoValor: "numero",
+    sleeptime: 1000,
+    value: 1,
+    by: "id",
+  });
+
+  await acercarHaElemento(driver, { locator: "postalCode" });
+
+  const cp = data.titular.codigoPostal || null; // Default postal code if not provided
+
+  if (cp == null) {
+    // prettier-ignore
+    data.msgError = "No se encontró un código postal válido.";
+    return data;
+  }
+
+  // ingresar el código postal
+  for (const digito of cp) {
+    await setInputValue(driver, {
+      locator: "postalCode",
+      changeFocus: false,
+      sleeptime: 10,
+      value: digito,
+    });
+  }
+
+  // Obteniendo direcciones disponibles
+  const direcciones = await getAutocompleteOptions(driver, {
+    locator: "ui-id-2",
+    sleeptime: 1000,
+  });
+
+  if (direcciones.length == 0) {
+    // prettier-ignore
+    data.msgError = "No se encontraron direcciones con los datos proporcionados.";
+    return data;
+  }
+
+  // Seleccionanando la primera direccion disponible
+  await selectInUL(driver, { locator: "ui-id-2" });
+
+  data.titular.direccion = direcciones[0].value;
+  data.titular.direcciones = direcciones;
+
+  // Continuando a la cotización
+  await acercarHaElemento(driver, {
+    locator: '//*[@id="formDatosDeVehiculo"]/button',
+    by: "xpath",
+  });
+
+  await clickElement(driver, {
+    locator: '//*[@id="formDatosDeVehiculo"]/button',
+    sleeptime: 1000,
+    by: "xpath",
+  });
+
+  // Saltando de formulario
+  await waitForElement(driver, { locator: "selectPolicyRight" });
+  await sleep(1000);
+  await scrollToBottom(driver);
+  await clickElement(driver, {
+    locator: '//*[@id="formDatosDeCotizacion"]/button',
+    sleeptime: 1000,
+    by: "xpath",
+  });
+
+  let existeModalError = await esperarElementosAlternativosCustom(driver, {
+    errorSelector: "modalErrorWithQuoteInfo",
+    successSelector: "coberturasAccesorias",
+    timeout: 60000,
+    pollInterval: 300,
+  });
+
+  if (!existeModalError) {
+    data.msgError = "No se pudo generar la cotización.";
+    return data;
+  }
+
+  await waitForElement(driver, { locator: "coberturasAccesorias" });
+  await scrollToBottom(driver, { locator: "coberturasAccesorias", by: "id" });
+  await scrollToBottom(driver);
+  await sleep(1000);
+  await clickElement(driver, {
+    locator: "button.btn.btn-primary.next[type='submit']",
+    by: "css",
+  });
+
+  return data;
+  console.log("Esperando a que se genere la cotización...");
+  await sleep(1000);
+
+  await waitForElement(driver, {
+    locator: "resumenNumCotizacion",
+  });
+
+  await sleep(1000);
+  let detalles = {};
+
+  let numeroCotizacion = await getElementText(driver, {
+    locator: "resumenNumCotizacion",
+    by: "id",
+  });
+
+  await sleep(1000);
+  numeroCotizacion = numeroCotizacion.trim();
+  console.log("Número de cotización:", numeroCotizacion);
+
+  await sleep(1000);
+  await scrollToBottom(driver);
+  await sleep(1000);
+  await scrollToBottom(driver);
+
+  let tmp = await obtenerValoresPorId(driver, campos);
+
+  detalles = {
+    ...detalles,
+    ...tmp,
+  };
+
+  detalles.direcciones = direcciones;
+  detalles.versiones = versiones;
+
+  let btnDownload = await getElement(driver, { locator: "descargarPDF" });
+  let href = await btnDownload.getAttribute("href");
+
+  // prettier-ignore
+  let responseFile = await descargarArchivoHipervinculo( driver,href,"cotizacion_" + numeroCotizacion);
+  let archivo = null;
+
+  if (responseFile.status) {
+    let pathFinal = await filePathToPublicUrl(responseFile.path);
+    archivo = pathFinal;
+  }
+
+  await clickElement(driver, {
+    locator:
+      '//span[contains(@class, "edit") and @data-target="#collapseCoberturas" and normalize-space(text())="Editar"]',
+    by: "xpath",
+  });
+
+  data = {
+    numeroCotizacion,
+    archivo: archivo,
+    ...data,
+    detalles: detalles,
+  };
+
+  data = await await getDetallesCotizacion(driver, data);
+
+  // deepPrint(data);
+
+  return data;
+}
+
+async function preparacionData(data) {
+  if (!data.detalles) {
+    data.detalles = {};
+  }
+
+  if (data.msgError) {
+    delete data.msgError;
+  }
+
+  if (data.cambios) {
+    delete data.cambios;
+  }
+
+  if (!data.hasOwnProperty("inicial")) {
+    data.inicial = true;
+  }
+
+  if (!data.hasOwnProperty("vehiculo")) {
+    data.vehiculo = {
+      marca: data.titular.marca,
+      modelo: data.titular.modelo,
+      anio: data.titular.anio,
+      version: data.titular.version,
+    };
+
+    delete data.titular.anio;
+    delete data.titular.marca;
+    delete data.titular.modelo;
+    delete data.titular.version;
+  }
+
+  if (data.hasOwnProperty("companias_productos")) {
+    if (data.companias_productos.length == 1) {
+      let producto = data.companias_productos[0];
+      data.companiaProducto_id = producto.id; // Asignar el primer ID de compania_producto
+      data.companiaProducto = producto.nombre; // Asignar el primer ID de compania_producto
+      delete data.companias_productos; // Eliminar la propiedad 'companias_productos' si existe
+    }
+  }
+  return data;
 }
 module.exports = { ejecutarCotizacionAutos };

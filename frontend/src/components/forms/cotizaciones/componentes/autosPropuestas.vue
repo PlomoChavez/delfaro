@@ -15,8 +15,10 @@
             </div>
             <div class="propuesta-card-horizontal">
               <!-- Columna 1: Checkbox -->
-              <div class="col-check">
+              <div class="col-check" >
                 <input
+
+                  v-if="!item.inicial"
                   type="checkbox"
                   :checked="seleccionadas.includes(item.id)"
                   @change="seleccionar(item)"
@@ -28,7 +30,7 @@
                 <div class="propuesta-header-horizontal">
                   <span class="nombre-compania">{{ item.companiaCorto }}</span>
                 </div>
-                <div class="propuesta-detalles-horizontal">
+                <div v-if="!item.inicial" class="propuesta-detalles-horizontal">
                   <div class="detalle-row">
                     <span class="detalle-key">Núm de Cotizacion:</span>
                     <span class="detalle-value">{{
@@ -56,6 +58,7 @@
               <!-- Columna 3: Iconos -->
               <div class="col-iconos">
                 <i
+                v-if="!item.inicial"
                   class="fa fa-exclamation-circle font22 icono-accion text-info"
                   :title="
                     abiertos.includes(item.id)
@@ -66,6 +69,7 @@
                   style="cursor: pointer"
                 />
                 <a
+                 v-if="!item.inicial && item.archivo"
                   :href="item.archivo"
                   target="_blank"
                   rel="noopener"
@@ -86,16 +90,18 @@
               </div>
             </div>
           </div>
-          <!-- Acordeón de detalle -->
-          <transition name="acordeon">
-            <div
-              :key="'acordeon-' + item.id"
-              v-if="abiertos.includes(item.id)"
-              class="card acordeonDetalles"
-            >
-              <PropuestaDetalles :cotizacion="item" />
-            </div>
-          </transition>
+          <template v-if="!item.inicial">
+            <!-- Acordeón de detalle -->
+            <transition name="acordeon">
+              <div
+                :key="'acordeon-' + item.id"
+                v-if="abiertos.includes(item.id)"
+                class="card acordeonDetalles"
+              >
+                <PropuestaDetalles :cotizacion="item" />
+              </div>
+            </transition>
+          </template>
         </div>
       </div>
     </div>
@@ -126,6 +132,17 @@ function seleccionar(item: any) {
 function editarPropuesta(item: any) {
   emit("editar", item);
 }
+
+const hadDetalles = computed(() => {
+  return (item: any): boolean => {
+    return (
+      item &&
+      item.detalles &&
+      typeof item.detalles === "object" &&
+      Object.keys(item.detalles).length > 0
+    );
+  };
+});
 
 function toggleAcordeon(id: number) {
   if (abiertos.value.includes(id)) {

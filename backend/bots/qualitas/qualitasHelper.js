@@ -192,133 +192,292 @@ async function esperarElementoVisible(driver, selector, timeout = 20000) {
 }
 
 async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
-  // prettier-ignore
-  const labels = await driver.findElements(By.css("#coberturasAccesoriasItems label"));
+  console.log("🔍 Iniciando obtención de coberturas accesorias...");
 
-  const nombres = [];
+  try {
+    // prettier-ignore
+    const labels = await driver.findElements(By.css("#coberturasAccesoriasItems label"));
+    console.log(
+      `📋 Encontrados ${labels.length} labels de coberturas accesorias`
+    );
 
-  for (const label of labels) {
-    await driver.executeScript("arguments[0].scrollIntoView(true);", label);
-    await driver.sleep(500);
-    if (darClick) {
-      // Obtener el id del input asociado al label
-      const inputId = await label.getAttribute("for");
-      const checkbox = await driver.findElement(By.id(inputId));
-      const isChecked = await checkbox.isSelected();
-
-      if (!isChecked) {
-        await driver.executeScript("arguments[0].click();", label);
-        await driver.sleep(300);
-      }
+    if (labels.length === 0) {
+      console.warn("⚠️ No se encontraron labels de coberturas accesorias");
+      return [];
     }
 
-    const idLabel = await label.getAttribute("for");
-    let nombre = null;
-    let prima = null;
+    const nombres = [];
 
-    let rowMb4;
-    try {
-      rowMb4 = await label.findElement(By.css("div.shadow .row.mb-4"));
-    } catch (e) {
-      continue;
-    }
+    for (let i = 0; i < labels.length; i++) {
+      const label = labels[i];
+      console.log(`\n🏷️ Procesando label ${i + 1}/${labels.length}`);
 
-    const ps = await rowMb4.findElements(By.css("p.c2"));
-    if (ps.length > 0) {
-      nombre = await ps[0].getText();
-      if (ps.length > 1) {
-        prima = await ps[1].getText();
-      }
-    }
+      try {
+        // Scroll al elemento
+        await driver.executeScript("arguments[0].scrollIntoView(true);", label);
+        await driver.sleep(500);
 
-    if (!nombre || nombre.trim() === "") {
-      continue;
-    }
+        // Obtener ID del label antes de hacer click
+        const idLabel = await label.getAttribute("for");
+        console.log(`   ID del label: ${idLabel}`);
 
-    // Busca los hijos en la segunda .row, agrupados por columna
-    let hijosInfo = [];
-    try {
-      const rows = await label.findElements(By.css("div.shadow .row"));
-      if (rows.length > 1) {
-        const hijosRow = rows[1];
-        const grupos = await hijosRow.findElements(
-          By.css("div[class*='col-']")
-        );
-        for (const grupo of grupos) {
-          let info = {};
+        if (!idLabel || idLabel.trim() === "") {
+          console.warn(`   ⚠️ Label ${i + 1} no tiene atributo 'for' válido`);
+          continue;
+        }
 
-          // Busca todos los labels (pueden ser varios, ej: "25%" y "Deducible")
-          let labels = [];
+        if (darClick) {
           try {
-            const labelElems = await grupo.findElements(By.css("label"));
-            for (const labelElem of labelElems) {
-              const txt = (await labelElem.getText()).trim();
-              if (txt) labels.push(txt);
+            const checkbox = await driver.findElement(By.id(idLabel));
+            const isChecked = await checkbox.isSelected();
+            console.log(
+              `   Checkbox ${idLabel} está ${
+                isChecked ? "marcado" : "desmarcado"
+              }`
+            );
+
+            if (!isChecked) {
+              await driver.executeScript("arguments[0].click();", label);
+              await driver.sleep(300);
+              console.log(`   ✅ Click realizado en label ${idLabel}`);
             }
-          } catch (e) {}
-
-          // Input
-          try {
-            const input = await grupo.findElement(By.css("input"));
-            info.tag = "input";
-            info.tipo = await input.getAttribute("type");
-            info.valor = await input.getAttribute("value");
-            info.id = await input.getAttribute("id");
-          } catch (e) {}
-
-          // Select
-          try {
-            const select = await grupo.findElement(By.css("select"));
-            info.tag = "select";
-            info.valor = await select.getAttribute("value");
-            info.id = await select.getAttribute("id");
-            // Opciones del select
-            info.opciones = [];
-            const opcionesElems = await select.findElements(By.css("option"));
-            for (const opcionElem of opcionesElems) {
-              const value = await opcionElem.getAttribute("value");
-              const texto = await opcionElem.getText();
-              info.opciones.push({ value, texto });
-            }
-          } catch (e) {}
-
-          // p
-          try {
-            const p = await grupo.findElement(By.css("p"));
-            info.tag = "p";
-            info.valor = await p.getText();
-          } catch (e) {}
-
-          // --- TRANSFORMACIÓN DE LABELS ---
-          if (labels.length === 1) {
-            info.label = labels[0];
-          } else if (labels.length === 2) {
-            info.valor = labels[0];
-            info.label = labels[1];
-          } else if (labels.length === 0) {
-            info.label = null;
-            info.valor = info.valor || null;
-          }
-
-          // Solo agrega si tiene algo relevante
-          if (info.tag || info.label || info.valor) {
-            hijosInfo.push(info);
+          } catch (checkboxError) {
+            console.error(
+              `   ❌ Error al manejar checkbox ${idLabel}:`,
+              checkboxError.message
+            );
+            continue;
           }
         }
+
+        // Buscar información del nombre y prima
+        let nombre = null;
+        let prima = null;
+        let rowMb4;
+
+        try {
+          rowMb4 = await label.findElement(By.css("div.shadow .row.mb-4"));
+          console.log(`   📄 Encontrado div.shadow .row.mb-4 para ${idLabel}`);
+        } catch (e) {
+          console.warn(
+            `   ⚠️ No se encontró div.shadow .row.mb-4 para ${idLabel}:`,
+            e.message
+          );
+          continue;
+        }
+
+        try {
+          const ps = await rowMb4.findElements(By.css("p.c2"));
+          console.log(`   📝 Encontrados ${ps.length} elementos p.c2`);
+
+          if (ps.length > 0) {
+            nombre = await ps[0].getText();
+            nombre = nombre && typeof nombre === "string" ? nombre.trim() : "";
+            console.log(`   📛 Nombre extraído: "${nombre}"`);
+
+            if (ps.length > 1) {
+              prima = await ps[1].getText();
+              prima = prima && typeof prima === "string" ? prima.trim() : "";
+              console.log(`   💰 Prima extraída: "${prima}"`);
+            }
+          }
+        } catch (textError) {
+          console.error(
+            `   ❌ Error al extraer texto de p.c2:`,
+            textError.message
+          );
+          continue;
+        }
+
+        if (!nombre || nombre === "") {
+          console.warn(`   ⚠️ Nombre vacío para ${idLabel}, saltando...`);
+          continue;
+        }
+
+        // Buscar información de los hijos
+        let hijosInfo = [];
+        try {
+          console.log(`   🔍 Buscando información de hijos para ${idLabel}...`);
+          const rows = await label.findElements(By.css("div.shadow .row"));
+          console.log(`   📊 Encontradas ${rows.length} filas en div.shadow`);
+
+          if (rows.length > 1) {
+            const hijosRow = rows[1];
+            const grupos = await hijosRow.findElements(
+              By.css("div[class*='col-']")
+            );
+            console.log(
+              `   🏗️ Encontrados ${grupos.length} grupos de columnas`
+            );
+
+            for (let j = 0; j < grupos.length; j++) {
+              const grupo = grupos[j];
+              console.log(`     🔧 Procesando grupo ${j + 1}/${grupos.length}`);
+
+              try {
+                let info = {};
+
+                // Buscar labels
+                let labelsTexto = [];
+                try {
+                  const labelElems = await grupo.findElements(By.css("label"));
+                  for (const labelElem of labelElems) {
+                    const txt = await labelElem.getText();
+                    const textoLimpio =
+                      txt && typeof txt === "string" ? txt.trim() : "";
+                    if (textoLimpio) {
+                      labelsTexto.push(textoLimpio);
+                    }
+                  }
+                  console.log(
+                    `       🏷️ Labels encontrados: [${labelsTexto.join(", ")}]`
+                  );
+                } catch (labelError) {
+                  console.warn(
+                    `       ⚠️ Error al buscar labels:`,
+                    labelError.message
+                  );
+                }
+
+                // Buscar input
+                try {
+                  const input = await grupo.findElement(By.css("input"));
+                  const tipo = await input.getAttribute("type");
+                  const valor = await input.getAttribute("value");
+                  const id = await input.getAttribute("id");
+
+                  info.tag = "input";
+                  info.tipo = tipo || "";
+                  info.valor = valor || "";
+                  info.id = id || "";
+
+                  console.log(
+                    `       🔤 Input encontrado - Tipo: ${info.tipo}, Valor: "${info.valor}", ID: ${info.id}`
+                  );
+                } catch (inputError) {
+                  // No hay input, no es error
+                }
+
+                // Buscar select
+                try {
+                  const select = await grupo.findElement(By.css("select"));
+                  const valor = await select.getAttribute("value");
+                  const id = await select.getAttribute("id");
+
+                  info.tag = "select";
+                  info.valor = valor || "";
+                  info.id = id || "";
+                  info.opciones = [];
+
+                  try {
+                    const opcionesElems = await select.findElements(
+                      By.css("option")
+                    );
+                    for (const opcionElem of opcionesElems) {
+                      const value = await opcionElem.getAttribute("value");
+                      const texto = await opcionElem.getText();
+                      info.opciones.push({
+                        value: value || "",
+                        texto: texto || "",
+                      });
+                    }
+                    console.log(
+                      `       📋 Select encontrado - Valor: "${info.valor}", Opciones: ${info.opciones.length}`
+                    );
+                  } catch (opcionesError) {
+                    console.warn(
+                      `       ⚠️ Error al obtener opciones del select:`,
+                      opcionesError.message
+                    );
+                  }
+                } catch (selectError) {
+                  // No hay select, no es error
+                }
+
+                // Buscar párrafo
+                try {
+                  const p = await grupo.findElement(By.css("p"));
+                  const texto = await p.getText();
+                  info.tag = "p";
+                  info.valor =
+                    texto && typeof texto === "string" ? texto.trim() : "";
+                  console.log(
+                    `       📄 Párrafo encontrado - Valor: "${info.valor}"`
+                  );
+                } catch (pError) {
+                  // No hay párrafo, no es error
+                }
+
+                // Transformación de labels
+                if (labelsTexto.length === 1) {
+                  info.label = labelsTexto[0];
+                } else if (labelsTexto.length === 2) {
+                  info.valor = labelsTexto[0];
+                  info.label = labelsTexto[1];
+                } else if (labelsTexto.length === 0) {
+                  info.label = null;
+                  info.valor = info.valor || null;
+                }
+
+                // Solo agregar si tiene información relevante
+                if (info.tag || info.label || info.valor) {
+                  hijosInfo.push(info);
+                  console.log(
+                    `       ✅ Información del grupo agregada:`,
+                    JSON.stringify(info, null, 2)
+                  );
+                }
+              } catch (grupoError) {
+                console.error(
+                  `     ❌ Error procesando grupo ${j + 1}:`,
+                  grupoError.message
+                );
+              }
+            }
+          }
+        } catch (hijosError) {
+          console.warn(
+            `   ⚠️ Error al buscar información de hijos:`,
+            hijosError.message
+          );
+          // hijosInfo queda vacío, no es fatal
+        }
+
+        // Agregar la información recopilada
+        const cobertura = {
+          label_id: idLabel,
+          nombre: nombre,
+          prima: prima,
+          hijos: hijosInfo,
+        };
+
+        nombres.push(cobertura);
+        console.log(`   ✅ Cobertura ${idLabel} agregada exitosamente`);
+        console.log(
+          `   📋 Resumen: Nombre="${nombre}", Prima="${prima}", Hijos=${hijosInfo.length}`
+        );
+      } catch (labelError) {
+        console.error(
+          `❌ Error procesando label ${i + 1}:`,
+          labelError.message
+        );
+        console.error(`   Stack trace:`, labelError.stack);
+        // Continúa con el siguiente label
       }
-    } catch (e) {
-      // Si no hay hijos, hijosInfo queda vacío
     }
 
-    nombres.push({
-      label_id: idLabel,
-      nombre,
-      prima,
-      hijos: hijosInfo,
-    });
+    console.log(
+      `\n🎉 Proceso completado. Total de coberturas obtenidas: ${nombres.length}`
+    );
+    return nombres;
+  } catch (mainError) {
+    console.error(
+      "❌ Error principal en obtenerNombresCoberturasAccesorias:",
+      mainError.message
+    );
+    console.error("   Stack trace:", mainError.stack);
+    throw mainError;
   }
-
-  return nombres;
 }
 
 function transformarCoberturas(filas) {

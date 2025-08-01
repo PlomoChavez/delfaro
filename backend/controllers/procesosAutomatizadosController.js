@@ -25,10 +25,17 @@ exports.estimarCotizaciones = async (req, res) => {
 
         const detalle = await handleEstimarCotizaciones(cotizacion);
 
-        resultado.push({
-          ...cotizacion,
-          ...detalle,
-        });
+        if (detalle.msgError) {
+          console.log("");
+          console.log("");
+          console.log("-------------------");
+          console.log("Error en la cotización:", detalle.msgError);
+          console.log("-------------------");
+          console.log("");
+          console.log("");
+        }
+
+        resultado.push(detalle);
       })
     );
 

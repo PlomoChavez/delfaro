@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useCatalogo } from "@/hooks/useCatalogo";
-import { VMoney } from "v-money3";
 import { getCurrentInstance, watch } from "vue";
 
 // Registrar la directiva manualmente
 const instance = getCurrentInstance();
-instance?.appContext.app.directive("money", VMoney);
+// instance?.appContext.app.directive("money", VMoney);
 
 interface Field {
   label: string;
@@ -394,7 +393,6 @@ onMounted(async () => {
                  :placeholder="field?.placeholder ?? 'Ingresa un fecha'"
                  :config="{
                    ...(field?.config || { dateFormat: 'Y-m-d' }),
-                   locale: 'es',
                    minDate: field.config?.minDate ? formLocal[field.config.minDate] : undefined,
                    maxDate: field.config?.maxDate ? formLocal[field.config.maxDate] : undefined,
                  }"
