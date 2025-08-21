@@ -245,6 +245,11 @@ onMounted(async () => {
       field.options = field.options;
     }
 
+    if (field.type === "date") {
+      // prettier-ignore
+      formLocal[field.model] = null;
+    }
+
     if (field.type === "select" && formLocal[field.model]) {
       // prettier-ignore
       formLocal[field.model] = {
@@ -389,7 +394,7 @@ onMounted(async () => {
                <!-- prettier-ignore -->
                <AppDateTimePicker
                  :key="`${field.model}`"
-                 v-model="formLocal[field.model]"
+                 v-model="formLocal[field.model] "
                  :placeholder="field?.placeholder ?? 'Ingresa un fecha'"
                  :config="{
                    ...(field?.config || { dateFormat: 'Y-m-d' }),

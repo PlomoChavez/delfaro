@@ -2,7 +2,11 @@ const { until, By } = require("selenium-webdriver");
 const { descargarConCookies } = require("../helpers/GeneralHelper");
 const { getPathFolderCotizaciones } = require("../../utils/filesHelper");
 const { deepPrint } = require("../../utils/helper");
-const { sleep } = require("../helpers/seleniumHelper");
+const {
+  sleep,
+  selectOptionInSelect,
+  setInputValue,
+} = require("../helpers/seleniumHelper");
 
 /**
  * Busca un <a> cuyo <u> contiene el texto indicado (en cualquier columna), abre el href en una nueva pestaña y cambia el foco.
@@ -191,18 +195,21 @@ async function esperarElementoVisible(driver, selector, timeout = 20000) {
   return element;
 }
 
-async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
-  console.log("🔍 Iniciando obtención de coberturas accesorias...");
+// ...existing code...
+// prettier-ignore
+async function obtenerNombresCoberturasAccesorias(driver, dataExtra = {
+  darClick: true,
+  darSegundoClick: false
+}) {
+  const darClick = dataExtra.darClick !== undefined ? dataExtra.darClick : true;
+  const darSegundoClick = dataExtra.darSegundoClick !== undefined ? dataExtra.darSegundoClick : false;
+  const accesorios = dataExtra.accesorios !== undefined ? dataExtra.accesorios : [];
+  console.log("Obteniendo coberturas accesorias...");
 
   try {
-    // prettier-ignore
     const labels = await driver.findElements(By.css("#coberturasAccesoriasItems label"));
-    console.log(
-      `📋 Encontrados ${labels.length} labels de coberturas accesorias`
-    );
 
     if (labels.length === 0) {
-      console.warn("⚠️ No se encontraron labels de coberturas accesorias");
       return [];
     }
 
@@ -210,7 +217,6 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
 
     for (let i = 0; i < labels.length; i++) {
       const label = labels[i];
-      console.log(`\n🏷️ Procesando label ${i + 1}/${labels.length}`);
 
       try {
         // Scroll al elemento
@@ -219,10 +225,8 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
 
         // Obtener ID del label antes de hacer click
         const idLabel = await label.getAttribute("for");
-        console.log(`   ID del label: ${idLabel}`);
 
         if (!idLabel || idLabel.trim() === "") {
-          console.warn(`   ⚠️ Label ${i + 1} no tiene atributo 'for' válido`);
           continue;
         }
 
@@ -230,22 +234,12 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
           try {
             const checkbox = await driver.findElement(By.id(idLabel));
             const isChecked = await checkbox.isSelected();
-            console.log(
-              `   Checkbox ${idLabel} está ${
-                isChecked ? "marcado" : "desmarcado"
-              }`
-            );
 
             if (!isChecked) {
               await driver.executeScript("arguments[0].click();", label);
               await driver.sleep(300);
-              console.log(`   ✅ Click realizado en label ${idLabel}`);
             }
           } catch (checkboxError) {
-            console.error(
-              `   ❌ Error al manejar checkbox ${idLabel}:`,
-              checkboxError.message
-            );
             continue;
           }
         }
@@ -257,62 +251,76 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
 
         try {
           rowMb4 = await label.findElement(By.css("div.shadow .row.mb-4"));
-          console.log(`   📄 Encontrado div.shadow .row.mb-4 para ${idLabel}`);
         } catch (e) {
-          console.warn(
-            `   ⚠️ No se encontró div.shadow .row.mb-4 para ${idLabel}:`,
-            e.message
-          );
           continue;
         }
-
+        let ps = [];
         try {
-          const ps = await rowMb4.findElements(By.css("p.c2"));
-          console.log(`   📝 Encontrados ${ps.length} elementos p.c2`);
+          ps = await rowMb4.findElements(By.css("p.c2"));
 
           if (ps.length > 0) {
             nombre = await ps[0].getText();
             nombre = nombre && typeof nombre === "string" ? nombre.trim() : "";
-            console.log(`   📛 Nombre extraído: "${nombre}"`);
-
-            if (ps.length > 1) {
-              prima = await ps[1].getText();
-              prima = prima && typeof prima === "string" ? prima.trim() : "";
-              console.log(`   💰 Prima extraída: "${prima}"`);
-            }
           }
         } catch (textError) {
-          console.error(
-            `   ❌ Error al extraer texto de p.c2:`,
-            textError.message
-          );
+          continue;
+        }
+        
+        if (!nombre || nombre === "") {
           continue;
         }
 
-        if (!nombre || nombre === "") {
-          console.warn(`   ⚠️ Nombre vacío para ${idLabel}, saltando...`);
-          continue;
+        let existeAccersori = accesorios.find((item)=> item.nombre === nombre);
+        let selectedAccesorio = existeAccersori ? (existeAccersori.selected  ?? false): false;
+
+        if(selectedAccesorio){
+          for (const hijo of existeAccersori.hijos) {
+            if (!hijo.tag) continue;
+            switch (hijo.tag) {
+              case "input":
+                await setInputValue(driver, {
+                  locator: hijo.id,
+                  clearInput: true,
+                  value: hijo.valor,
+                  sleeptime: 1000,
+                  by: "id",
+                });
+                break;
+              case "select":
+                await selectOptionInSelect(driver, {
+                  esperarHabilitado: true,
+                  value: hijo.valor.texto,
+                  tipoValor: "label",
+                  locator: hijo.id, // Cambié de hijo.name a hijo.id para consistencia
+                  sleeptime: 1000,
+                  by: "id", // Cambié de "name" a "id" para consistencia
+                });
+                break;
+            }
+          }
+        }
+
+        ps = await rowMb4.findElements(By.css("p.c2"));
+        if (ps.length > 0) {
+          if (ps.length > 1) {
+            prima = await ps[1].getText();
+            prima = prima && typeof prima === "string" ? prima.trim() : "";
+          }
         }
 
         // Buscar información de los hijos
         let hijosInfo = [];
         try {
-          console.log(`   🔍 Buscando información de hijos para ${idLabel}...`);
           const rows = await label.findElements(By.css("div.shadow .row"));
-          console.log(`   📊 Encontradas ${rows.length} filas en div.shadow`);
 
           if (rows.length > 1) {
             const hijosRow = rows[1];
             const grupos = await hijosRow.findElements(
               By.css("div[class*='col-']")
             );
-            console.log(
-              `   🏗️ Encontrados ${grupos.length} grupos de columnas`
-            );
 
             for (let j = 0; j < grupos.length; j++) {
               const grupo = grupos[j];
-              console.log(`     🔧 Procesando grupo ${j + 1}/${grupos.length}`);
 
               try {
                 let info = {};
@@ -329,14 +337,8 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
                       labelsTexto.push(textoLimpio);
                     }
                   }
-                  console.log(
-                    `       🏷️ Labels encontrados: [${labelsTexto.join(", ")}]`
-                  );
                 } catch (labelError) {
-                  console.warn(
-                    `       ⚠️ Error al buscar labels:`,
-                    labelError.message
-                  );
+                  // No hay labels
                 }
 
                 // Buscar input
@@ -345,15 +347,13 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
                   const tipo = await input.getAttribute("type");
                   const valor = await input.getAttribute("value");
                   const id = await input.getAttribute("id");
+                  const name = await input.getAttribute("name"); // Agregué name también
 
                   info.tag = "input";
                   info.tipo = tipo || "";
                   info.valor = valor || "";
                   info.id = id || "";
-
-                  console.log(
-                    `       🔤 Input encontrado - Tipo: ${info.tipo}, Valor: "${info.valor}", ID: ${info.id}`
-                  );
+                  info.name = name || ""; // Agregué name para tener ambas opciones
                 } catch (inputError) {
                   // No hay input, no es error
                 }
@@ -363,10 +363,12 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
                   const select = await grupo.findElement(By.css("select"));
                   const valor = await select.getAttribute("value");
                   const id = await select.getAttribute("id");
+                  const name = await select.getAttribute("name"); // Agregué name también
 
                   info.tag = "select";
                   info.valor = valor || "";
                   info.id = id || "";
+                  info.name = name || ""; // Agregué name para tener ambas opciones
                   info.opciones = [];
 
                   try {
@@ -381,14 +383,8 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
                         texto: texto || "",
                       });
                     }
-                    console.log(
-                      `       📋 Select encontrado - Valor: "${info.valor}", Opciones: ${info.opciones.length}`
-                    );
                   } catch (opcionesError) {
-                    console.warn(
-                      `       ⚠️ Error al obtener opciones del select:`,
-                      opcionesError.message
-                    );
+                    // Error al obtener opciones
                   }
                 } catch (selectError) {
                   // No hay select, no es error
@@ -401,9 +397,6 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
                   info.tag = "p";
                   info.valor =
                     texto && typeof texto === "string" ? texto.trim() : "";
-                  console.log(
-                    `       📄 Párrafo encontrado - Valor: "${info.valor}"`
-                  );
                 } catch (pError) {
                   // No hay párrafo, no es error
                 }
@@ -422,24 +415,13 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
                 // Solo agregar si tiene información relevante
                 if (info.tag || info.label || info.valor) {
                   hijosInfo.push(info);
-                  console.log(
-                    `       ✅ Información del grupo agregada:`,
-                    JSON.stringify(info, null, 2)
-                  );
                 }
               } catch (grupoError) {
-                console.error(
-                  `     ❌ Error procesando grupo ${j + 1}:`,
-                  grupoError.message
-                );
+                // Error procesando grupo
               }
             }
           }
         } catch (hijosError) {
-          console.warn(
-            `   ⚠️ Error al buscar información de hijos:`,
-            hijosError.message
-          );
           // hijosInfo queda vacío, no es fatal
         }
 
@@ -449,36 +431,36 @@ async function obtenerNombresCoberturasAccesorias(driver, darClick = true) {
           nombre: nombre,
           prima: prima,
           hijos: hijosInfo,
+          selected: selectedAccesorio,
         };
 
         nombres.push(cobertura);
-        console.log(`   ✅ Cobertura ${idLabel} agregada exitosamente`);
-        console.log(
-          `   📋 Resumen: Nombre="${nombre}", Prima="${prima}", Hijos=${hijosInfo.length}`
-        );
+        if(selectedAccesorio){
+          console.log("cobertura")
+          console.log(cobertura)
+        }
+
+        // Dar segundo click si está habilitado y se cumplen las condiciones
+        if (!selectedAccesorio) {
+          try {
+            await driver.executeScript("arguments[0].click();", label);
+            await driver.sleep(300);
+          } catch (segundoClickError) {
+            // Error en segundo click, no es fatal
+          }
+        }
+
       } catch (labelError) {
-        console.error(
-          `❌ Error procesando label ${i + 1}:`,
-          labelError.message
-        );
-        console.error(`   Stack trace:`, labelError.stack);
         // Continúa con el siguiente label
       }
     }
 
-    console.log(
-      `\n🎉 Proceso completado. Total de coberturas obtenidas: ${nombres.length}`
-    );
     return nombres;
   } catch (mainError) {
-    console.error(
-      "❌ Error principal en obtenerNombresCoberturasAccesorias:",
-      mainError.message
-    );
-    console.error("   Stack trace:", mainError.stack);
     throw mainError;
   }
 }
+// ...existing code...
 
 function transformarCoberturas(filas) {
   return filas
@@ -629,6 +611,55 @@ async function esperarQueNoExistaModalError(
   }
   // Si nunca apareció el modal, retorna null
   return null;
+}
+
+async function actualizacionAccesosrio(driver, accesorios) {
+  console.log("Obteniendo nombres y primas de coberturas accesorias...");
+  try {
+    const labels = await driver.findElements(
+      By.css("#coberturasAccesoriasItems label")
+    );
+    if (labels.length === 0) {
+      return [];
+    }
+    const coberturas = [];
+    for (const label of labels) {
+      try {
+        await driver.executeScript("arguments[0].scrollIntoView(true);", label);
+        await driver.sleep(200);
+
+        const label_id = await label.getAttribute("for");
+        if (!label_id || label_id.trim() === "") continue;
+
+        let nombre = null;
+        let prima = null;
+        try {
+          const rowMb4 = await label.findElement(
+            By.css("div.shadow .row.mb-4")
+          );
+          const ps = await rowMb4.findElements(By.css("p.c2"));
+          if (ps.length > 0) {
+            nombre = await ps[0].getText();
+            nombre = nombre && typeof nombre === "string" ? nombre.trim() : "";
+            if (ps.length > 1) {
+              prima = await ps[1].getText();
+              prima = prima && typeof prima === "string" ? prima.trim() : "";
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+        if (!nombre || nombre === "") continue;
+
+        coberturas.push({ label_id, nombre, prima });
+      } catch (e) {
+        // Continúa con el siguiente label
+      }
+    }
+    return coberturas;
+  } catch (mainError) {
+    throw mainError;
+  }
 }
 module.exports = {
   esperarQueNoExistaModalError,

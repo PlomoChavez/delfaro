@@ -18,7 +18,7 @@
               <div class="col-check" >
                 <input
 
-                  v-if="!item.inicial"
+                  v-if="typeof item.inicial !== 'undefined' && item.inicial == false"
                   type="checkbox"
                   :checked="seleccionadas.includes(item.id)"
                   @change="seleccionar(item)"
@@ -30,11 +30,11 @@
                 <div class="propuesta-header-horizontal">
                   <span class="nombre-compania">{{ item.companiaCorto }}</span>
                 </div>
-                <div v-if="!item.inicial" class="propuesta-detalles-horizontal">
+                <div v-if="typeof item.inicial !== 'undefined' && item.inicial == false" class="propuesta-detalles-horizontal">
                   <div class="detalle-row">
                     <span class="detalle-key">Núm de Cotizacion:</span>
                     <span class="detalle-value">{{
-                      item.numeroCotizacion
+                      item.detalles.numeroCotizacion
                     }}</span>
                   </div>
                   <div class="detalle-row">
@@ -58,7 +58,7 @@
               <!-- Columna 3: Iconos -->
               <div class="col-iconos">
                 <i
-                v-if="!item.inicial"
+                v-if="typeof item.inicial !== 'undefined' && item.inicial == false"
                   class="fa fa-exclamation-circle font22 icono-accion text-info"
                   :title="
                     abiertos.includes(item.id)
@@ -90,7 +90,7 @@
               </div>
             </div>
           </div>
-          <template v-if="!item.inicial">
+          <template v-if="typeof item.inicial !== 'undefined' && item.inicial == false"">
             <!-- Acordeón de detalle -->
             <transition name="acordeon">
               <div
@@ -123,9 +123,7 @@ const abiertos = ref<number[]>([]);
 
 function seleccionar(item: any) {
   item = deepToRaw(item);
-  console.log("Seleccionando propuesta:", item);
   toggleItemInArray(seleccionadas.value, item, "id");
-  console.log("Seleccionadas:", seleccionadas.value);
   emit("seleccionar", item);
 }
 

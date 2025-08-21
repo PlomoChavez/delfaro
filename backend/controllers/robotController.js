@@ -31,6 +31,7 @@ exports.demoRobots = async (req, res) => {
 exports.handleEstimarCotizaciones = async (data) => {
   let resultado = null;
   let bot = data.bot || null; // Nombre del bot a ejecutar
+  console.log("Ejecutando el bot:", data);
 
   if (bot == null) {
     if (data.ramo == "AUTOS") {
@@ -60,7 +61,7 @@ exports.handleEstimarCotizaciones = async (data) => {
       break;
 
     default:
-      resultado = "Bot no encontrado, " + compania;
+      resultado = "Bot no encontrado, " + data.compania;
   }
 
   return resultado;

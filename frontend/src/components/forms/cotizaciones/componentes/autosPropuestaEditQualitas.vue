@@ -8,319 +8,334 @@
         Print cambios
       </VBtn>
     </div>
-    <div class="mt-4">
-      <FormFactory
-        :schema="schemaInicial"
-        :formLive="true"
-        :modelValue="cambios || {}"
-        @update:modelValue="(val) => (cambios = val)"
-        :textButtonSubmit="'Empezar cotización'"
-        :showButtonSubmit="false"
-        :showButtonCancel="false"
-      />
-    </div>
-    <v-expansion-panels
-      v-if="!cotizacion.inicial"
-      v-model="panelActivo"
-      multiple
-    >
-      <v-expansion-panel>
-        <v-expansion-panel-title>Frecuencias de pago</v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <div class="frecuencias-row">
-            <div
-              v-for="(item, idx) in frecuenciasPago"
-              :key="idx"
-              class="frecuencia-card"
-              :class="{ selected: selectedFrecuencia === item.tipo }"
-              @click="
-                () => {
-                  handleSelectFrecuencia(item);
-                }
-              "
+    <template v-if="itsOkay">
+      <div class="mt-4">
+        <FormFactory
+          :schema="schemaInicial"
+          :formLive="true"
+          :modelValue="cambios || {}"
+          @update:modelValue="(val) => (cambios = val)"
+          :textButtonSubmit="'Empezar cotización'"
+          :showButtonSubmit="false"
+          :showButtonCancel="false"
+        />
+      </div>
+      <template v-if="!cotizacion.inicial">
+        <v-expansion-panels v-model="panelActivo" multiple>
+          <v-expansion-panel>
+            <v-expansion-panel-title
+              >Frecuencias de pago</v-expansion-panel-title
             >
-              <div class="frecuencia-tipo">{{ item.tipo }}</div>
-              <div class="frecuencia-monto">{{ item.monto }}</div>
-            </div>
-          </div>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-title>Coberturas básicas</v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <table class="table table-bordered w-100 mt-4 tabla-cuadriculada">
-            <thead>
-              <tr>
-                <th>Cobertura</th>
-                <th class="text-center">Suma asegurada</th>
-                <th class="text-center">Deducible</th>
-                <th class="text-center">Prima</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-for="(row, idx) in coberturas" :key="idx">
-                <template v-if="Array.isArray(row.sumaSegura)">
-                  <tr v-for="(item, i) in row.sumaSegura" :key="i">
-                    <td
-                      v-if="i === 0"
-                      :rowspan="row.sumaSegura.length"
-                      class="cuadriculada-cellNotCenter"
-                    >
-                      {{ row.cobertura }}
-                    </td>
-                    <td
-                      class="text-center cuadriculada-cell"
-                      :class="
-                        row.sumaSegura.length > 1 && i > 0
-                          ? 'cuadriculada-cell-sinborde'
-                          : ''
-                      "
-                    >
-                      <div class="cuadriculada-content">
-                        <template v-if="item.tag === 'p'">
-                          <span>{{ item.texto }}</span>
-                        </template>
-                        <template
-                          v-else-if="
-                            item.tag === 'input' && item.tipo === 'checkbox'
-                          "
-                        >
-                          <v-checkbox
-                            v-model="item.checked"
-                            :label="item.texto || ''"
-                            :disabled="item.disabled"
-                            :readonly="item.readonly"
-                            :id="item.id"
-                            :name="item.name"
-                            hide-details
-                            density="compact"
-                          />
-                        </template>
-                        <template
-                          v-else-if="
-                            item.tag === 'input' && item.tipo === 'text'
-                          "
-                        >
-                          <VTextField
-                            variant="outlined"
-                            v-model="item.valor"
-                            :disabled="item.disabled"
-                            :readonly="item.readonly"
-                            :placeholder="
-                              item.placeholder || 'Introduce el dato requerido'
-                            "
-                            class="cuadriculada-element formInput"
-                          />
-                        </template>
-                        <template v-else-if="item.tag === 'select'">
-                          <VSelect
-                            :items="item.opciones || []"
-                            v-model="item.valor"
-                            item-title="texto"
-                            :item-value="(item) => item"
-                            :placeholder="'Selecciona una opción'"
-                            :disabled="item.disabled"
-                            :readonly="item.readonly"
-                            class="cuadriculada-element formInput"
-                          />
-                        </template>
-                      </div>
-                    </td>
-                    <td
-                      class="text-center cuadriculada-cell"
-                      v-if="i === 0"
-                      :rowspan="row.sumaSegura.length"
-                    >
-                      <div class="cuadriculada-content">
-                        <template
-                          v-if="row.deducible && row.deducible.tag === 'select'"
-                        >
-                          <VSelect
-                            :items="row.deducible.opciones || []"
-                            v-model="row.deducible.valor"
-                            item-title="texto"
-                            :item-value="(item) => item"
-                            :placeholder="'Selecciona una opción'"
-                            :disabled="row.deducible.disabled"
-                            :readonly="row.deducible.readonly"
-                            class="cuadriculada-element formInput"
-                          />
-                        </template>
-                      </div>
-                    </td>
-                    <td
-                      class="text-center cuadriculada-cell"
-                      v-if="i === 0"
-                      :rowspan="row.sumaSegura.length"
-                    >
-                      <div class="cuadriculada-content">
-                        <template v-if="row.prima?.tag === 'p'">
-                          <span>{{ row.prima.texto }}</span>
-                        </template>
-                      </div>
-                    </td>
-                  </tr>
-                </template>
-                <template v-else>
-                  <tr>
-                    <td class="cuadriculada-cellNotCenter">
-                      {{ row.cobertura }}
-                    </td>
-                    <td class="text-center cuadriculada-cell">
-                      <div class="cuadriculada-content">
-                        <template v-if="row.sumaSegura?.tag === 'p'">
-                          <span>{{ row.sumaSegura.texto }}</span>
-                        </template>
-                        <template
-                          v-else-if="
-                            row.sumaSegura?.tag === 'input' &&
-                            row.sumaSegura.tipo === 'text'
-                          "
-                        >
-                          <VTextField
-                            variant="outlined"
-                            v-model="row.sumaSegura.valor"
-                            :disabled="row.sumaSegura.disabled"
-                            :readonly="row.sumaSegura.readonly"
-                            :placeholder="
-                              row.sumaSegura.placeholder ||
-                              'Introduce el dato requerido'
-                            "
-                            class="cuadriculada-element formInput"
-                          />
-                        </template>
-                        <template v-else-if="row.sumaSegura?.tag === 'select'">
-                          <VSelect
-                            :items="row.sumaSegura.opciones || []"
-                            v-model="row.sumaSegura.valor"
-                            item-title="texto"
-                            :item-value="(item) => item"
-                            :placeholder="'Selecciona una opción'"
-                            :disabled="row.sumaSegura.disabled"
-                            :readonly="row.sumaSegura.readonly"
-                            class="cuadriculada-element formInput"
-                          />
-                        </template>
-                      </div>
-                    </td>
-                    <td class="text-center cuadriculada-cell">
-                      <div class="cuadriculada-content">
-                        <template
-                          v-if="row.deducible && row.deducible.tag === 'select'"
-                        >
-                          <VSelect
-                            :items="row.deducible.opciones || []"
-                            v-model="row.deducible.valor"
-                            item-title="texto"
-                            :item-value="(item) => item"
-                            :placeholder="'Selecciona una opción'"
-                            :disabled="row.deducible.disabled"
-                            :readonly="row.deducible.readonly"
-                            class="cuadriculada-element formInput"
-                          />
-                        </template>
-                      </div>
-                    </td>
-                    <td class="text-center cuadriculada-cell">
-                      <div class="cuadriculada-content">
-                        <template v-if="row.prima?.tag === 'p'">
-                          <span>{{ row.prima.texto }}</span>
-                        </template>
-                      </div>
-                    </td>
-                  </tr>
-                </template>
-              </template>
-            </tbody>
-          </table>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-title>Accesorios</v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <div class="accesorios-tarjetas mt-4">
-            <template
-              v-for="(item, idx) in accesorios || []"
-              :key="item.label_id || idx"
-            >
-              <div v-if="item.nombre != null">
+            <v-expansion-panel-text>
+              <div class="frecuencias-row">
                 <div
-                  :key="item.label_id || idx"
-                  v-if="item.nombre != null"
-                  class="accesorio-tarjeta"
-                  :class="{ selected: selectedAccesorios.includes(idx) }"
-                  @click="handleItem(idx, item)"
+                  v-for="(item, idx) in frecuenciasPago"
+                  :key="idx"
+                  class="frecuencia-card"
+                  :class="{ selected: selectedFrecuencia === item.tipo }"
+                  @click="
+                    () => {
+                      handleSelectFrecuencia(item);
+                    }
+                  "
                 >
-                  <div class="accesorio-row">
-                    <div class="accesorio-nombre">
-                      {{ item.nombre }}
-                    </div>
-                    <div
-                      class="accesorio-valor"
-                      v-if="selectedAccesorios.includes(idx)"
-                    >
-                      {{ item.prima }}
-                    </div>
-                  </div>
-                  <div
-                    v-if="
-                      selectedAccesorios.includes(idx) &&
-                      item.hijos &&
-                      item.hijos.length > 0
-                    "
-                    @click.stop
-                    class="accesorio-hijos"
-                  >
-                    <template
-                      v-for="(hijo, hidx) in item.hijos"
-                      :key="hijo.id || hidx"
-                    >
-                      <div class="accesorio-hijo-col">
-                        <span v-if="hijo.label" class="accesorio-hijo-label">{{
-                          hijo.label
-                        }}</span>
-                        <VTextField
-                          v-if="hijo.tag === 'input'"
-                          v-model="hijo.valor"
-                          :placeholder="hijo.label || 'Valor'"
-                          class="accesorio-input formInput"
-                          variant="outlined"
-                          density="compact"
-                          :readonly="!selectedAccesorios.includes(idx)"
-                          @mousedown.stop
-                        />
-                        <VSelect
-                          v-else-if="hijo.tag === 'select'"
-                          v-model="hijo.valor"
-                          :items="hijo.opciones || []"
-                          item-title="texto"
-                          :item-value="(item) => item"
-                          :placeholder="hijo.label || 'Selecciona una opción'"
-                          class="accesorio-select formInput"
-                          density="compact"
-                          :readonly="!selectedAccesorios.includes(idx)"
-                          @mousedown.stop
-                        />
-                        <span
-                          v-else-if="hijo.valor && hijo.label"
-                          class="accesorio-hijo-valor"
-                          >{{ hijo.valor }}</span
-                        >
-                        <span
-                          v-else-if="hijo.valor"
-                          class="accesorio-hijo-valor"
-                          >{{ hijo.valor }}</span
-                        >
-                      </div>
-                    </template>
-                  </div>
+                  <div class="frecuencia-tipo">{{ item.tipo }}</div>
+                  <div class="frecuencia-monto">{{ item.monto }}</div>
                 </div>
               </div>
-            </template>
-          </div>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-title
+              >Coberturas básicas</v-expansion-panel-title
+            >
+            <v-expansion-panel-text>
+              <table class="table table-bordered w-100 mt-4 tabla-cuadriculada">
+                <thead>
+                  <tr>
+                    <th>Cobertura</th>
+                    <th class="text-center">Suma asegurada</th>
+                    <th class="text-center">Deducible</th>
+                    <th class="text-center">Prima</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="(row, idx) in coberturas" :key="idx">
+                    <template v-if="Array.isArray(row.sumaSegura)">
+                      <tr v-for="(item, i) in row.sumaSegura" :key="i">
+                        <td
+                          v-if="i === 0"
+                          :rowspan="row.sumaSegura.length"
+                          class="cuadriculada-cellNotCenter"
+                        >
+                          {{ row.cobertura }}
+                        </td>
+                        <td
+                          class="text-center cuadriculada-cell"
+                          :class="
+                            row.sumaSegura.length > 1 && i > 0
+                              ? 'cuadriculada-cell-sinborde'
+                              : ''
+                          "
+                        >
+                          <div class="cuadriculada-content">
+                            <template v-if="item.tag === 'p'">
+                              <span>{{ item.texto }}</span>
+                            </template>
+                            <template
+                              v-else-if="
+                                item.tag === 'input' && item.tipo === 'checkbox'
+                              "
+                            >
+                              <v-checkbox
+                                v-model="item.checked"
+                                :label="item.texto || ''"
+                                :disabled="item.disabled"
+                                :readonly="item.readonly"
+                                :id="item.id"
+                                :name="item.name"
+                                hide-details
+                                density="compact"
+                              />
+                            </template>
+                            <template
+                              v-else-if="
+                                item.tag === 'input' && item.tipo === 'text'
+                              "
+                            >
+                              <VTextField
+                                variant="outlined"
+                                v-model="item.valor"
+                                :disabled="item.disabled"
+                                :readonly="item.readonly"
+                                :placeholder="
+                                  item.placeholder ||
+                                  'Introduce el dato requerido'
+                                "
+                                class="cuadriculada-element formInput"
+                              />
+                            </template>
+                            <template v-else-if="item.tag === 'select'">
+                              <VSelect
+                                :items="item.opciones || []"
+                                v-model="item.valor"
+                                item-title="texto"
+                                :item-value="(item) => item"
+                                :placeholder="'Selecciona una opción'"
+                                :disabled="item.disabled"
+                                :readonly="item.readonly"
+                                class="cuadriculada-element formInput"
+                              />
+                            </template>
+                          </div>
+                        </td>
+                        <td
+                          class="text-center cuadriculada-cell"
+                          v-if="i === 0"
+                          :rowspan="row.sumaSegura.length"
+                        >
+                          <div class="cuadriculada-content">
+                            <template
+                              v-if="
+                                row.deducible && row.deducible.tag === 'select'
+                              "
+                            >
+                              <VSelect
+                                :items="row.deducible.opciones || []"
+                                v-model="row.deducible.valor"
+                                item-title="texto"
+                                :item-value="(item) => item"
+                                :placeholder="'Selecciona una opción'"
+                                :disabled="row.deducible.disabled"
+                                :readonly="row.deducible.readonly"
+                                class="cuadriculada-element formInput"
+                              />
+                            </template>
+                          </div>
+                        </td>
+                        <td
+                          class="text-center cuadriculada-cell"
+                          v-if="i === 0"
+                          :rowspan="row.sumaSegura.length"
+                        >
+                          <div class="cuadriculada-content">
+                            <template v-if="row.prima?.tag === 'p'">
+                              <span>{{ row.prima.texto }}</span>
+                            </template>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                    <template v-else>
+                      <tr>
+                        <td class="cuadriculada-cellNotCenter">
+                          {{ row.cobertura }}
+                        </td>
+                        <td class="text-center cuadriculada-cell">
+                          <div class="cuadriculada-content">
+                            <template v-if="row.sumaSegura?.tag === 'p'">
+                              <span>{{ row.sumaSegura.texto }}</span>
+                            </template>
+                            <template
+                              v-else-if="
+                                row.sumaSegura?.tag === 'input' &&
+                                row.sumaSegura.tipo === 'text'
+                              "
+                            >
+                              <VTextField
+                                variant="outlined"
+                                v-model="row.sumaSegura.valor"
+                                :disabled="row.sumaSegura.disabled"
+                                :readonly="row.sumaSegura.readonly"
+                                :placeholder="
+                                  row.sumaSegura.placeholder ||
+                                  'Introduce el dato requerido'
+                                "
+                                class="cuadriculada-element formInput"
+                              />
+                            </template>
+                            <template
+                              v-else-if="row.sumaSegura?.tag === 'select'"
+                            >
+                              <VSelect
+                                :items="row.sumaSegura.opciones || []"
+                                v-model="row.sumaSegura.valor"
+                                item-title="texto"
+                                :item-value="(item) => item"
+                                :placeholder="'Selecciona una opción'"
+                                :disabled="row.sumaSegura.disabled"
+                                :readonly="row.sumaSegura.readonly"
+                                class="cuadriculada-element formInput"
+                              />
+                            </template>
+                          </div>
+                        </td>
+                        <td class="text-center cuadriculada-cell">
+                          <div class="cuadriculada-content">
+                            <template
+                              v-if="
+                                row.deducible && row.deducible.tag === 'select'
+                              "
+                            >
+                              <VSelect
+                                :items="row.deducible.opciones || []"
+                                v-model="row.deducible.valor"
+                                item-title="texto"
+                                :item-value="(item) => item"
+                                :placeholder="'Selecciona una opción'"
+                                :disabled="row.deducible.disabled"
+                                :readonly="row.deducible.readonly"
+                                class="cuadriculada-element formInput"
+                              />
+                            </template>
+                          </div>
+                        </td>
+                        <td class="text-center cuadriculada-cell">
+                          <div class="cuadriculada-content">
+                            <template v-if="row.prima?.tag === 'p'">
+                              <span>{{ row.prima.texto }}</span>
+                            </template>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </template>
+                </tbody>
+              </table>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-title>Accesorios</v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <div class="accesorios-tarjetas mt-4">
+                <template
+                  v-for="(item, idx) in accesorios || []"
+                  :key="item.label_id || idx"
+                >
+                  <div v-if="item.nombre != null">
+                    <div
+                      :key="item.label_id || idx"
+                      v-if="item.nombre != null"
+                      class="accesorio-tarjeta"
+                      :class="{ selected: item.selected || false }"
+                      @click="handleItem(idx, item)"
+                    >
+                      <div class="accesorio-row">
+                        <div class="accesorio-nombre">
+                          {{ item.nombre }}
+                        </div>
+                        <div
+                          class="accesorio-valor"
+                          v-if="item.selected || false"
+                        >
+                          {{ item.prima }}
+                        </div>
+                      </div>
+                      <div
+                        v-if="
+                          (item.selected || false) &&
+                          item.hijos &&
+                          item.hijos.length > 0
+                        "
+                        @click.stop
+                        class="accesorio-hijos"
+                      >
+                        <template
+                          v-for="(hijo, hidx) in item.hijos"
+                          :key="hijo.id || hidx"
+                        >
+                          <div class="accesorio-hijo-col">
+                            <span
+                              v-if="hijo.label"
+                              class="accesorio-hijo-label"
+                              >{{ hijo.label }}</span
+                            >
+                            <VTextField
+                              v-if="hijo.tag === 'input'"
+                              v-model="hijo.valor"
+                              :placeholder="hijo.label || 'Valor'"
+                              class="accesorio-input formInput"
+                              variant="outlined"
+                              density="compact"
+                              :readonly="!(item.selected || false)"
+                              @mousedown.stop
+                            />
+                            <VSelect
+                              v-else-if="hijo.tag === 'select'"
+                              v-model="hijo.valor"
+                              :items="hijo.opciones || []"
+                              item-title="texto"
+                              :item-value="(item) => item"
+                              :placeholder="
+                                hijo.label || 'Selecciona una opción'
+                              "
+                              class="accesorio-select formInput"
+                              density="compact"
+                              :readonly="!(item.selected || false)"
+                              @mousedown.stop
+                            />
+                            <span
+                              v-else-if="hijo.valor && hijo.label"
+                              class="accesorio-hijo-valor"
+                              >{{ hijo.valor }}</span
+                            >
+                            <span
+                              v-else-if="hijo.valor"
+                              class="accesorio-hijo-valor"
+                              >{{ hijo.valor }}</span
+                            >
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </template>
+    </template>
 
     <div class="d-flex justify-space-between w-100 mt-5">
       <div>
@@ -431,6 +446,7 @@ let schemaInicial : any = [
     classElement: " col-sm-12 col-md-6  col-lg-3 ",
   },
 ];
+const itsOkay = ref(false); // Por defecto solo el primero abierto
 const panelActivo = ref([0]); // Por defecto solo el primero abierto
 const accesorios: any = ref(null);
 const cambios: any = ref(null);
@@ -456,29 +472,15 @@ function handleCancelar() {
   emit("cancelar");
 }
 
-const hadDetalles = computed(() => {
-  return (item: any): boolean => {
-    return (
-      item &&
-      item.detalles &&
-      typeof item.detalles === "object" &&
-      Object.keys(item.detalles).length > 0
-    );
-  };
-});
-
 function handleActualizar() {
+  let tmpCotizacion = { ...deepClone(props.cotizacion) };
   // Clona los accesorios y seleccionados para evitar referencias
   const coberturasTmp = deepClone(coberturas.value || []);
+
   // prettier-ignore
   const cambiosCoberturas = diffObjects(coberturasTmp, coberturasInicial.value || {});
   const accesoriosClon = deepClone(accesorios.value || []);
-  const seleccionadosClon = deepClone(selectedAccesorios.value || []);
-
-  // Obtiene los accesorios seleccionados por índice
-  const tmpAccesorios = accesoriosClon.filter((_: any, idx: any) =>
-    seleccionadosClon.includes(idx)
-  );
+  tmpCotizacion.detalles.accesorios = [...accesoriosClon];
 
   // Prepara los cambios finales
   let cambiosFinales = {
@@ -486,13 +488,10 @@ function handleActualizar() {
     coberturas: cambiosCoberturas,
   };
 
-  if (tmpAccesorios.length > 0) {
-    cambiosFinales.accesorios = tmpAccesorios;
-  }
-
   if (cambiosCoberturas.length > 0) {
     cambiosFinales.coberturas = cambiosCoberturas;
   }
+
   // Clona el titular original
   let tmpTitular = deepClone(props.cotizacion.titular || {});
 
@@ -510,26 +509,43 @@ function handleActualizar() {
     });
   }
 
-  if (cambiosFinales.codigoPostal) {
+  if (isObject(tmpTitular.direccion)) {
+    tmpTitular.direccion = tmpTitular.direccion.label;
+  }
+
+  if ("codigoPostal" in cambiosFinales) {
     tmpTitular.codigoPostal = cambiosFinales.codigoPostal;
     delete cambiosFinales.codigoPostal;
   }
 
-  // Clona la cotización y actualiza los cambios
-  const tmpCotizacion = {
-    ...deepClone(props.cotizacion),
-    estimar: true,
-    cambios: cambiosFinales,
-    titular: tmpTitular, // Titular actualizado
-  };
+  if ("marca" in cambiosFinales) {
+    tmpCotizacion.vehiculo.marca = cambiosFinales.marca;
+    delete cambiosFinales.marca;
+  }
 
+  if ("modelo" in cambiosFinales) {
+    tmpCotizacion.vehiculo.modelo = cambiosFinales.modelo;
+    delete cambiosFinales.modelo;
+  }
+
+  if ("anio" in cambiosFinales) {
+    tmpCotizacion.vehiculo.anio = cambiosFinales.anio;
+    delete cambiosFinales.anio;
+  }
+
+  if ("version" in cambiosFinales) {
+    tmpCotizacion.vehiculo.version = cambiosFinales.version.label;
+    delete cambiosFinales.version;
+  }
+
+  if ("frecuenciaPago" in cambiosFinales) {
+    tmpCotizacion.detalles.frecuenciaPago = cambiosFinales.frecuenciaPago.tipo;
+    delete cambiosFinales.frecuenciaPago;
+  }
+
+  tmpCotizacion.estimar = true;
+  tmpCotizacion.titular = tmpTitular; // Titular actualizado
   emit("actualizar", tmpCotizacion);
-}
-
-function getPrimeraOpcionValida(arr: any[], prop: string): string | null {
-  return Array.isArray(arr)
-    ? arr.find((item) => item[prop] && item[prop] !== "")?.[prop] ?? null
-    : null;
 }
 
 const handleSelectFrecuencia = (item: any) => {
@@ -545,69 +561,74 @@ function filtrarOpcionesValidas(arr: any[], prop: string) {
     : [];
 }
 
-function toggleAccesorio(idx: number) {
-  const i = selectedAccesorios.value.indexOf(idx);
-  if (i === -1) {
-    selectedAccesorios.value.push(idx);
-  } else {
-    selectedAccesorios.value.splice(i, 1);
-  }
-}
-
 const handleItem = (idx: number, item: any) => {
-  toggleAccesorio(idx);
+  accesorios.value[idx].selected = !accesorios.value[idx].selected;
 };
 
 onMounted(() => {
   if (props.cotizacion) {
     let cotizacionTMP = deepToRaw(props.cotizacion);
-    let tmpCambios = {};
-
-    console.log("onMounted:", cotizacionTMP);
+    let tmpCambios: any = {};
     if (cotizacionTMP.inicial) {
-      if (cotizacionTMP.titular.direcciones) {
-        console.log("Direcciones del titular:");
-        let direcciones = cotizacionTMP.titular.direcciones;
-        schemaInicial.push({
-          label: "Direccion",
-          type: "select",
-          model: "direccion",
-          classElement: " col-sm-12 col-md-6  col-lg-6 ",
-          options: filtrarOpcionesValidas(direcciones, "value"),
-        });
-      }
-
+      tmpCambios = {
+        ...(cotizacionTMP.titular || {}),
+        ...(cotizacionTMP.vehiculo || {}),
+      };
+    } else {
       tmpCambios = {
         ...(cotizacionTMP.titular || {}),
         ...(cotizacionTMP.vehiculo || {}),
       };
     }
 
+    if (cotizacionTMP.titular.direcciones) {
+      let direcciones = cotizacionTMP.titular.direcciones;
+      schemaInicial.push({
+        label: "Direccion",
+        type: "select",
+        model: "direccion",
+        classElement: " col-sm-12 col-md-6  col-lg-6 ",
+        options: filtrarOpcionesValidas(direcciones, "value"),
+      });
+    }
+
+    if (cotizacionTMP.vehiculo.versiones) {
+      let versiones = cotizacionTMP.vehiculo.versiones;
+      schemaInicial.push({
+        label: "Versión",
+        type: "select",
+        model: "version",
+        classElement: " col-sm-12 col-md-6  col-lg-6 ",
+        options: filtrarOpcionesValidas(versiones, "label"),
+      });
+      tmpCambios.version = {
+        value: cotizacionTMP.vehiculo.version,
+        label: cotizacionTMP.vehiculo.version,
+      };
+    }
+
+    if (cotizacionTMP.detalles.frecuenciasPago) {
+      frecuenciasPago.value = cotizacionTMP.detalles.frecuenciasPago;
+    }
+
+    if (typeof tmpCambios.direccion == "string") {
+      tmpCambios.direccion = {
+        value: tmpCambios.direccion,
+        label: tmpCambios.direccion,
+      };
+    }
+
     cambios.value = deepClone(tmpCambios);
+    accesorios.value = deepClone(cotizacionTMP.detalles.accesorios || []);
     cambiosInicial.value = deepClone(tmpCambios);
-    console.log("schemaInicial ", deepToRaw(schemaInicial));
+    // prettier-ignore
+    coberturas.value = deepClone(cotizacionTMP.detalles.coberturasBasicas || []);
+    // prettier-ignore
+    coberturasInicial.value = deepClone( cotizacionTMP.detalles.coberturasBasicas || []);
+
+    itsOkay.value = true;
   }
 });
-
-function mapDeducibleValorToObject(arr: any[]): any[] {
-  return arr.map((row: any) => {
-    // prettier-ignore
-    // Deducible
-    if ( row.deducible && row.deducible.tag === "select" && typeof row.deducible.valor === "string" ) {
-          const found = (row.deducible.opciones || []).find( (opt: any) => opt.value === row.deducible.valor );
-          if (found) row.deducible.valor = found;
-        }
-
-    // prettier-ignore
-    // SumaSegura
-    if ( row.sumaSegura && row.sumaSegura.tag === "select" && typeof row.sumaSegura.valor === "string" ) {
-          const found = (row.sumaSegura.opciones || []).find( (opt: any) => opt.value === row.sumaSegura.valor );
-          if (found) row.sumaSegura.valor = found;
-        }
-    return row;
-  });
-}
-
 // prettier-ignore
 watch( coberturas, () => {
     let tmpCambios = diffObjects(coberturas.value, coberturasInicial.value);
@@ -619,10 +640,6 @@ watch( coberturas, () => {
 watch( cambios, () => {
     const cambiosDetectados = diffObjects(cambios.value, cambiosInicial.value);
     hayCambios.value = Object.keys(cambiosDetectados).length > 0;
-
-    if (hayCambios.value) {
-      console.log("Cambios detectados en formulario:", cambiosDetectados);
-    }
   },
   { deep: true }
 );

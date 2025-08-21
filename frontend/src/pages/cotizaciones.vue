@@ -21,9 +21,44 @@ const apiEndpoints = {
   update: "/api/cotizaciones/update", // Endpoint para actualizar un elemento
   delete: "/api/cotizaciones/delete", // Endpoint para eliminar un elemento
 };
+function safeParseConfig(configString: any) {
+  try {
+    if (!configString) return {};
+
+    // Sanitizar caracteres de control comunes
+    let cleanConfig = configString
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remover caracteres de control
+      .replace(/\\/g, "\\\\") // Escapar backslashes
+      .replace(/\n/g, "\\n") // Escapar saltos de línea
+      .replace(/\r/g, "\\r") // Escapar retornos de carro
+      .replace(/\t/g, "\\t"); // Escapar tabs
+
+    return JSON.parse(cleanConfig);
+  } catch (error) {
+    console.error("Error al parsear configuración:", error);
+    console.log(
+      "Configuración problemática:",
+      configString.substring(960, 980)
+    ); // Mostrar área problemática
+
+    // Intentar una segunda vez con limpieza más agresiva
+    try {
+      let aggressiveClean = configString
+        .replace(/[\x00-\x1F\x7F]/g, "") // Remover todos los caracteres de control ASCII
+        .replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, ""); // Mantener solo caracteres imprimibles
+
+      return JSON.parse(aggressiveClean);
+    } catch (secondError) {
+      console.error("Segundo intento falló:", secondError);
+      return {}; // Retornar objeto vacío como fallback
+    }
+  }
+}
 
 const handleActionsEdit = (dataRow: any) => {
-  let tmp = JSON.parse(JSON.stringify(dataRow)); // Clonar el objeto para evitar mutaciones
+  let tmp = dataRow;
+  let tmpConfig = safeParseConfig(dataRow.configuracion);
+  tmp.configuracion = tmpConfig;
 
   // Solo parsea si es string
   if (typeof tmp.configuracion == "string") {

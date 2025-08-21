@@ -114,7 +114,13 @@ const isEstimando: any = ref(false);
 const estimando: any = ref(false);
 
 // prettier-ignore
-const localData: any = ref(props.registro ? { ...props.registro } : { companias: [], titular: {} });
+const localData: any = ref(props.registro ? { ...props.registro } : { 
+  configuracion: { 
+    companias: [], 
+    titular: {},
+    cotizaciones: []
+  } 
+});
 
 const handleStepPrev = () => {
   if (step.value === 1) {
@@ -126,13 +132,44 @@ const handleStepPrev = () => {
 
 const handleStepNext = () => {
   step.value = step.value + 1; // Avanza al siguiente paso
+  if (step.value == 3) {
+    if (typeof localData.value.configuracion.cotizaciones === "undefined") {
+      localData.value.configuracion.cotizaciones = [];
+      let tmpID = 1;
+      localData.value.configuracion.companias.forEach((item: any) => {
+        localData.value.configuracion.cotizaciones.push({
+          id: tmpID,
+          compania_id: item.compania_id,
+          companiaCorto: item.companiaCorto,
+          compania: item.compania,
+          companias_productos: item.companias_productos,
+          ramo: item.ramo,
+          ramo_id: item.ramo_id,
+          titular: localData.value.configuracion.titular,
+          vehiculo: {
+            marca: localData.value.configuracion.titular.marca,
+            modelo: localData.value.configuracion.titular.modelo,
+            anio: localData.value.configuracion.titular.anio,
+          },
+        });
+        tmpID++;
+      });
+    }
+
+    localData.value.configuracion.cotizaciones.forEach((element: any) => {
+      if (typeof element.inicial == "undefined") {
+        element.inicial = true; // Asegura que inicial esté definido
+      }
+      if (typeof element.estimar == "undefined") {
+        element.estimar = true; // Asegura que estimar esté definido
+      }
+    });
+  }
   handleUpdateCotizacion();
 };
 
 const handleAddCotizacionesEstimadas = async (data: any) => {
-  console.log("handleAddCotizacionesEstimadas", data);
   data = data.filter((item: any) => {
-    console.log("item", item);
     const idx = localData.value.configuracion.cotizaciones.findIndex(
       (c: any) => c.id === item.id
     );
@@ -145,16 +182,12 @@ const handleAddCotizacionesEstimadas = async (data: any) => {
   });
 
   localData.value.configuracion.cotizaciones.push(...data);
-  console.log(
-    "handleAddCotizacionesEstimadas",
-    localData.value.configuracion.cotizaciones
-  );
   // await handleUpdateCotizacion();
 };
 
 const handleSelectCompania = (item: any) => {
   item = toRaw(item); // Asegúrate de que el item sea un objeto plano
-  console.log("handleSelectCompania", item);
+
   if (!Array.isArray(localData.value.configuracion.companias)) {
     localData.value.configuracion.companias = [];
   }
@@ -167,7 +200,7 @@ const handleSelectCompania = (item: any) => {
 
 const handleSelectCotizacion = (item: any) => {
   item = toRaw(item); // Asegúrate de que el item sea un objeto plano
-  console.log("handleSelectCotizacion", item);
+
   if (!Array.isArray(localData.value.configuracion.seleccionadas)) {
     localData.value.configuracion.seleccionadas = [];
   }
@@ -180,7 +213,6 @@ const handleSelectCotizacion = (item: any) => {
 
 const handleEditarCotizacion = (data: any) => {
   data = deepToRaw(data); // Asegúrate de que el data sea un objeto plano
-  console.log("handleEditarCotizacion", data);
   cotizacion.value = deepClone(data); // Asigna la cotización seleccionada para editar
 };
 
@@ -242,7 +274,6 @@ const handleUpdateCotizacion = async () => {
       step: step.value,
     },
   };
-
   await updateCotizacion(tmp);
 };
 
@@ -256,10 +287,6 @@ const updateCotizacion = async (data: any, editando = false) => {
   if (dataResponse.result) {
     if (localData.value.id == undefined) {
       localData.value.id = dataResponse.data;
-    }
-
-    if (editando) {
-      console.log("Cotización actualizada:", dataResponse.data);
     }
 
     // prettier-ignore
@@ -312,19 +339,22 @@ const handleFiltrandoCotizacionesPorCompania = async () => {
 };
 
 // prettier-ignore
-async function handleCanEstimar() {
-  let tmp = await searchKeysInArray(localData.value.configuracion.cotizaciones, [{ key: "numeroCotizacion", tipoValidacion: "existe" }]);
-  isEstimando.value = tmp;
-}
-
-// prettier-ignore
 async function handleCotizacionesParaEstimar(arr: any[]) {
-  let tmp = await searchKeysInArray(arr, [
-    { key: "numeroCotizacion"},
-    { key: "detalles"},
+  // Verificar si tiene inicial=true Y estimar=true
+  const cumpleCondicion1 = await searchKeysInArray(arr, [
+    // { key: "inicial", tipoValidacion: "igual", valor: true},
+    { key: "estimar", tipoValidacion: "igual", valor: true},
+  ], true);
+
+  // Verificar si tiene msgError
+  const cumpleCondicion2 = await searchKeysInArray(arr, [
     { key: "msgError"},
   ], true);
-  return !tmp
+
+  // Retorna true si cumple cualquiera de las dos condiciones
+  const resultado = cumpleCondicion1 || !cumpleCondicion2;
+  
+  return resultado;
 }
 
 const estimarCotizaciones = async (data = null, flujoNormal = false) => {
@@ -339,7 +369,6 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
   estimando.value = false; // Finaliza la estimación
 
   const dataResponse = response.data;
-  console.log("dataResponse", deepToRaw(dataResponse));
 
   if (dataResponse.result) {
     if (flujoNormal) {
@@ -402,7 +431,7 @@ onMounted(async () => {
 
 watch(step, async (nuevoValor, valorAnterior) => {
   if (nuevoValor === 3) {
-    let typ = !true;
+    let typ = false;
     if (typ) {
       let tmo = {
         id: 56,
@@ -499,18 +528,12 @@ watch(step, async (nuevoValor, valorAnterior) => {
     } else {
       await handleFiltrandoCotizacionesPorCompania();
       // prettier-ignore
-      let canEstimar = await handleCotizacionesParaEstimar( localData.value.configuracion.cotizaciones );
-      console.log(deepToRaw(localData.value.configuracion.cotizaciones));
-      console.log("canEstimar", canEstimar);
+      let canEstimar = await handleCotizacionesParaEstimar(deepToRaw(localData.value.configuracion.cotizaciones));
       if (canEstimar) {
         estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
       }
     }
   }
-});
-
-watch(localData, async (nuevoValor, valorAnterior) => {
-  // await handleCanEstimar();
 });
 </script>
 
@@ -527,7 +550,7 @@ watch(localData, async (nuevoValor, valorAnterior) => {
         <FormFactory
           :schema="schemaInicial"
           :formLive="true"
-          :modelValue="localData.configuracion.titular"
+          :modelValue="localData?.configuracion?.titular || {}"
           @update:modelValue="(val) => (localData.configuracion.titular = val)"
           :textButtonSubmit="'Empezar cotización'"
           :showIconButtonSubmit="false"
@@ -581,19 +604,16 @@ watch(localData, async (nuevoValor, valorAnterior) => {
           >
             Refrescar estimación
           </VBtn>
+
+          <!-- prettier-ignore -->
           <VBtn
             color="dark"
             variant="outlined"
-            @click="
-              () => {
-                console.log(deepToRaw(localData));
-              }
-            "
+            @click=" () => { console.log(deepToRaw(localData)); } "
           >
             Print cotizaciones
           </VBtn>
         </div>
-        <h2 class="title wFull text-center">Estimando cotizaciones</h2>
         <div>
           <div class="card cardForm mx-auto mt-3">
             <h2 class="w-full mb-2">Detalles de la cotizacion:</h2>
@@ -611,7 +631,7 @@ watch(localData, async (nuevoValor, valorAnterior) => {
 
             <!-- prettier-ignore -->
             <div class="wFull">
-                <p class="p-0 m-0 w-full text-right textSecondary fontItalic">Ultima actualización:  <span class="fontBold">{{ localData.configuracion.tiempoEstimacion }}</span></p>
+                <p v-if="localData.configuracion.tiempoEstimacion" class="p-0 m-0 w-full text-right textSecondary fontItalic">Ultima actualización:  <span class="fontBold">{{ localData.configuracion.tiempoEstimacion }}</span></p>
               </div>
           </div>
         </div>
