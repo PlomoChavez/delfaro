@@ -30,6 +30,12 @@
                 <div class="propuesta-header-horizontal">
                   <span class="nombre-compania">{{ item.companiaCorto }}</span>
                 </div>
+                <div class="propuesta-header-horizontal">
+                  Vehiculo: <span class="nombre-compania">{{ item.vehiculo.marca }} {{ item.vehiculo.modelo }} ({{ item.vehiculo.anio }})</span>
+                </div>
+                <div v-if="item.vehiculo.version" class="propuesta-header-horizontal">
+                  Version: <span class="nombre-compania">{{ item.vehiculo.version }}</span>
+                </div>
                 <div v-if="typeof item.inicial !== 'undefined' && item.inicial == false" class="propuesta-detalles-horizontal">
                   <div class="detalle-row">
                     <span class="detalle-key">Núm de Cotizacion:</span>

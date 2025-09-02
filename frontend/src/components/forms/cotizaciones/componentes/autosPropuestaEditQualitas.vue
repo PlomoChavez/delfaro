@@ -521,21 +521,33 @@ function handleActualizar() {
   if ("marca" in cambiosFinales) {
     tmpCotizacion.vehiculo.marca = cambiosFinales.marca;
     delete cambiosFinales.marca;
+  } else if ("marca" in tmpTitular) {
+    tmpCotizacion.vehiculo.marca = tmpTitular.marca;
+    delete tmpTitular.marca;
   }
 
   if ("modelo" in cambiosFinales) {
     tmpCotizacion.vehiculo.modelo = cambiosFinales.modelo;
     delete cambiosFinales.modelo;
+  } else if ("modelo" in tmpTitular) {
+    tmpCotizacion.vehiculo.modelo = tmpTitular.modelo;
+    delete tmpTitular.modelo;
   }
 
   if ("anio" in cambiosFinales) {
     tmpCotizacion.vehiculo.anio = cambiosFinales.anio;
     delete cambiosFinales.anio;
+  } else if ("anio" in tmpTitular) {
+    tmpCotizacion.vehiculo.anio = tmpTitular.anio;
+    delete tmpTitular.anio;
   }
 
   if ("version" in cambiosFinales) {
     tmpCotizacion.vehiculo.version = cambiosFinales.version.label;
     delete cambiosFinales.version;
+  } else if ("version" in tmpTitular) {
+    tmpCotizacion.vehiculo.version = tmpTitular.version;
+    delete tmpTitular.version;
   }
 
   if ("frecuenciaPago" in cambiosFinales) {
@@ -545,6 +557,7 @@ function handleActualizar() {
 
   tmpCotizacion.estimar = true;
   tmpCotizacion.titular = tmpTitular; // Titular actualizado
+  console.log(toRaw(tmpCotizacion));
   emit("actualizar", tmpCotizacion);
 }
 

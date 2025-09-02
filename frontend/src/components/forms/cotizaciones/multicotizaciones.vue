@@ -78,7 +78,6 @@ onMounted(() => {
         @cancelar="handleCancelarCotizacion"
       />
     </div>
-    <!-- <pre>{{ localData }}</pre> -->
   </div>
 </template>
 

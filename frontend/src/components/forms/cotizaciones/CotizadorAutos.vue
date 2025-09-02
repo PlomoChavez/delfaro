@@ -2,6 +2,7 @@
 // Make sure the file exists at the specified path and extension
 import BtnAtras from "@/components/apps/BtnAtras.vue";
 import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import ManagerCliente from "@/components/forms/clientes/ManagerClientes.vue";
 import PropuestaEdit from "@/components/forms/cotizaciones/componentes/autosPropuestaEdit.vue";
 import Propuestas from "@/components/forms/cotizaciones/componentes/autosPropuestas.vue";
 import { deepToRaw, isItemSelected, toggleItemInArray } from "@/utils/helper";
@@ -21,91 +22,6 @@ const props = withDefaults(
 const handleCancelarCotizacion = () => {
   emit("cancelar");
 };
-
-// prettier-ignore
-const schemaInicial : any = [
-  {
-    label: "Nombre",
-    type: "text",
-    model: "nombre",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Segundo nombre",
-    type: "text",
-    model: "segundoNombre",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Apellido paterno",
-    type: "text",
-    model: "apellidoPaterno",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Apellido materno",
-    type: "text",
-    model: "apellidoMaterno",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Fecha de nacimiento",
-    type: "date",
-    model: "fechaNacimiento",
-    classElement: " col-sm-12 col-md-6  col-lg-4 ",
-  },
-  {
-    label: "Sexo",
-    type: "select",
-    model: "sexo",
-    classElement: " col-sm-12 col-md-6  col-lg-4 ",
-      options: [
-      {label:"Hombre",id:"Hombre"},
-      {label:"Mujer",id:"Mujer"}
-    ]
-  },
-  {
-    label: "Telefono",
-    type: "text",
-    model: "telefono",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Correo electronico",
-    type: "text",
-    model: "correo",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Datos del auto",
-    type: "separador",
-    classElement: " col-12 ",
-  },
-  {
-    label: "Marca",
-    type: "text",
-    model: "marca",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Modelo",
-    type: "text",
-    model: "modelo",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Año",
-    type: "text",
-    model: "anio",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Codigo Postal",
-    type: "text",
-    model: "codigoPostal",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-];
 
 const step = ref(1);
 const companias: any = ref([]);
@@ -216,14 +132,8 @@ const handleEditarCotizacion = (data: any) => {
   cotizacion.value = deepClone(data); // Asigna la cotización seleccionada para editar
 };
 
-const handleInicialSubmit = async () => {
-  if (!localData.value.configuracion.titular) {
-    showErrorMessage({
-      title: "Error",
-      message: "Por favor, completa la información del cliente.",
-    });
-    return;
-  }
+const handleInicialSubmit = async (data: any) => {
+  localData.value.configuracion.titular = data;
   step.value = 2; // Cambia al siguiente paso
   await handleUpdateCotizacion();
 };
@@ -544,22 +454,14 @@ watch(step, async (nuevoValor, valorAnterior) => {
     <BtnAtras titulo="Volver a cotizaciones" @atras="handleCancelarCotizacion" />
     <h1 class="module-title">Cotizador de Seguros de Autos</h1>
     <!-- Preguntas iniciales -->
+    <!-- Informacion del cliente -->
     <div v-if="step == 1">
       <div class="card cardForm mx-auto mt-3">
         <h2 class="w-full mb-5">Información del cliente:</h2>
-        <FormFactory
-          :schema="schemaInicial"
-          :formLive="true"
-          :modelValue="localData?.configuracion?.titular || {}"
-          @update:modelValue="(val) => (localData.configuracion.titular = val)"
-          :textButtonSubmit="'Empezar cotización'"
-          :showIconButtonSubmit="false"
-          :showIconButtonCancel="false"
-          @submit="handleInicialSubmit"
-          @cancel="handleCancelarCotizacion"
-        />
+        <ManagerCliente @export="handleInicialSubmit" />
       </div>
     </div>
+    <!-- Selección de compañias -->
     <div v-if="step == 2">
       <h2 class="title wFull text-center">Selecciona las compañias</h2>
       <div class="divRows mt-3">
@@ -584,16 +486,8 @@ watch(step, async (nuevoValor, valorAnterior) => {
         <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
       </div>
     </div>
-    <div v-if="step == 4">
-      <pre>{{ localData.configuracion.cotizaciones }}</pre>
-      <div>
-        <VBtn color="dark" variant="outlined" @click="handleRefreshEstimar">
-          Refrescar estimación
-        </VBtn>
-      </div>
-    </div>
+    <!-- Selección de estimaciones -->
     <div v-if="step == 3">
-      <pre>Estimando: {{ estimando ? "Sí" : "No" }}</pre>
       <div v-if="!cotizacion">
         <div>
           <VBtn
@@ -616,18 +510,13 @@ watch(step, async (nuevoValor, valorAnterior) => {
         </div>
         <div>
           <div class="card cardForm mx-auto mt-3">
-            <h2 class="w-full mb-2">Detalles de la cotizacion:</h2>
+            <h2 class="w-full mb-2">Detalles del titular:</h2>
 
             <!-- prettier-ignore -->
             <div class="">
-                <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Titular:</span>
-                <span class="font24 ">{{ localData.nombre }}</span>
-              </div>
-            <!-- prettier-ignore -->
-            <div class="">
-                <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Vehiculo:</span>
-                <span class="font24 fontItalic ">{{ localData.configuracion.titular.marca }} - {{ localData.configuracion.titular.modelo }} - {{ localData.configuracion.titular.anio }} - {{ localData.configuracion.titular.version }}</span>
-              </div>
+              <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Nombre:</span>
+              <span class="font24 ">{{ localData.configuracion.titular.nombre + " " + localData.configuracion.titular.segundoNombre + " " + localData.configuracion.titular.apellidoPaterno + " " + localData.configuracion.titular.apellidoMaterno }}</span>
+            </div>
 
             <!-- prettier-ignore -->
             <div class="wFull">
