@@ -261,15 +261,22 @@ async function handleCotizacionesParaEstimar(arr: any[]) {
     { key: "msgError"},
   ], true);
 
+  console.log("arr: ", arr);
+
   // Retorna true si cumple cualquiera de las dos condiciones
   const resultado = cumpleCondicion1 || !cumpleCondicion2;
-  
+  console.log("cumpleCondicion1: ", cumpleCondicion1);
+  console.log("cumpleCondicion2: ", !cumpleCondicion2);
+  console.log("resultado: ", resultado);
+
   return resultado;
 }
 
 const estimarCotizaciones = async (data = null, flujoNormal = false) => {
   estimando.value = true; // Indica que se está estimando
+
   let localDataEstimacion = data || deepToRaw(localData.value);
+
   const response = await customRequest({
     url: "/api/cotizaciones/estimar",
     method: "POST",
@@ -297,6 +304,7 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
 };
 
 const handleActualizarCotizacion = async (cotizacionData: any) => {
+  console.log("Cotización actualizada:", cotizacionData);
   cotizacion.value = null;
   // prettier-ignore
   const cotizacionesClon = deepClone( localData.value.configuracion.cotizaciones || []);
@@ -306,11 +314,14 @@ const handleActualizarCotizacion = async (cotizacionData: any) => {
   if (idx !== -1) {
     cotizacionesClon[idx] = cotizacionData;
   }
-
+  console.log("Cotización idx:", idx);
   // Clona el registro y actualiza las cotizaciones
   const tmpRegistro = deepClone(localData.value);
   tmpRegistro.configuracion.cotizaciones = cotizacionesClon;
-  await estimarCotizaciones(tmpRegistro, true);
+  localData.value = deepClone(tmpRegistro);
+  await handleUpdateCotizacion();
+  // prettier-ignore
+  setTimeout(async () => { await estimarCotizaciones(tmpRegistro, true); }, 10);
 };
 
 const handleRefreshEstimar = async () => {
@@ -439,8 +450,9 @@ watch(step, async (nuevoValor, valorAnterior) => {
       await handleFiltrandoCotizacionesPorCompania();
       // prettier-ignore
       let canEstimar = await handleCotizacionesParaEstimar(deepToRaw(localData.value.configuracion.cotizaciones));
-      if (canEstimar) {
-        estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
+      if (canEstimar == true) {
+        console.log("Estimar");
+        // estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
       }
     }
   }

@@ -20,7 +20,9 @@
           :showButtonCancel="false"
         />
       </div>
-      <template v-if="!cotizacion.inicial">
+      <template
+        v-if="cotizacion.detalles && cotizacion.detalles.frecuenciasPago"
+      >
         <v-expansion-panels v-model="panelActivo" multiple>
           <v-expansion-panel>
             <v-expansion-panel-title
@@ -32,7 +34,9 @@
                   v-for="(item, idx) in frecuenciasPago"
                   :key="idx"
                   class="frecuencia-card"
-                  :class="{ selected: selectedFrecuencia === item.tipo }"
+                  :class="{
+                    selected: selectedFrecuencia === item.tipo,
+                  }"
                   @click="
                     () => {
                       handleSelectFrecuencia(item);
@@ -361,61 +365,10 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["cancelar", "actualizar"]);
+
 // Controla los paneles abiertos del acordeón (soporta múltiples)
 // prettier-ignore
 let schemaInicial : any = [
-  {
-    label: "Nombre",
-    type: "text",
-    model: "nombre",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Segundo nombre",
-    type: "text",
-    model: "segundoNombre",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Apellido paterno",
-    type: "text",
-    model: "apellidoPaterno",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Apellido materno",
-    type: "text",
-    model: "apellidoMaterno",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Fecha de nacimiento",
-    type: "date",
-    model: "fechaNacimiento",
-    classElement: " col-sm-12 col-md-6  col-lg-4 ",
-  },
-  {
-    label: "Sexo",
-    type: "select",
-    model: "sexo",
-    classElement: " col-sm-12 col-md-6  col-lg-4 ",
-      options: [
-      {label:"Hombre",id:"Hombre"},
-      {label:"Mujer",id:"Mujer"}
-    ]
-  },
-  {
-    label: "Telefono",
-    type: "text",
-    model: "telefono",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
-  {
-    label: "Correo electronico",
-    type: "text",
-    model: "correo",
-    classElement: " col-sm-12 col-md-6  col-lg-3 ",
-  },
   {
     label: "Datos del auto",
     type: "separador",
@@ -446,6 +399,7 @@ let schemaInicial : any = [
     classElement: " col-sm-12 col-md-6  col-lg-3 ",
   },
 ];
+
 const itsOkay = ref(false); // Por defecto solo el primero abierto
 const panelActivo = ref([0]); // Por defecto solo el primero abierto
 const accesorios: any = ref(null);
@@ -474,6 +428,8 @@ function handleCancelar() {
 
 function handleActualizar() {
   let tmpCotizacion = { ...deepClone(props.cotizacion) };
+  tmpCotizacion.detalles = deepClone(tmpCotizacion?.detalles || {});
+
   // Clona los accesorios y seleccionados para evitar referencias
   const coberturasTmp = deepClone(coberturas.value || []);
 
@@ -519,18 +475,18 @@ function handleActualizar() {
   }
 
   if ("marca" in cambiosFinales) {
-    tmpCotizacion.vehiculo.marca = cambiosFinales.marca;
+    tmpCotizacion.vehiculo.marca = cambiosFinales.marca.toUpperCase();
     delete cambiosFinales.marca;
   } else if ("marca" in tmpTitular) {
-    tmpCotizacion.vehiculo.marca = tmpTitular.marca;
+    tmpCotizacion.vehiculo.marca = tmpTitular.marca.toUpperCase();
     delete tmpTitular.marca;
   }
 
   if ("modelo" in cambiosFinales) {
-    tmpCotizacion.vehiculo.modelo = cambiosFinales.modelo;
+    tmpCotizacion.vehiculo.modelo = cambiosFinales.modelo.toUpperCase();
     delete cambiosFinales.modelo;
   } else if ("modelo" in tmpTitular) {
-    tmpCotizacion.vehiculo.modelo = tmpTitular.modelo;
+    tmpCotizacion.vehiculo.modelo = tmpTitular.modelo.toUpperCase();
     delete tmpTitular.modelo;
   }
 
@@ -543,10 +499,15 @@ function handleActualizar() {
   }
 
   if ("version" in cambiosFinales) {
-    tmpCotizacion.vehiculo.version = cambiosFinales.version.label;
-    delete cambiosFinales.version;
+    if (cambiosFinales.version == null) {
+      tmpCotizacion.vehiculo.version = "";
+    } else {
+      tmpCotizacion.vehiculo.version =
+        cambiosFinales.version.label.toUpperCase();
+      delete cambiosFinales.version;
+    }
   } else if ("version" in tmpTitular) {
-    tmpCotizacion.vehiculo.version = tmpTitular.version;
+    tmpCotizacion.vehiculo.version = tmpTitular.version.toUpperCase();
     delete tmpTitular.version;
   }
 
@@ -557,7 +518,21 @@ function handleActualizar() {
 
   tmpCotizacion.estimar = true;
   tmpCotizacion.titular = tmpTitular; // Titular actualizado
-  console.log(toRaw(tmpCotizacion));
+
+  // Supón que cambiosFinales.coberturas es un array de objetos de cobertura
+  cambiosFinales.coberturas.forEach((nuevaCobertura: any) => {
+    const idx = tmpCotizacion.detalles.coberturasBasicas.findIndex(
+      (item: any) => item.cobertura === nuevaCobertura.cobertura
+    );
+    if (idx !== -1) {
+      // Reemplaza el objeto completo
+      tmpCotizacion.detalles.coberturasBasicas[idx] = nuevaCobertura;
+    }
+  });
+
+  // prettier-ignore
+  console.log("Cotización actualizada:",tmpCotizacion.detalles.coberturasBasicas);
+
   emit("actualizar", tmpCotizacion);
 }
 
@@ -584,13 +559,13 @@ onMounted(() => {
     let tmpCambios: any = {};
     if (cotizacionTMP.inicial) {
       tmpCambios = {
-        ...(cotizacionTMP.titular || {}),
         ...(cotizacionTMP.vehiculo || {}),
+        codigoPostal: cotizacionTMP.titular.codigoPostal,
       };
     } else {
       tmpCambios = {
-        ...(cotizacionTMP.titular || {}),
         ...(cotizacionTMP.vehiculo || {}),
+        codigoPostal: cotizacionTMP.titular.codigoPostal,
       };
     }
 
@@ -620,8 +595,14 @@ onMounted(() => {
       };
     }
 
-    if (cotizacionTMP.detalles.frecuenciasPago) {
-      frecuenciasPago.value = cotizacionTMP.detalles.frecuenciasPago;
+    if ("detalles" in cotizacionTMP) {
+      if ("frecuenciasPago" in cotizacionTMP.detalles) {
+        frecuenciasPago.value = cotizacionTMP.detalles.frecuenciasPago;
+      }
+    }
+    if ("detalles" in cotizacionTMP) {
+      // prettier-ignore
+      selectedFrecuencia.value = cotizacionTMP.detalles.frecuenciaPago || "Contado";
     }
 
     if (typeof tmpCambios.direccion == "string") {
@@ -632,16 +613,17 @@ onMounted(() => {
     }
 
     cambios.value = deepClone(tmpCambios);
-    accesorios.value = deepClone(cotizacionTMP.detalles.accesorios || []);
+    accesorios.value = deepClone(cotizacionTMP?.detalles?.accesorios || []);
     cambiosInicial.value = deepClone(tmpCambios);
     // prettier-ignore
-    coberturas.value = deepClone(cotizacionTMP.detalles.coberturasBasicas || []);
+    coberturas.value = deepClone(cotizacionTMP?.detalles?.coberturasBasicas || []);
     // prettier-ignore
-    coberturasInicial.value = deepClone( cotizacionTMP.detalles.coberturasBasicas || []);
+    coberturasInicial.value = deepClone( cotizacionTMP?.detalles?.coberturasBasicas || []);
 
     itsOkay.value = true;
   }
 });
+
 // prettier-ignore
 watch( coberturas, () => {
     let tmpCambios = diffObjects(coberturas.value, coberturasInicial.value);
@@ -649,13 +631,38 @@ watch( coberturas, () => {
   },
   { deep: true }
 );
+
 // prettier-ignore
-watch( cambios, () => {
-    const cambiosDetectados = diffObjects(cambios.value, cambiosInicial.value);
-    hayCambios.value = Object.keys(cambiosDetectados).length > 0;
-  },
-  { deep: true }
-);
+watch(cambios, () => {
+  const cambiosDetectados = diffObjects(cambios.value, cambiosInicial.value);
+  if (cambiosDetectados.anio) {
+    // Elimina el campo "Versión" del schemaInicial
+    const idx = schemaInicial.findIndex(
+      (item: any) => item.model === "version"
+    );
+    if (idx !== -1) {
+      itsOkay.value = false;
+      schemaInicial.splice(idx, 1);
+      cambios.value.version = null; // <-- Asignación correcta
+      // prettier-ignore
+      setTimeout(() => { itsOkay.value = true; }, 0.1);
+    }
+  }
+  if (cambiosDetectados.codigoPostal) {
+    // Elimina el campo "Versión" del schemaInicial
+    const idx = schemaInicial.findIndex(
+      (item: any) => item.model === "direccion"
+    );
+    if (idx !== -1) {
+      itsOkay.value = false;
+      schemaInicial.splice(idx, 1);
+      cambios.value.direccion = null; // <-- Asignación correcta
+      // prettier-ignore
+      setTimeout(() => { itsOkay.value = true; }, 0.1);
+    }
+  }
+  hayCambios.value = Object.keys(cambiosDetectados).length > 0;
+}, { deep: true });
 </script>
 
 <style scoped>

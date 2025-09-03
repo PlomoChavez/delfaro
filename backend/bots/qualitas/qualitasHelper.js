@@ -6,6 +6,7 @@ const {
   sleep,
   selectOptionInSelect,
   setInputValue,
+  setCheckboxValue,
 } = require("../helpers/seleniumHelper");
 
 /**
@@ -481,7 +482,54 @@ function transformarCoberturas(filas) {
     .filter((item) => item.cobertura !== "");
 }
 
-async function obtenerCoberturasBasicas(driver) {
+// Función recursiva para extraer tags aunque estén anidados
+function extractByTag(obj, result) {
+  if (!obj) return;
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item) => extractByTag(item, result));
+  } else if (typeof obj === "object") {
+    if (obj.tag) {
+      switch (obj.tag) {
+        case "input":
+          if (obj.tipo === "checkbox") {
+            result.checks.push(obj);
+          } else {
+            result.text.push(obj);
+          }
+          break;
+        case "select":
+          result.select.push(obj);
+          break;
+        case "p":
+          result.p.push(obj);
+          break;
+      }
+    }
+
+    // Seguir recorriendo propiedades
+    Object.values(obj).forEach((val) => extractByTag(val, result));
+  }
+}
+
+function groupByTags(coberturas) {
+  const result = {
+    select: [],
+    checks: [],
+    text: [],
+    p: [],
+  };
+
+  coberturas.forEach((cob) => {
+    extractByTag(cob, result);
+  });
+
+  return result;
+}
+
+async function obtenerCoberturasBasicas(driver, coberturasBasicas) {
+  const grouped = groupByTags(coberturasBasicas);
+
   // Espera a que la tabla esté visible
   await esperarElementoVisible(
     driver,
@@ -533,10 +581,24 @@ async function obtenerCoberturasBasicas(driver) {
             readonly,
           });
         } else if (type === "checkbox") {
-          const valor = await input.getAttribute("value");
           const id = await input.getAttribute("id");
           const name = await input.getAttribute("name");
+
+          const coberturaCheck = grouped.checks.find((c) => c.id === id);
+
+          // prettier-ignore
+          if (coberturaCheck && !coberturaCheck.disabled && !coberturaCheck.readonly) {
+            await setCheckboxValue(driver, {
+              locator: coberturaCheck.id,
+              value: coberturaCheck.checked, // true o false
+              by: "id",
+              sleeptime: 500
+            });
+          }
+
           const checked = (await input.getAttribute("checked")) !== null;
+          const valor = await input.getAttribute("value");
+
           elementos.push({
             tag: "input",
             tipo: "checkbox",
@@ -547,18 +609,33 @@ async function obtenerCoberturasBasicas(driver) {
           });
         }
       }
-
+      setCheckboxValue;
       for (const select of selects) {
-        const valor = await select.getAttribute("value");
-        const id = await select.getAttribute("id");
         const name = await select.getAttribute("name");
         const disabled = (await select.getAttribute("disabled")) !== null;
         const readonly = (await select.getAttribute("readonly")) !== null;
 
+        const coberturaSelect = grouped.select.find((s) => s.name === name);
+
+        // prettier-ignore
+        if (coberturaSelect && coberturaSelect.valor && !disabled && !readonly) {
+          await selectOptionInSelect(driver, {
+            value: coberturaSelect.valor.texto,
+            esperarHabilitado: true,
+            tipoValor: "label",
+            sleeptime: 1000,
+            locator: name,
+            by: "name",
+          });
+        }
+
+        const id = await select.getAttribute("id");
+        const valor = await select.getAttribute("value");
         let textoSeleccionado = "";
-        // Opcional: obtener opciones del select
+
         const opciones = [];
         const options = await select.findElements(By.css("option"));
+
         for (const option of options) {
           const value = await option.getAttribute("value");
           const texto = await option.getText();
@@ -567,6 +644,7 @@ async function obtenerCoberturasBasicas(driver) {
             textoSeleccionado = texto;
           }
         }
+
         elementos.push({
           tag: "select",
           valor: { value: valor, texto: textoSeleccionado },

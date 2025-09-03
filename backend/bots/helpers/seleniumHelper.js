@@ -54,6 +54,24 @@ function sleep(ms) {
 }
 
 // prettier-ignore
+async function setCheckboxValue(driver, {
+  locator,
+  value, // true o false
+  by = "id",
+  sleeptime = 0
+}) {
+  if (sleeptime > 0) await sleep(sleeptime);
+
+  const checkbox = await driver.wait(until.elementLocated(getBy(by, locator)), 10000);
+  const isChecked = await checkbox.isSelected();
+
+  // Si el estado actual no coincide con el deseado, haz click
+  if (Boolean(value) !== isChecked) {
+    await checkbox.click();
+  }
+}
+
+// prettier-ignore
 async function setInputValue(driver, { 
     locator, 
     value, 
@@ -710,6 +728,7 @@ module.exports = {
   esperarElementosAlternativosCustom,
   sleep,
   setInputValue,
+  setCheckboxValue,
   selectInUL,
   selectMatOption,
   selectOptionInSelect,
