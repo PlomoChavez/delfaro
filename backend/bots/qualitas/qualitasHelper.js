@@ -528,7 +528,7 @@ function groupByTags(coberturas) {
 }
 
 async function obtenerCoberturasBasicas(driver, coberturasBasicas) {
-  const grouped = groupByTags(coberturasBasicas);
+  const grouped = groupByTags(coberturasBasicas ?? []);
 
   // Espera a que la tabla esté visible
   await esperarElementoVisible(

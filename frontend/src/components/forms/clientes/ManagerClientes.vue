@@ -144,8 +144,6 @@ onMounted(async () => {
 });
 
 const handleInicialSubmit = async () => {
-  console.log("submit");
-  console.log("Guardando el cliente");
   if (props.exportCliente) {
     emit("export", localData.value);
     pnl.value = "";

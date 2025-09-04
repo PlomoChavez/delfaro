@@ -107,7 +107,6 @@ async function getCompanias() {
       return compania;
     });
     companias.value = dataResponse;
-    console.log("Companias response:", toRaw(dataResponse));
   } else {
     showErrorMessage({
       title: "Error",
@@ -200,27 +199,6 @@ async function sendToCotizar() {
     },
   });
   const dataResponse = response.data;
-  console.log("Response de enviar a cotizar:", dataResponse);
-
-  // if (dataResponse.result) {
-  //   if (localData.value.id == undefined) {
-  //     console.log("Creando nueva cotización");
-  //     localData.value.id = dataResponse.data;
-  //     configuracion.value.titular = {
-  //       nombre: configuracion.value.nombre,
-  //       fechaNacimiento: configuracion.value.fechaNacimiento,
-  //       sexo: configuracion.value.sexo,
-  //     };
-  //   }
-  //   toast.success("¡Cotización guardada!", {
-  //     theme: "dark", // Activa el tema oscuro
-  //   });
-  // } else {
-  //   showErrorMessage({
-  //     title: "Error",
-  //     message: dataResponse.message,
-  //   });
-  // }
 }
 
 function selectCompania(compania: any) {
@@ -264,7 +242,6 @@ async function handleTerminarEntrevista(data: any) {
   const realData = data.value ? data.value : data;
   // O mejor aún:
   const rawData = toRaw(realData);
-  console.log("Datos de la entrevista:", { ...rawData });
   // Busca el índice del producto
   const idx = configuracion.value.productos.findIndex(
     (p: any) => p.id == rawData.id
@@ -297,7 +274,6 @@ function resetCotizacion() {
 }
 
 const handleInicialSubmit = async (data: any) => {
-  console.log("Datos iniciales:", { ...data });
   step.value = 1;
   let tmp = {
     ...props.registro,
@@ -321,7 +297,6 @@ const updateCotizacion = async (data: any) => {
 
   if (dataResponse.result) {
     if (localData.value.id == undefined) {
-      console.log("Creando nueva cotización");
       localData.value.id = dataResponse.data;
       configuracion.value.titular = {
         nombre: configuracion.value.nombre,
@@ -402,7 +377,6 @@ onMounted(() => {
   } else {
     configuracion.value = { ...configuracionDefault.value };
   }
-  console.log("Configuración inicial:", { ...configuracion.value });
   if (step.value > 0 && configuracion.value.titular == undefined) {
     configuracion.value.titular = {
       nombre: configuracion.value.nombre,
@@ -437,7 +411,6 @@ watch(
         },
       };
       localData.value = tmp;
-      console.log("Actualizando cotización:", step.value);
       setTimeout(() => {
         updateWatch.value = false;
       }, 1);

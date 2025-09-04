@@ -98,7 +98,6 @@ const handleAddCotizacionesEstimadas = async (data: any) => {
   });
 
   localData.value.configuracion.cotizaciones.push(...data);
-  // await handleUpdateCotizacion();
 };
 
 const handleSelectCompania = (item: any) => {
@@ -251,23 +250,15 @@ const handleFiltrandoCotizacionesPorCompania = async () => {
 // prettier-ignore
 async function handleCotizacionesParaEstimar(arr: any[]) {
   // Verificar si tiene inicial=true Y estimar=true
-  const cumpleCondicion1 = await searchKeysInArray(arr, [
-    // { key: "inicial", tipoValidacion: "igual", valor: true},
-    { key: "estimar", tipoValidacion: "igual", valor: true},
-  ], true);
+  // prettier-ignore
+  const cumpleCondicion1 = await searchKeysInArray(arr, [{ key: "estimar", tipoValidacion: "igual", valor: true}], true);
 
   // Verificar si tiene msgError
-  const cumpleCondicion2 = await searchKeysInArray(arr, [
-    { key: "msgError"},
-  ], true);
-
-  console.log("arr: ", arr);
+  // prettier-ignore
+  const cumpleCondicion2 = await searchKeysInArray(arr, [{ key: "msgError"}], true);
 
   // Retorna true si cumple cualquiera de las dos condiciones
   const resultado = cumpleCondicion1 || !cumpleCondicion2;
-  console.log("cumpleCondicion1: ", cumpleCondicion1);
-  console.log("cumpleCondicion2: ", !cumpleCondicion2);
-  console.log("resultado: ", resultado);
 
   return resultado;
 }
@@ -292,9 +283,10 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
       localData.value.configuracion.cotizaciones = dataResponse.data;
     } else {
       await handleAddCotizacionesEstimadas(dataResponse.data);
+      // prettier-ignore
+      setTimeout(async () => { await handleUpdateCotizacion(); }, 10);
     }
     localData.value.configuracion.tiempoEstimacion = await getFechaAMPM();
-    await handleUpdateCotizacion(); // Actualiza la cotización después de estimar
   } else {
     showErrorMessage({
       title: "Error",
@@ -304,7 +296,6 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
 };
 
 const handleActualizarCotizacion = async (cotizacionData: any) => {
-  console.log("Cotización actualizada:", cotizacionData);
   cotizacion.value = null;
   // prettier-ignore
   const cotizacionesClon = deepClone( localData.value.configuracion.cotizaciones || []);
@@ -314,7 +305,6 @@ const handleActualizarCotizacion = async (cotizacionData: any) => {
   if (idx !== -1) {
     cotizacionesClon[idx] = cotizacionData;
   }
-  console.log("Cotización idx:", idx);
   // Clona el registro y actualiza las cotizaciones
   const tmpRegistro = deepClone(localData.value);
   tmpRegistro.configuracion.cotizaciones = cotizacionesClon;
@@ -451,7 +441,6 @@ watch(step, async (nuevoValor, valorAnterior) => {
       // prettier-ignore
       let canEstimar = await handleCotizacionesParaEstimar(deepToRaw(localData.value.configuracion.cotizaciones));
       if (canEstimar == true) {
-        console.log("Estimar");
         // estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
       }
     }

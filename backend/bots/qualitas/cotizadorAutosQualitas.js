@@ -389,26 +389,6 @@ async function generadorCotizacion(driver, data) {
     return data;
   }
 
-  // await waitForElement(driver, { locator: "coberturasAccesorias" });
-  // await scrollToBottom(driver, { locator: "coberturasAccesorias", by: "id" });
-  //
-  //
-
-  // Regrsar al detalles de la cotizacion
-  // await sleep(1000000000);
-  // await clickElement(driver, {
-  //   locator:
-  //     '//span[contains(@class, "edit") and @data-target="#collapseCoberturas" and normalize-space(text())="Editar"]',
-  //   by: "xpath",
-  // });
-
-  // data = {
-  //   ...data,
-  //   inicial: false,
-  //   archivo: archivo,
-  //   detalles: detalles,
-  // };
-
   data = await getDetallesCotizacion(driver, data);
 
   let mensajeError = await guardandoCambios(driver, data);

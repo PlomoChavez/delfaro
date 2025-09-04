@@ -271,3 +271,22 @@ async function changeInputsCobertura(driver, cobertura) {
   }
 }
 
+
+
+  // Se obtiene el anio del vehiculo seleccionado
+  data.vehiculo.anio = await getElementValue(driver, {
+    selectReturnType: "label",
+    locator: "selectYear",
+  });
+
+  // Se obtiene la marca del vehiculo seleccionado
+  data.vehiculo.marca = await getElementValue(driver, {
+    selectReturnType: "label",
+    locator: "selectBrand",
+  });
+
+  // Se obtiene el modelo del vehiculo seleccionado
+  data.vehiculo.modelo = await getElementValue(driver, {
+    selectReturnType: "label",
+    locator: "selectType",
+  });

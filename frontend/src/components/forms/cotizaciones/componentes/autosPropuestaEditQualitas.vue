@@ -529,10 +529,6 @@ function handleActualizar() {
       tmpCotizacion.detalles.coberturasBasicas[idx] = nuevaCobertura;
     }
   });
-
-  // prettier-ignore
-  console.log("Cotización actualizada:",tmpCotizacion.detalles.coberturasBasicas);
-
   emit("actualizar", tmpCotizacion);
 }
 
