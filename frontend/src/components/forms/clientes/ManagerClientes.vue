@@ -2,22 +2,30 @@
 const props = withDefaults(
   defineProps<{
     tipo?: string;
+    registro?: any;
+    form?: string;
+    classForm?: string;
     exportCliente?: boolean;
   }>(),
   {
+    registro: null,
     tipo: "auto",
+    form: "cliente",
+    classForm: "w-100",
     exportCliente: true,
   }
 );
 
 // prettier-ignore
 const emit = defineEmits([
-  "export"
+  "export",
+  "cancelar"
 ]);
 
 const pnl: any = ref("");
 // prettier-ignore
 const localData: any = ref();
+const schemaUse: any = ref([]);
 
 // prettier-ignore
 const schemaForm : any = [
@@ -109,6 +117,89 @@ const schemaForm : any = [
     classElement: " col-sm-12 col-md-6  col-lg-3 ",
   },
 ];
+// prettier-ignore
+const schemaClienteCotizacion : any = [
+  {
+    label: "Nombre",
+    type: "text",
+    model: "nombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Segundo nombre",
+    type: "text",
+    model: "segundoNombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido paterno",
+    type: "text",
+    model: "apellidoPaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido materno",
+    type: "text",
+    model: "apellidoMaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Datos del auto",
+    type: "separador",
+    classElement: " col-12 ",
+  },
+  {
+    label: "Marca",
+    type: "text",
+    model: "marca",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Modelo",
+    type: "text",
+    model: "modelo",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Año",
+    type: "text",
+    model: "anio",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Codigo Postal",
+    type: "text",
+    model: "codigoPostal",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+];
+// prettier-ignore
+const schemaUpdateCliente : any = [
+  {
+    label: "Nombre",
+    type: "text",
+    model: "nombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Segundo nombre",
+    type: "text",
+    model: "segundoNombre",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido paterno",
+    type: "text",
+    model: "apellidoPaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Apellido materno",
+    type: "text",
+    model: "apellidoMaterno",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+];
 
 const dataTmp = {
   fechaNacimiento: "10-08-1994",
@@ -139,7 +230,18 @@ onMounted(async () => {
       pnl.value = "";
     }
 
-    localData.value = dataTmp;
+    localData.value = props.registro == null ? dataTmp : props.registro;
+  }
+  if (props.form) {
+    if (props.form == "clienteCotizacion") {
+      schemaUse.value = schemaClienteCotizacion;
+    } else if (props.form == "updateCliente") {
+      schemaUse.value = schemaUpdateCliente;
+    } else if (props.form == "buscar") {
+      // schemaUse.value = schemaClienteCotizacion;
+    }
+  } else {
+    schemaUse.value = schemaForm;
   }
 });
 
@@ -151,7 +253,11 @@ const handleInicialSubmit = async () => {
 };
 
 const handleCancelarForm = async () => {
-  pnl.value = "";
+  if (props.tipo == "nuevo") {
+    emit("cancelar");
+  } else {
+    pnl.value = "";
+  }
 };
 </script>
 
@@ -172,7 +278,8 @@ const handleCancelarForm = async () => {
     </div>
     <div v-else-if="pnl == 'nuevo'" class="manager-clientes-container">
       <FormFactory
-        :schema="schemaForm"
+        :class="props.classForm || 'w-100'"
+        :schema="schemaUse"
         :formLive="true"
         :modelValue="localData || {}"
         @update:modelValue="(val) => (localData = val)"

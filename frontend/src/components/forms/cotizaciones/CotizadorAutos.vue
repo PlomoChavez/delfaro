@@ -25,9 +25,11 @@ const handleCancelarCotizacion = () => {
 
 const step = ref(1);
 const companias: any = ref([]);
+const estimando: any = ref(false);
 const cotizacion: any = ref(null);
 const isEstimando: any = ref(false);
-const estimando: any = ref(false);
+const editandoTitular: any = ref(false);
+const agregandoCotizaciones: any = ref(false);
 
 // prettier-ignore
 const localData: any = ref(props.registro ? { ...props.registro } : { 
@@ -44,6 +46,10 @@ const handleStepPrev = () => {
   } else {
     step.value = step.value - 1; // Regresa al paso anterior
   }
+};
+
+const editarTitular = () => {
+  editandoTitular.value = !editandoTitular.value;
 };
 
 const handleStepNext = () => {
@@ -137,6 +143,36 @@ const handleInicialSubmit = async (data: any) => {
   await handleUpdateCotizacion();
 };
 
+const handleActualiarTitular = async (data: any) => {
+  const tmp = deepClone(localData.value);
+
+  // Actualiza el titular principal
+  Object.assign(tmp.configuracion.titular, data);
+
+  // Actualiza el titular en cada cotización
+  tmp.configuracion.cotizaciones.forEach((c: any) => {
+    Object.assign(c.titular, data);
+  });
+
+  localData.value = deepClone(tmp);
+  editandoTitular.value = false;
+  await handleUpdateCotizacion();
+};
+
+const handleUpdateCotizaciones = async (data: any) => {
+  const tmp = deepClone(localData.value);
+
+  // Actualiza el titular principal
+  tmp.configuracion.cotizaciones = data;
+
+  localData.value = deepClone(tmp);
+  setTimeout(async () => {
+    agregandoCotizaciones.value = !agregandoCotizaciones.value;
+  }, 10);
+  console.log("Actualizando cotizaciones...", deepToRaw(data));
+  await handleUpdateCotizacion();
+};
+
 const getCompanias = async () => {
   let url = "/api/wizard/cotizacion/companias";
   let response = await customRequest({
@@ -206,6 +242,16 @@ const updateCotizacion = async (data: any, editando = false) => {
       message: dataResponse.message,
     });
   }
+};
+
+const handleCancelarAgregarCotizaciones = async () => {
+  agregandoCotizaciones.value = false;
+};
+const handleGetCompanias = async () => {
+  if (companias.value.length == 0) {
+    await getCompanias();
+  }
+  agregandoCotizaciones.value = !agregandoCotizaciones.value;
 };
 
 const handleFiltrandoCotizacionesPorCompania = async () => {
@@ -450,24 +496,39 @@ watch(step, async (nuevoValor, valorAnterior) => {
 
 <template>
   <div>
-    <pre>{{ step }}</pre>
     <!-- prettier-ignore -->
     <BtnAtras titulo="Volver a cotizaciones" @atras="handleCancelarCotizacion" />
     <h1 class="module-title">Cotizador de Seguros de Autos</h1>
-    <!-- Preguntas iniciales -->
-    <!-- Informacion del cliente -->
-    <div v-if="step == 1">
+    <div v-if="editandoTitular">
       <div class="card cardForm mx-auto mt-3">
         <h2 class="w-full mb-5">Información del cliente:</h2>
-        <ManagerCliente @export="handleInicialSubmit" />
+        <ManagerCliente
+          :registro="localData.configuracion.titular"
+          tipo="nuevo"
+          form="updateCliente"
+          @export="handleActualiarTitular"
+          @cancelar="editarTitular"
+        />
       </div>
     </div>
-    <!-- Selección de compañias -->
-    <div v-if="step == 2">
-      <h2 class="title wFull text-center">Selecciona las compañias</h2>
-      <div class="divRows mt-3">
-        <!-- prettier-ignore -->
-        <div
+    <div v-else>
+      <!-- Preguntas iniciales -->
+      <!-- Informacion del cliente -->
+      <div v-if="step == 1">
+        <div class="card cardForm mx-auto mt-3">
+          <h2 class="w-full mb-5">Información del cliente:</h2>
+          <ManagerCliente
+            @export="handleInicialSubmit"
+            form="clienteCotizacion"
+          />
+        </div>
+      </div>
+      <!-- Selección de compañias -->
+      <div v-if="step == 2">
+        <h2 class="title wFull text-center">Selecciona las compañias</h2>
+        <div class="divRows mt-3">
+          <!-- prettier-ignore -->
+          <div
             v-for="item in companias"
             :key="item"
             class="mb-5 card cardCompania"
@@ -477,92 +538,107 @@ watch(step, async (nuevoValor, valorAnterior) => {
           <!-- prettier-ignore -->
           <p class="p-0 m-0 fontBold"> {{ item.companiaCorto }} </p>
         </div>
-      </div>
-      <div class="d-flex justify-space-between w-100 mt-5">
-        <div>
-          <VBtn color="dark" variant="outlined" @click="handleStepPrev">
-            Anterior
-          </VBtn>
         </div>
-        <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
+        <div class="d-flex justify-space-between w-100 mt-5">
+          <div>
+            <VBtn color="dark" variant="outlined" @click="handleStepPrev">
+              Anterior
+            </VBtn>
+          </div>
+          <div><VBtn @click="handleStepNext"> Siguiente </VBtn></div>
+        </div>
       </div>
-    </div>
-    <!-- Selección de estimaciones -->
-    <div v-if="step == 3">
-      <div v-if="!cotizacion">
-        <div>
-          <VBtn
-            color="dark"
-            variant="outlined"
-            @click="handleRefreshEstimar"
-            class="mr-4"
-          >
-            Refrescar estimación
-          </VBtn>
+      <!-- Selección de estimaciones -->
+      <div v-if="step == 3">
+        <div v-if="!cotizacion">
+          <div>
+            <VBtn
+              color="dark"
+              variant="outlined"
+              @click="handleRefreshEstimar"
+              class="mr-4"
+            >
+              Refrescar estimación
+            </VBtn>
 
-          <!-- prettier-ignore -->
-          <VBtn
+            <!-- prettier-ignore -->
+            <VBtn
             color="dark"
             variant="outlined"
             @click=" () => { console.log(deepToRaw(localData)); } "
           >
             Print cotizaciones
           </VBtn>
-        </div>
-        <div>
-          <div class="card cardForm mx-auto mt-3">
-            <h2 class="w-full mb-2">Detalles del titular:</h2>
+          </div>
+          <div>
+            <div class="card cardForm mx-auto mt-3">
+              <div class="d-flex align-center justify-space-between mb-2">
+                <h2 class="mb-0">Detalles del titular:</h2>
 
-            <!-- prettier-ignore -->
-            <div class="">
+                <i
+                  class="fa fa-pencil font22 icono-accion text-warning"
+                  aria-hidden="true"
+                  title="Editar"
+                  @click="editarTitular()"
+                />
+              </div>
+
+              <!-- prettier-ignore -->
+              <div class="">
               <span class="detalle-key font18 fontBold detalleKeyW100 text-left ">Nombre:</span>
               <span class="font24 ">{{ localData.configuracion.titular.nombre + " " + localData.configuracion.titular.segundoNombre + " " + localData.configuracion.titular.apellidoPaterno + " " + localData.configuracion.titular.apellidoMaterno }}</span>
             </div>
 
-            <!-- prettier-ignore -->
-            <div class="wFull">
+              <!-- prettier-ignore -->
+              <div class="wFull">
                 <p v-if="localData.configuracion.tiempoEstimacion" class="p-0 m-0 w-full text-right textSecondary fontItalic">Ultima actualización:  <span class="fontBold">{{ localData.configuracion.tiempoEstimacion }}</span></p>
               </div>
+            </div>
           </div>
-        </div>
-        <div v-if="estimando">
-          <h1 class="wFull text-center mt-5">Estimando cotizaciones...</h1>
+          <div v-if="estimando">
+            <h1 class="wFull text-center mt-5">Estimando cotizaciones...</h1>
+          </div>
+          <div v-else>
+            <div class="divRows mt-3">
+              <Propuestas
+                class="w-100"
+                :companias="companias"
+                :configuracion="localData.configuracion"
+                @editar="handleEditarCotizacion"
+                @cancelar="handleCancelarAgregarCotizaciones"
+                @actualizar="handleUpdateCotizaciones"
+                @getCompanias="handleGetCompanias"
+                @seleccionar="handleSelectCotizacion"
+              />
+            </div>
+
+            <!-- prettier-ignore -->
+            <div v-if="!agregandoCotizaciones" class="d-flex justify-space-between w-100 mt-5">
+              <div>
+                <!-- <VBtn color="dark" variant="outlined" @click="handleStepPrev">
+                Anterior
+              </VBtn> -->
+              </div>
+              <div>
+                <!-- prettier-ignore -->
+                <VBtn
+                  :disabled=" !(localData.configuracion.seleccionadas || []).length "
+                  @click="handleStepNext"
+                >
+                  Siguiente
+                </VBtn>
+              </div>
+            </div>
+          </div>
         </div>
         <div v-else>
-          <div class="divRows mt-3">
-            <Propuestas
-              :configuracion="localData.configuracion"
-              @editar="handleEditarCotizacion"
-              @seleccionar="handleSelectCotizacion"
-            />
-          </div>
-
-          <div class="d-flex justify-space-between w-100 mt-5">
-            <div>
-              <VBtn color="dark" variant="outlined" @click="handleStepPrev">
-                Anterior
-              </VBtn>
-            </div>
-            <div>
-              <VBtn
-                :disabled="
-                  !(localData.configuracion.seleccionadas || []).length
-                "
-                @click="handleStepNext"
-              >
-                Siguiente
-              </VBtn>
-            </div>
-          </div>
+          <PropuestaEdit
+            :registro="localData"
+            :cotizacion="cotizacion"
+            @cancelar="() => (cotizacion = null)"
+            @actualizar="handleActualizarCotizacion"
+          />
         </div>
-      </div>
-      <div v-else>
-        <PropuestaEdit
-          :registro="localData"
-          :cotizacion="cotizacion"
-          @cancelar="() => (cotizacion = null)"
-          @actualizar="handleActualizarCotizacion"
-        />
       </div>
     </div>
   </div>

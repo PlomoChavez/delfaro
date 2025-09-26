@@ -1,113 +1,167 @@
 <template>
   <div>
     <div v-if="propuestas && propuestas.length">
-      <h2 class="title wFull text-center">Propuestas de Seguro</h2>
-      <div class="propuestas-list-horizontal">
-        <div v-for="item in propuestas" :key="item.id">
+      <div v-if="addingCotizacion" class="w-100">
+        <h2 class="title wFull text-center">Selecciona las compañias</h2>
+        <div class="divRows mt-3">
           <!-- prettier-ignore -->
           <div
-            class="propuesta-card  card"
-            :class="{ ' activeItem ': isItemSelected(seleccionadas, item, 'id') }"
+            v-for="item in props.companias"
+            :key="item"
+            class="mb-5 card cardCompania"
+            @click="handleSelectCompania(item)"
+            :class="{ ' activeItem ': isItemSelected(companiasSeleccionadas, item, 'compania_id') }"
           >
-            <div v-if="item.msgError" class="detalle-row error-row">
-              <span class="detalle-key text-danger">Error:</span>
-              <span class="detalle-value text-danger">{{ item.msgError }}</span>
-            </div>
-            <div class="propuesta-card-horizontal">
-              <!-- Columna 1: Checkbox -->
-              <div class="col-check" >
-                <input
-
-                  v-if="typeof item.inicial !== 'undefined' && item.inicial == false"
-                  type="checkbox"
-                  :checked="seleccionadas.includes(item.id)"
-                  @change="seleccionar(item)"
-                  class="custom-checkbox"
-                />
-              </div>
-              <!-- Columna 2: Datos (diseño original) -->
-              <div class="col-datos flex-grow-1">
-                <div class="propuesta-header-horizontal">
-                  <span class="nombre-compania">{{ item.companiaCorto }}</span>
-                </div>
-                <div class="propuesta-header-horizontal">
-                  Vehiculo: <span class="nombre-compania">{{ item.vehiculo.marca }} {{ item.vehiculo.modelo }} ({{ item.vehiculo.anio }})</span>
-                </div>
-                <div v-if="item.vehiculo.version" class="propuesta-header-horizontal">
-                  Version: <span class="nombre-compania">{{ item.vehiculo.version }}</span>
-                </div>
-                <div v-if="typeof item.inicial !== 'undefined' && item.inicial == false" class="propuesta-detalles-horizontal">
-                  <div class="detalle-row">
-                    <span class="detalle-key">Núm de Cotizacion:</span>
-                    <span class="detalle-value">{{
-                      item.detalles.numeroCotizacion
-                    }}</span>
-                  </div>
-                  <div class="detalle-row">
-                    <span class="detalle-key">Prima neta:</span>
-                    <span class="detalle-value">{{
-                      item.detalles.primaNeta
-                    }}</span>
-                  </div>
-                  <div class="detalle-row">
-                    <span class="detalle-key">Derechos de póliza:</span>
-                    <span class="detalle-value">{{
-                      item.detalles.expedicionPoliza
-                    }}</span>
-                  </div>
-                  <div class="detalle-row">
-                    <span class="detalle-key">IVA:</span>
-                    <span class="detalle-value">{{ item.detalles.iVA }}</span>
-                  </div>
-                </div>
-              </div>
-              <!-- Columna 3: Iconos -->
-              <div class="col-iconos">
-                <i
-                v-if="typeof item.inicial !== 'undefined' && item.inicial == false"
-                  class="fa fa-exclamation-circle font22 icono-accion text-info"
-                  :title="
-                    abiertos.includes(item.id)
-                      ? 'Ocultar detalle'
-                      : 'Ver detalle'
-                  "
-                  @click="toggleAcordeon(item.id)"
-                  style="cursor: pointer"
-                />
-                <a
-                 v-if="!item.inicial && item.archivo"
-                  :href="item.archivo"
-                  target="_blank"
-                  rel="noopener"
-                  class="btn-icon"
-                  :title="'Descargar PDF'"
-                >
-                  <i
-                    class="fa fa-download font22 text-secondary"
-                    aria-hidden="true"
-                  ></i>
-                </a>
-                <i
-                  class="fa fa-pencil font22 icono-accion text-warning"
-                  aria-hidden="true"
-                  title="Editar"
-                  @click="editarPropuesta(item)"
-                />
-              </div>
-            </div>
+            <!-- prettier-ignore -->
+            <p class="p-0 m-0 fontBold"> {{ item.companiaCorto }} </p>
           </div>
-          <template v-if="typeof item.inicial !== 'undefined' && item.inicial == false"">
-            <!-- Acordeón de detalle -->
-            <transition name="acordeon">
-              <div
-                :key="'acordeon-' + item.id"
-                v-if="abiertos.includes(item.id)"
-                class="card acordeonDetalles"
-              >
-                <PropuestaDetalles :cotizacion="item" />
+        <!-- prettier-ignore -->
+        </div>
+        <div class="d-flex justify-space-between w-100 mt-5">
+          <div>
+            <VBtn color="dark" variant="outlined" @click="handleCancelarAgregarCotizaciones">
+            Cancelar
+          </VBtn>
+          </div>
+          <div>
+            <!-- prettier-ignore -->
+            <VBtn
+              :disabled=" !(companiasSeleccionadas || []).length "
+              @click="handleAgregarCotizacion"
+            >
+              Agregar cotizaciones
+            </VBtn>
+          </div>
+        </div>
+      </div>
+      <div v-else class="w-75 mx-auto">
+        <div class="d-flex align-center justify-space-between mb-2">
+          <h2 class="title wFull text-rigth">Propuestas de Seguro</h2>
+          <div class="d-flex align-center" style="gap: 0.7rem;">
+            <VIcon start icon="tabler-plus"  color="primary" @click="handleAddCotizacion" />
+            <VIcon v-if="propuestas.length > 1" start icon="tabler-eraser"  color="danger" @click="() => moodDelete = true" />
+          </div>
+        </div>
+        <div class="propuestas-list-horizontal">
+          <div v-for="item in propuestas" :key="item.id">
+            <!-- prettier-ignore -->
+            <div
+              class="propuesta-card  card"
+              :class="{ ' activeItem ': isItemSelected(seleccionadas, item, 'id') }"
+            >
+              <div v-if="item.msgError" class="detalle-row error-row">
+                <span class="detalle-key text-danger">Error:</span>
+                <span class="detalle-value text-danger">{{ item.msgError }}</span>
               </div>
-            </transition>
-          </template>
+              <div class="propuesta-card-horizontal">
+                <!-- Columna 1: Checkbox -->
+                <div class="col-check" >
+                  <input
+  
+                    v-if="typeof item.inicial !== 'undefined' && item.inicial == false"
+                    type="checkbox"
+                    :checked="seleccionadas.includes(item.id)"
+                    @change="seleccionar(item)"
+                    class="custom-checkbox"
+                  />
+                </div>
+                <!-- Columna 2: Datos (diseño original) -->
+                <div class="col-datos flex-grow-1">
+                  <div class="propuesta-header-horizontal">
+                    <span class="nombre-compania">{{ item.companiaCorto }}</span>
+                  </div>
+                  <div v-if="item.vehiculo" class="propuesta-header-horizontal">
+                    Vehiculo: <span class="nombre-compania">{{ item.vehiculo.marca }} {{ item.vehiculo.modelo }} ({{ item.vehiculo.anio }})</span>
+                  </div>
+                  <div v-if="item.vehiculo?.version ?? false" class="propuesta-header-horizontal">
+                    Version: <span class="nombre-compania">{{ item.vehiculo.version }}</span>
+                  </div>
+                  <div v-if="typeof item.inicial !== 'undefined' && item.inicial == false && item.detalles" class="propuesta-detalles-horizontal">
+                    <div class="detalle-row">
+                      <span class="detalle-key">Núm de Cotizacion:</span>
+                      <span class="detalle-value">{{
+                        item.detalles.numeroCotizacion
+                      }}</span>
+                    </div>
+                    <div class="detalle-row">
+                      <span class="detalle-key">Prima neta:</span>
+                      <span class="detalle-value">{{
+                        item.detalles.primaNeta
+                      }}</span>
+                    </div>
+                    <div class="detalle-row">
+                      <span class="detalle-key">Derechos de póliza:</span>
+                      <span class="detalle-value">{{
+                        item.detalles.expedicionPoliza
+                      }}</span>
+                    </div>
+                    <div class="detalle-row">
+                      <span class="detalle-key">IVA:</span>
+                      <span class="detalle-value">{{ item.detalles.iVA }}</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Columna 3: Iconos -->
+                <div class="">
+                   <div v-if="!moodDelete" class="col-iconos">
+                     <i
+                     v-if="typeof item.inicial !== 'undefined' && item.inicial == false"
+                       class="fa fa-exclamation-circle font22 icono-accion text-info"
+                       :title="
+                         abiertos.includes(item.id)
+                           ? 'Ocultar detalle'
+                           : 'Ver detalle'
+                       "
+                       @click="toggleAcordeon(item.id)"
+                       style="cursor: pointer"
+                     />
+                     <a
+                       v-if="item?.detalles?.archivo"
+                       :href="item.detalles.archivo"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn-icon"
+                       :title="'Descargar PDF'"
+                     >
+                       <i
+                         class="fa fa-download font22 text-secondary"
+                         aria-hidden="true"
+                       ></i>
+                     </a>
+                     <i
+                       class="fa fa-pencil font22 icono-accion text-warning"
+                       aria-hidden="true"
+                       title="Editar"
+                       @click="editarPropuesta(item)"
+                     />
+
+                   </div>
+                   <div v-else class="col-iconos">
+                    
+                     <i
+                       class="fa fa-eraser font22 icono-accion textDanger"
+                       aria-hidden="true"
+                       title="Editar"
+                       @click="deleteItem(item)"
+                     />
+
+                   </div>
+                </div>
+              </div>
+            </div>
+            <template v-if="typeof item.inicial !== 'undefined' && item.inicial == false"">
+              <!-- Acordeón de detalle -->
+              <transition name="acordeon">
+                <div
+                  :key="'acordeon-' + item.id"
+                  v-if="abiertos.includes(item.id)"
+                  class="card acordeonDetalles"
+                >
+                  <PropuestaDetalles :cotizacion="item" />
+                </div>
+              </transition>
+            </template>
+          </div>
         </div>
       </div>
     </div>
@@ -116,16 +170,43 @@
 
 <script setup lang="ts">
 import PropuestaDetalles from "@/components/forms/cotizaciones/componentes/autosPropuestaDetalles.vue";
-import { toggleItemInArray } from "@/utils/helper";
+import { deepToRaw, isItemSelected, toggleItemInArray } from "@/utils/helper";
 import { defineEmits, defineProps, ref } from "vue";
-const props = defineProps<{
-  configuracion: any;
-}>();
-const emit = defineEmits(["seleccionar", "editar"]);
 
-const seleccionadas = ref<number[]>([]);
-const propuestas = ref<any>(props.configuracion.cotizaciones || []);
+const props = withDefaults(
+  defineProps<{
+  configuracion: any;
+  companias: any;
+  }>(),
+  {
+    companias: [],
+  }
+);
+
+const emit = defineEmits([
+  "seleccionar", 
+  "editar",
+  "getCompanias",
+  "actualizar",
+  "cancelar"
+]);
+
 const abiertos = ref<number[]>([]);
+const companias = ref<any>([]);
+const moodDelete = ref<boolean>(false);
+const propuestas = ref<any>(props.configuracion.cotizaciones || []);
+const seleccionadas = ref<number[]>([]);
+const addingCotizacion = ref<boolean>(false);
+const companiasSeleccionadas = ref<number[]>([]);
+
+watch(
+  () => props.configuracion.cotizaciones,
+  (newVal) => {
+console.log("props.configuracion.cotizaciones changed:", deepToRaw(newVal));
+    propuestas.value = newVal || [];
+  },
+  { immediate: true }
+);
 
 function seleccionar(item: any) {
   item = deepToRaw(item);
@@ -133,9 +214,75 @@ function seleccionar(item: any) {
   emit("seleccionar", item);
 }
 
+function handleCancelarAgregarCotizaciones(item: any) {
+  addingCotizacion.value = false;
+  emit("cancelar");
+}
+
 function editarPropuesta(item: any) {
   emit("editar", item);
 }
+
+async function handleAddCotizacion() {
+  emit("getCompanias");
+  addingCotizacion.value = true;
+  companiasSeleccionadas.value = [];
+}
+
+async function handleAgregarCotizacion() {
+  addingCotizacion.value = false;
+  let tmp : any = [];
+  let index = props.configuracion.cotizaciones
+    ? props.configuracion.cotizaciones.length + 1
+    : 1;
+    
+  console.log("Companias seleccionadas:", toRaw(companiasSeleccionadas.value));
+  companiasSeleccionadas.value.forEach((compania: any) => {
+    tmp.push({
+      id: index++,
+      estimar: true,
+      inicial: false,
+      ramo: compania.ramo ?? "",
+      ramo_id: compania.ramo_id ?? "",
+      compania: compania.compania ?? "",
+      compania_id: compania.compania_id ?? compania.id ?? "",
+      companiaCorto: compania.companiaCorto ?? "",
+      companiaProducto_id: compania.companiaProducto_id ?? "",
+      companiaProducto: compania.companiaProducto ?? "",
+      titular: {}
+    });
+  });
+
+  tmp = [
+    ...(props.configuracion.cotizaciones || []),
+    ...tmp,
+  ];
+  emit("actualizar", tmp);
+}
+
+async function deleteItem(item: any) {
+  let tmp = (props.configuracion.cotizaciones || []).filter(
+    (x: any) => x.id !== item.id
+  );
+  console.log("Eliminar item:", item.id, deepToRaw(tmp));
+  console.log("Propuestas actuales:", tmp.length);
+  emit("actualizar", tmp);
+  moodDelete.value = false;
+}
+
+
+const handleSelectCompania = (item: any) => {
+  item = toRaw(item); // Asegúrate de que el item sea un objeto plano
+
+  if (!Array.isArray(companiasSeleccionadas.value)) {
+    companiasSeleccionadas.value = [];
+  }
+  companiasSeleccionadas.value = toggleItemInArray(
+    companiasSeleccionadas.value,
+    item,
+    "compania_id"
+  );
+};
 
 const hadDetalles = computed(() => {
   return (item: any): boolean => {
@@ -297,5 +444,18 @@ function toggleAcordeon(id: number) {
   max-width: 900px;
   min-width: 520px;
   white-space: pre-wrap;
+}
+.divRows {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.cardCompania {
+  text-align: center !important;
+  min-width: 100px !important;
 }
 </style>

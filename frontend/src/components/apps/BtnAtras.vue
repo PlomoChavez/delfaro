@@ -1,16 +1,16 @@
 <!-- filepath: /Users/plomochavez/Documents/GitHub/delfaro/frontend/src/components/ui/BtnAtras.vue -->
 <template>
-  <div
-    class="d-flex justify-start align-center cursorPointer"
-    @click="emitAtras"
-  >
+  <div class="d-flex justify-start align-center">
     <VBtn
       icon="tabler-arrow-left"
       class="cursor-pointer"
       variant="text"
       color="secondary"
+      @click="emitAtras"
     />
-    <span v-if="titulo" class="ml-2">{{ titulo }}</span>
+    <span v-if="titulo" class="ml-2 cursorPointer" @click="emitAtras">{{
+      titulo
+    }}</span>
   </div>
 </template>
 
