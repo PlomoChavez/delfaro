@@ -19,6 +19,33 @@
 
 .p-0 { padding: 0 !important; }
 .m-0 { margin: 0 !important; }
+/* Margen-bottom de 2 en 2 hasta mb50 */
+.mb0  { margin-bottom: 0px !important; }
+.mb2  { margin-bottom: 2px !important; }
+.mb4  { margin-bottom: 4px !important; }
+.mb6  { margin-bottom: 6px !important; }
+.mb8  { margin-bottom: 8px !important; }
+.mb10 { margin-bottom: 10px !important; }
+.mb12 { margin-bottom: 12px !important; }
+.mb14 { margin-bottom: 14px !important; }
+.mb16 { margin-bottom: 16px !important; }
+.mb18 { margin-bottom: 18px !important; }
+.mb20 { margin-bottom: 20px !important; }
+.mb22 { margin-bottom: 22px !important; }
+.mb24 { margin-bottom: 24px !important; }
+.mb26 { margin-bottom: 26px !important; }
+.mb28 { margin-bottom: 28px !important; }
+.mb30 { margin-bottom: 30px !important; }
+.mb32 { margin-bottom: 32px !important; }
+.mb34 { margin-bottom: 34px !important; }
+.mb36 { margin-bottom: 36px !important; }
+.mb38 { margin-bottom: 38px !important; }
+.mb40 { margin-bottom: 40px !important; }
+.mb42 { margin-bottom: 42px !important; }
+.mb44 { margin-bottom: 44px !important; }
+.mb46 { margin-bottom: 46px !important; }
+.mb48 { margin-bottom: 48px !important; }
+.mb50 { margin-bottom: 50px !important; }
 
 .cursorPointer { cursor: pointer;} 
 

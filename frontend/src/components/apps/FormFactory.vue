@@ -71,27 +71,6 @@ watch(
   }
 );
 
-// watch(
-//   () => formLocal, // Observa directamente el objeto reactivo
-//   (newValue) => {
-//     schemaLocal.value.forEach((field: any) => {
-//       if (field?.type === "rangeDate") {
-//         if (newValue[field.minModel]) {
-//           showForm.value = false;
-//           field.maxConfig.minDate = newValue[field.minModel];
-//         }
-//         if (newValue[field.maxModel]) {
-//           showForm.value = false;
-//           field.minConfig.maxDate = newValue[field.maxModel];
-//         }
-//       }
-//     });
-//     // prettier-ignore
-//     setTimeout(() => { showForm.value = true; }, 0.5);
-//   },
-//   { deep: true } // Habilita la observación profunda
-// );
-
 // Maneja los cambios en los inputs
 function handleInputChange(field: string, value: any) {
   formLocal[field] = value;
@@ -251,20 +230,29 @@ onMounted(async () => {
     }
 
     if (field.type === "select" && formLocal[field.model]) {
-      // prettier-ignore
-      formLocal[field.model] = {
-        label:formLocal[field.model].label || formLocal[field.model].nombre || "",
-        ...formLocal[field.model], // Mantener otras propiedades si existen
-      };
+      if (field.options) {
+        let valor = toRaw(formLocal[field.model].label);
+        let options = field.options;
+        let option = options.find((option: any) => {
+          return (
+            String(option.label).toLowerCase() == String(valor).toLowerCase()
+          );
+        });
+        formLocal[field.model] = option ? toRaw(option) : null;
+      } else {
+        // prettier-ignore
+        formLocal[field.model] = {
+          label:formLocal[field.model].label || formLocal[field.model].nombre || "",
+          ...formLocal[field.model], // Mantener otras propiedades si existen
+        };
+      }
     }
 
     if (field.type === "rangeDate") {
-      // prettier-ignore
-      // field.minDisable = true;
-      // field.maxDisable = true;
       field.minConfig = {
         ...(field?.config || { dateFormat: "Y-m-d" }),
       };
+
       field.maxConfig = {
         ...(field?.config || { dateFormat: "Y-m-d" }),
       };

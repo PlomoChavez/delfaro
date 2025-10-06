@@ -5,6 +5,7 @@ import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import ManagerCliente from "@/components/forms/clientes/ManagerClientes.vue";
 import PropuestaEdit from "@/components/forms/cotizaciones/componentes/autosPropuestaEdit.vue";
 import Propuestas from "@/components/forms/cotizaciones/componentes/autosPropuestas.vue";
+import PanelEmision from "@/components/forms/cotizaciones/PanelEmision.vue";
 import { deepToRaw, isItemSelected, toggleItemInArray } from "@/utils/helper";
 import { toast } from "vue3-toastify";
 
@@ -32,12 +33,12 @@ const editandoTitular: any = ref(false);
 const agregandoCotizaciones: any = ref(false);
 
 // prettier-ignore
-const localData: any = ref(props.registro ? { ...props.registro } : { 
-  configuracion: { 
-    companias: [], 
+const localData: any = ref(props.registro ? { ...props.registro } : {
+  configuracion: {
+    companias: [],
     titular: {},
     cotizaciones: []
-  } 
+  }
 });
 
 const handleStepPrev = () => {
@@ -52,7 +53,7 @@ const editarTitular = () => {
   editandoTitular.value = !editandoTitular.value;
 };
 
-const handleStepNext = () => {
+const handleStepNext = (update: boolean = true) => {
   step.value = step.value + 1; // Avanza al siguiente paso
   if (step.value == 3) {
     if (typeof localData.value.configuracion.cotizaciones === "undefined") {
@@ -87,7 +88,13 @@ const handleStepNext = () => {
       }
     });
   }
-  handleUpdateCotizacion();
+  if (update) {
+    handleUpdateCotizacion();
+  }
+};
+
+await function handleGoEmitir() {
+  handleStepNext(false);
 };
 
 const handleAddCotizacionesEstimadas = async (data: any) => {
@@ -247,6 +254,7 @@ const updateCotizacion = async (data: any, editando = false) => {
 const handleCancelarAgregarCotizaciones = async () => {
   agregandoCotizaciones.value = false;
 };
+
 const handleGetCompanias = async () => {
   if (companias.value.length == 0) {
     await getCompanias();
@@ -639,6 +647,14 @@ watch(step, async (nuevoValor, valorAnterior) => {
             @actualizar="handleActualizarCotizacion"
           />
         </div>
+      </div>
+      <!-- Emision de cotizaciones -->
+      <div v-if="step == 4">
+        <PanelEmision
+          :registro="localData.configuracion.seleccionadas[0]"
+          @cancelar="handleCancelarCotizacion"
+        />
+        <!-- <pre>{{ localData.configuracion.seleccionadas }}</pre> -->
       </div>
     </div>
   </div>

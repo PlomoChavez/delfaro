@@ -51,3 +51,53 @@ Facilidades de pago - Administrativo
 
 
 Pendientes
+
+
+
+
+
+
+
+
+
+nacionalidad
+estado de nacimiento
+nombres
+apellido paterno
+apellido materno 
+genero
+fecha de nacimiento
+curp
+tipo de identificacion
+referencia de identificacion 
+RFC
+Domicilio
+    municipio
+    colonia
+    calle
+    colonia
+    calle 
+    numero exterior 
+    estado
+    pais
+    telefono fijo
+celular
+correo
+profesion
+ocupacion
+giro
+isPolitico
+
+
+
+placas
+numero de serie
+numero de motor
+color
+conductorHabitual
+Repuve
+numero economico
+
+Forma de pago
+inicio de vigencia
+
