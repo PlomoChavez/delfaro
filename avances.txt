@@ -60,43 +60,42 @@ Pendientes
 
 
 
-nacionalidad
+nacionalidad  - text
 estado de nacimiento
-nombres
-apellido paterno
-apellido materno 
-genero
+nombres  - text
+apellido paterno  - text
+apellido materno   - text
+genero switch
 fecha de nacimiento
-curp
-tipo de identificacion
-referencia de identificacion 
-RFC
+curp  - text
+tipo de identificacion  - text
+referencia de identificacion   - text
+RFC  - text
 Domicilio
-    municipio
-    colonia
-    calle
-    colonia
-    calle 
-    numero exterior 
-    estado
-    pais
-    telefono fijo
-celular
-correo
-profesion
-ocupacion
-giro
-isPolitico
+    municipio  - text
+    colonia  - text
+    calle  - text
+    colonia  - text
+    numero exterior   - text
+    estado select
+    pais  - text
+    telefono fijo  - text
+celular  - text
+correo  - text
+profesion  - text
+ocupacion  - text
+giro  - text
+isPolitico switch
 
 
 
-placas
-numero de serie
-numero de motor
-color
-conductorHabitual
-Repuve
-numero economico
+placas  - text
+numero de serie  - text
+numero de motor  - text
+color  - text
+conductorHabitual  - text
+Repuve  - text
+numero economico  - text
 
 Forma de pago
 inicio de vigencia

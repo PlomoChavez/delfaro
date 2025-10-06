@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCatalogo } from "@/hooks/useCatalogo";
-import { getCurrentInstance, watch } from "vue";
+import { computed, getCurrentInstance, ref, watch } from "vue";
 
 // Registrar la directiva manualmente
 const instance = getCurrentInstance();
@@ -62,6 +62,13 @@ const emit = defineEmits<{
 const formLocal: any = reactive(props.modelValue || {});
 const schemaLocal: any = ref({});
 const showForm: any = ref(false);
+const mensajeRef = ref<HTMLElement | null>(null);
+const camposFaltantes = ref<string[]>([]);
+const mostrarTodosFaltantes = ref(false);
+
+function toggleFaltantes() {
+  mostrarTodosFaltantes.value = !mostrarTodosFaltantes.value;
+}
 // Sincroniza los cambios entre `props.modelValue` y `formLocal`
 watch(
   () => props.modelValue,
@@ -69,6 +76,10 @@ watch(
     Object.keys(formLocal).forEach((key) => delete formLocal[key]);
     Object.assign(formLocal, { ...newValue });
   }
+);
+
+const tieneRequeridos = computed(() =>
+  props.schema?.some((field: any) => field.required)
 );
 
 // Maneja los cambios en los inputs
@@ -79,6 +90,7 @@ function handleInputChange(field: string, value: any) {
     emit("update:modelValue", { ...formLocal });
   }
 }
+
 function handleSwitchChange(field: string) {
   // Asegúrate de que el valor sea booleano
   formLocal[field] = !!formLocal[field];
@@ -87,6 +99,7 @@ function handleSwitchChange(field: string) {
     emit("update:modelValue", { ...formLocal });
   }
 }
+
 function handleSelectChange(field: any, selected: any) {
   let value = field.options.find((option: any) => option.label === selected);
   if (!(value === undefined)) {
@@ -99,9 +112,35 @@ function handleSelectChange(field: any, selected: any) {
   }
 }
 
+function validarCamposRequeridos() {
+  const faltantes: string[] = [];
+  props.schema.forEach((field: any) => {
+    if (field.required) {
+      const valor = formLocal[field.model];
+      if (
+        valor === undefined ||
+        valor === null ||
+        (typeof valor === "string" && valor.trim() === "") ||
+        (Array.isArray(valor) && valor.length === 0)
+      ) {
+        faltantes.push(field.label.replace(/<[^>]*>?/gm, "")); // Elimina etiquetas HTML del label
+      }
+    }
+  });
+  camposFaltantes.value = faltantes;
+  return faltantes;
+}
+
 function handleSubmit() {
+  const faltantes = validarCamposRequeridos();
+  if (faltantes.length > 0) {
+    // Muestra el mensaje y hace scroll al mensaje
+    setTimeout(() => {
+      mensajeRef.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+    return;
+  }
   let tmp = { ...formLocal };
-  // Filtra los valores de formLocal según las claves definidas en el esquema
   const filteredForm = Object.fromEntries(
     props.schema.map((field) => [field.model, tmp[field.model]])
   );
@@ -115,9 +154,8 @@ function handleSubmit() {
     ...tmp,
     ...filteredForm,
   };
-  // Emite solo los valores filtrados
   emit("submit", tmp);
-  emit("update:isDialogVisible", false); // Cerrar el modal
+  emit("update:isDialogVisible", false);
 }
 
 // Maneja la cancelación del formulario
@@ -308,6 +346,51 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
+.faltantes-alert {
+  background: #fff7e6;
+  border: 1.5px solid #ffd699;
+  color: #b85c00;
+  font-weight: 500;
+  padding: 18px 18px 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #ffd69944;
+  margin-bottom: 16px;
+  font-size: 0.95rem; // <--- tamaño de letra reducido
+}
+
+.faltantes-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.faltantes-icon {
+  font-size: 1.3rem; // <--- icono un poco más pequeño
+}
+
+.faltantes-title {
+  font-size: 0.9rem; // <--- título más pequeño
+  font-weight: 700;
+}
+
+.faltantes-desc {
+  font-size: 0.8rem; // <--- descripción más pequeña
+  margin-bottom: 8px;
+}
+
+.faltantes-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.8rem; // <--- lista más pequeña
+}
+
+.faltantes-list-icon {
+  color: #b85c00;
+  font-weight: bold;
+  margin-right: 6px;
+}
+
 @media (min-width: 1201px) {
   /* prettier-ignore */
   .wDefault { width: 25% !important; }
@@ -332,8 +415,61 @@ onMounted(async () => {
     <!-- Inline Form -->
     <div v-if="showForm" class="w-full">
       <!-- Renderiza el formulario -->
+
       <div class="formWrapper">
         <!-- Render dynamic fields -->
+        <!-- prettier-ignore -->
+        <h6 v-if="tieneRequeridos" class="mb16" style="color: #535353; font-size: 0.80rem;">
+          Este formulario cuenta con campos obligatorios, los puedes identificar porque tienen este símbolo <span style="color:red">*</span>
+        </h6>
+
+        <div
+          v-if="camposFaltantes.length"
+          ref="mensajeRef"
+          class="mb14 faltantes-alert mx-auto"
+        >
+          <div class="faltantes-header">
+            <span class="faltantes-icon">⚠️</span>
+            <span class="faltantes-title">Campos obligatorios pendientes</span>
+          </div>
+          <div class="faltantes-desc">
+            Por favor completa los siguientes campos requeridos antes de
+            continuar:
+          </div>
+          <ul class="faltantes-list">
+            <li
+              v-for="campo in mostrarTodosFaltantes
+                ? camposFaltantes
+                : camposFaltantes.slice(0, 5)"
+              :key="campo"
+            >
+              {{ campo }}
+            </li>
+          </ul>
+          <div
+            v-if="camposFaltantes.length > 5"
+            style="margin-top: 6px"
+            class="text-center"
+          >
+            <button
+              @click="toggleFaltantes"
+              style="
+                background: none;
+                border: none;
+                color: #b85c00;
+                cursor: pointer;
+                font-size: 0.8rem;
+                text-decoration: underline;
+              "
+            >
+              {{
+                mostrarTodosFaltantes
+                  ? "Ocultar otros campos"
+                  : `Ver otros campos (${camposFaltantes.length - 5})`
+              }}
+            </button>
+          </div>
+        </div>
         <v-row>
           <template v-for="field in schemaLocal" :key="field.model">
             <!-- Campo de texto -->
@@ -350,7 +486,9 @@ onMounted(async () => {
              </div>
 
             <div v-if="field.type === 'text'" :class="field.classElement">
-              <label :for="field.model"> {{ field.label }} </label>
+              <!-- prettier-ignore -->
+              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+
               <VTextField
                 variant="outlined"
                 v-model="formLocal[field.model]"
@@ -365,7 +503,9 @@ onMounted(async () => {
             <!-- Campo number -->
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'number'" :class="field.classElement">
-               <label :for="field.model"> {{ field.label }} </label>
+              <!-- prettier-ignore -->   
+              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+
                <VTextField
                  @input="handleNumberInput($event, field)"
                  :disabled="props.isDisabled || field.disabled"
@@ -378,19 +518,20 @@ onMounted(async () => {
             <!-- Campo date -->
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'date'" :class="field.classElement">
-               <label :for="field.model"> {{ field.label }} </label>
-               <!-- prettier-ignore -->
-               <AppDateTimePicker
-                 :key="`${field.model}`"
-                 v-model="formLocal[field.model] "
-                 :placeholder="field?.placeholder ?? 'Ingresa un fecha'"
-                 :config="{
-                   ...(field?.config || { dateFormat: 'Y-m-d' }),
-                   minDate: field.config?.minDate ? formLocal[field.config.minDate] : undefined,
-                   maxDate: field.config?.maxDate ? formLocal[field.config.maxDate] : undefined,
-                 }"
-               />
-             </div>
+              <!-- prettier-ignore -->   
+              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+              <!-- prettier-ignore -->
+              <AppDateTimePicker
+                :key="`${field.model}`"
+                v-model="formLocal[field.model] "
+                :placeholder="field?.placeholder ?? 'Ingresa un fecha'"
+                :config="{
+                  ...(field?.config || { dateFormat: 'Y-m-d' }),
+                  minDate: field.config?.minDate ? formLocal[field.config.minDate] : undefined,
+                  maxDate: field.config?.maxDate ? formLocal[field.config.maxDate] : undefined,
+                }"
+              />
+            </div>
 
             <!-- Campo rangeDate -->
             <!-- prettier-ignore -->
@@ -425,38 +566,42 @@ onMounted(async () => {
             <!-- Campo select -->
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'select'" :class="field.classElement">
-               <label :for="field.model"> {{ field.label }} </label>
-               <!-- prettier-ignore -->
-               <VSelect
-                 :items="field.options || []"
-                 :value="formLocal[field.model]?.label ?? ''"
-                 item-title="label"
-                 :placeholder="field.placeholder || 'Selecciona una opción'"
-                 :disabled="props.isDisabled || field.disabled"
-                 @update:modelValue=" (selected) => handleSelectChange(field, selected) "
-               >
-                 <template v-for="(_, label) in $slots" v-slot:[label]="slotProps">
-                   <slot :name="label" v-bind="slotProps || {}" />
-                 </template>
-               </VSelect>
+              <!-- prettier-ignore -->   
+              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+              <!-- prettier-ignore -->
+              <VSelect
+                :items="field.options || []"
+                :value="formLocal[field.model]?.label ?? ''"
+                item-title="label"
+                :placeholder="field.placeholder || 'Selecciona una opción'"
+                :disabled="props.isDisabled || field.disabled"
+                @update:modelValue=" (selected) => handleSelectChange(field, selected) "
+              >
+                <template v-for="(_, label) in $slots" v-slot:[label]="slotProps">
+                  <slot :name="label" v-bind="slotProps || {}" />
+                </template>
+              </VSelect>
              </div>
+
             <!-- Campo switch -->
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'switch'" :class="field.classElement">
-               <label :for="field.model"> {{ field.label }} </label>
-               <VSwitch
-                 v-model="formLocal[field.model]"
-                 :id="field.model"
-                 :disabled="props.isDisabled || field.disabled"
-                 :label="
-                   (field.options || [
-                     { value: true, label: 'Activo' },
-                     { value: false, label: 'Inactivo' },
-                   ])[formLocal[field.model] ? 0 : 1].label
-                 "
-                 @change="handleSwitchChange(field.model)"
-               />
-             </div>
+              <!-- prettier-ignore -->   
+              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+
+              <VSwitch
+                v-model="formLocal[field.model]"
+                :id="field.model"
+                :disabled="props.isDisabled || field.disabled"
+                :label="
+                  (field.options || [
+                    { value: true, label: 'Activo' },
+                    { value: false, label: 'Inactivo' },
+                  ])[formLocal[field.model] ? 0 : 1].label
+                "
+                @change="handleSwitchChange(field.model)"
+              />
+            </div>
           </template>
         </v-row>
       </div>

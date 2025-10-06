@@ -14,64 +14,35 @@ const props = withDefaults(
   }
 );
 
+// prettier-ignore
 const opciones = {
   cliente: [
-    {
-      label: "Registro nuevo",
-      accion: "nuevo",
-      icono: "fa fa-user-plus fa-2x",
-      disabled: false,
-    },
-    {
-      label: "Buscar cliente",
-      accion: "buscar",
-      icono: "fa fa-search fa-2x",
-      disabled: false,
-    },
+    { label: "Registro nuevo", accion: "nuevo",   icono: "fa fa-user-plus fa-2x",},
+    { label: "Buscar cliente", accion: "buscar",  icono: "fa fa-search fa-2x",   }, 
   ],
   aseguradoIgual: [
-    {
-      label: "Sí, es el mismo",
-      accion: "igual",
-      icono: "fa fa-user-check fa-2x",
-      disabled: false,
-    },
-    {
-      label: "No, es diferente",
-      accion: "diferente",
-      icono: "fa fa-user-edit fa-2x",
-      disabled: false,
-    },
+    { label: "Sí, es el mismo",   accion: "igual",      icono: "fa fa-user-check fa-2x", },
+    { label: "No, es diferente",  accion: "diferente",  icono: "fa fa-user-edit fa-2x",  },
   ],
   asegurado: [
-    {
-      label: "Registro nuevo asegurado",
-      accion: "nuevoAsegurado",
-      icono: "fa fa-user-plus fa-2x",
-      disabled: false,
-    },
-    {
-      label: "Buscar asegurado existente",
-      accion: "buscarAsegurado",
-      icono: "fa fa-search fa-2x",
-      disabled: false,
-    },
+    { label: "Registro nuevo asegurado",  accion: "nuevoAsegurado", icono: "fa fa-user-plus fa-2x",},
+    { label: "Buscar asegurado existente",accion: "buscarAsegurado",icono: "fa fa-search fa-2x",   },
   ],
 };
 
 // prettier-ignore
 const formSchema = [
-  { label: "Nacionalidad",                  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "nacionalidad" },
-  { label: "Estado de nacimiento",          type: "select",   classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "estadoNacimiento", catalogo: "estados" },
-  { label: "Nombres",                       type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "nombre" },
-  { label: "Apellido paterno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "apellidoPaterno" },
-  { label: "Apellido materno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "apellidoMaterno" },
-  { label: "Fecha de nacimiento",           type: "date",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "fechaNacimiento" },
-  { label: "CURP",                          type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "curp" },
-  { label: "RFC",                           type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "rfc" },
-  { label: "Tipo de identificación",        type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "tipoIdentificacion" },
-  { label: "Referencia de identificación",  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "referenciaIdentificacion" },
-  { label: "Género",                        type: "switch",   classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "genero", options: [ {label:"Hombre",id:"Hombre"}, {label:"Mujer",id:"Mujer"} ]},
+  { label: "Nacionalidad",                  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "nacionalidad"},
+  { label: "Estado de nacimiento",          type: "select",   classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "estadoNacimiento", catalogo: "estados" },
+  { label: "Nombres",                       type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "nombre" },
+  { label: "Apellido paterno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "apellidoPaterno" },
+  { label: "Apellido materno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "apellidoMaterno" },
+  { label: "Fecha de nacimiento",           type: "date",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "fechaNacimiento" },
+  { label: "CURP",                          type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "curp" },
+  { label: "RFC",                           type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "rfc" },
+  { label: "Tipo de identificación",        type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "tipoIdentificacion" },
+  { label: "Referencia de identificación",  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "referenciaIdentificacion" },
+  { label: "Género",                        type: "switch",   classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "genero", options: [ {label:"Hombre",id:"Hombre"}, {label:"Mujer",id:"Mujer"} ]},
   
 
   // Domicilio
@@ -126,7 +97,9 @@ function handleTerminar() {
   paso.value = paso.value > 4 ? 8 : 4;
 }
 
-function handleFormSubmit() {}
+function handleFormSubmit() {
+  alert("Formulario enviado");
+}
 
 onBeforeMount(() => {
   if (props.registro) {
@@ -152,7 +125,6 @@ onBeforeMount(() => {
 <template>
   <div>
     <pre>{{ paso }}</pre>
-    <pre>{{ formData }}</pre>
     <OpcionSelector
       v-if="paso === 1"
       :config="{
