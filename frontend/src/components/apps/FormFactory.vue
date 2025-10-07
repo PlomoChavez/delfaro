@@ -34,14 +34,18 @@ const props = withDefaults(
     showIconButtonCancel?: boolean;
     showButtonSubmit?: boolean;
     showButtonCancel?: boolean;
+    formRequired?: boolean;
+    validarCambios?: boolean;
   }>(),
   {
     title: null,
     formModal: false,
     formLive: false,
+    formRequired: false,
     isDisabled: false,
     isDialogVisible: false,
     showButtonsAction: true,
+    validarCambios: true,
     showIconButtonSubmit: true,
     showIconButtonCancel: true,
     showButtonSubmit: true,
@@ -65,6 +69,7 @@ const showForm: any = ref(false);
 const mensajeRef = ref<HTMLElement | null>(null);
 const camposFaltantes = ref<string[]>([]);
 const mostrarTodosFaltantes = ref(false);
+const spanRequired = ref('<span style="color:red">*</span>');
 
 function toggleFaltantes() {
   mostrarTodosFaltantes.value = !mostrarTodosFaltantes.value;
@@ -89,6 +94,10 @@ function handleInputChange(field: string, value: any) {
   if (props.formLive) {
     emit("update:modelValue", { ...formLocal });
   }
+
+  if (props.validarCambios) {
+    validarCamposRequeridos();
+  }
 }
 
 function handleSwitchChange(field: string) {
@@ -109,13 +118,24 @@ function handleSelectChange(field: any, selected: any) {
     if (props.formLive) {
       emit("update:modelValue", { ...formLocal });
     }
+  } else {
+    formLocal[field.model] = null;
+  }
+  if (props.validarCambios) {
+    validarCamposRequeridos();
   }
 }
 
 function validarCamposRequeridos() {
   const faltantes: string[] = [];
   props.schema.forEach((field: any) => {
-    if (field.required) {
+    // Si formRequired es true, todos los campos son requeridos excepto los ignorados
+    const ignorados = ["label", "separador", "switch"];
+    const esRequerido = props.formRequired
+      ? !ignorados.includes(field.type)
+      : field.required;
+
+    if (esRequerido) {
       const valor = formLocal[field.model];
       if (
         valor === undefined ||
@@ -123,7 +143,7 @@ function validarCamposRequeridos() {
         (typeof valor === "string" && valor.trim() === "") ||
         (Array.isArray(valor) && valor.length === 0)
       ) {
-        faltantes.push(field.label.replace(/<[^>]*>?/gm, "")); // Elimina etiquetas HTML del label
+        faltantes.push(field.label.replace(/<[^>]*>?/gm, ""));
       }
     }
   });
@@ -379,10 +399,18 @@ onMounted(async () => {
   margin-bottom: 8px;
 }
 
-.faltantes-list {
-  margin: 0;
+.faltantes-list,
+.faltantes-list-2col {
   padding-left: 18px;
-  font-size: 0.8rem; // <--- lista más pequeña
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.6; // iguala el interlineado
+}
+
+.faltantes-list-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0px 24px; // aumenta el gap vertical para mejor lectura
 }
 
 .faltantes-list-icon {
@@ -436,16 +464,24 @@ onMounted(async () => {
             Por favor completa los siguientes campos requeridos antes de
             continuar:
           </div>
-          <ul class="faltantes-list">
-            <li
-              v-for="campo in mostrarTodosFaltantes
-                ? camposFaltantes
-                : camposFaltantes.slice(0, 5)"
-              :key="campo"
+          <div class="">
+            <ul
+              class="faltantes-list"
+              :class="{
+                'faltantes-list-2col':
+                  camposFaltantes.length > 10 && mostrarTodosFaltantes,
+              }"
             >
-              {{ campo }}
-            </li>
-          </ul>
+              <li
+                v-for="campo in mostrarTodosFaltantes
+                  ? camposFaltantes
+                  : camposFaltantes.slice(0, 5)"
+                :key="campo"
+              >
+                {{ campo }}
+              </li>
+            </ul>
+          </div>
           <div
             v-if="camposFaltantes.length > 5"
             style="margin-top: 6px"
@@ -487,7 +523,7 @@ onMounted(async () => {
 
             <div v-if="field.type === 'text'" :class="field.classElement">
               <!-- prettier-ignore -->
-              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
 
               <VTextField
                 variant="outlined"
@@ -504,7 +540,7 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'number'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
 
                <VTextField
                  @input="handleNumberInput($event, field)"
@@ -519,7 +555,7 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'date'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
               <!-- prettier-ignore -->
               <AppDateTimePicker
                 :key="`${field.model}`"
@@ -567,12 +603,13 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'select'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
               <!-- prettier-ignore -->
               <VSelect
                 :items="field.options || []"
                 :value="formLocal[field.model]?.label ?? ''"
                 item-title="label"
+                clearable
                 :placeholder="field.placeholder || 'Selecciona una opción'"
                 :disabled="props.isDisabled || field.disabled"
                 @update:modelValue=" (selected) => handleSelectChange(field, selected) "
@@ -587,7 +624,7 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'switch'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="field.required ? field.label + ' <span style=\'color:red\'>*</span>' : field.label"></label>
+              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
 
               <VSwitch
                 v-model="formLocal[field.model]"

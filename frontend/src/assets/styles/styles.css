@@ -4,6 +4,10 @@
 .textSuccess { color: var(--v-theme-success)!important; } 
 .textSecondary { color: #717171 !important; } 
 
+.text-muted { color: #6b7280 !important; }
+.text-dark { color: #23272f !important; }
+.font-bold { font-weight: 700 !important; } 
+
 
 .w-fit { width: fit-content; }
 .wFull{ width: 100% !important;}
@@ -16,9 +20,63 @@
 .w700 { width: 700px !important; }
 
 
-
-.p-0 { padding: 0 !important; }
+/* Padding completo de 2 en 2 hasta p50 */
+.p0  { padding: 0px !important; }
+.p2  { padding: 2px !important; }
+.p4  { padding: 4px !important; }
+.p6  { padding: 6px !important; }
+.p8  { padding: 8px !important; }
+.p10 { padding: 10px !important; }
+.p12 { padding: 12px !important; }
+.p14 { padding: 14px !important; }
+.p16 { padding: 16px !important; }
+.p18 { padding: 18px !important; }
+.p20 { padding: 20px !important; }
+.p22 { padding: 22px !important; }
+.p24 { padding: 24px !important; }
+.p26 { padding: 26px !important; }
+.p28 { padding: 28px !important; }
+.p30 {
+  padding: 30px !important;
+}
+.p32 { padding: 32px !important; }
+.p34 { padding: 34px !important; }
+.p36 { padding: 36px !important; }
+.p38 { padding: 38px !important; }
+.p40 { padding: 40px !important; }
+.p42 { padding: 42px !important; }
+.p44 { padding: 44px !important; }
+.p46 { padding: 46px !important; }
+.p48 { padding: 48px !important; }
+.p50 { padding: 50px !important; }
 .m-0 { margin: 0 !important; }
+/* Margen completo de 2 en 2 hasta m50 */
+.m0  { margin: 0px !important; }
+.m2  { margin: 2px !important; }
+.m4  { margin: 4px !important; }
+.m6  { margin: 6px !important; }
+.m8  { margin: 8px !important; }
+.m10 { margin: 10px !important; }
+.m12 { margin: 12px !important; }
+.m14 { margin: 14px !important; }
+.m16 { margin: 16px !important; }
+.m18 { margin: 18px !important; }
+.m20 { margin: 20px !important; }
+.m22 { margin: 22px !important; }
+.m24 { margin: 24px !important; }
+.m26 { margin: 26px !important; }
+.m28 { margin: 28px !important; }
+.m30 { margin: 30px !important; }
+.m32 { margin: 32px !important; }
+.m34 { margin: 34px !important; }
+.m36 { margin: 36px !important; }
+.m38 { margin: 38px !important; }
+.m40 { margin: 40px !important; }
+.m42 { margin: 42px !important; }
+.m44 { margin: 44px !important; }
+.m46 { margin: 46px !important; }
+.m48 { margin: 48px !important; }
+.m50 { margin: 50px !important; }
 /* Margen-bottom de 2 en 2 hasta mb50 */
 .mb0  { margin-bottom: 0px !important; }
 .mb2  { margin-bottom: 2px !important; }
@@ -155,7 +213,7 @@
   font-weight: bolder;
   margin-top: 0;
 }
-
+.row { display: flex; flex-wrap: wrap;}
 
 .detalle-row {
   display: flex;

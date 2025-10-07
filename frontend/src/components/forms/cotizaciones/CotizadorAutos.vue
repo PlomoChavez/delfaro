@@ -654,7 +654,6 @@ watch(step, async (nuevoValor, valorAnterior) => {
           :registro="localData.configuracion.seleccionadas[0]"
           @cancelar="handleCancelarCotizacion"
         />
-        <!-- <pre>{{ localData.configuracion.seleccionadas }}</pre> -->
       </div>
     </div>
   </div>

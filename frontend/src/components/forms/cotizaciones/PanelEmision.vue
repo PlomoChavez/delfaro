@@ -4,6 +4,100 @@ import { ref } from "vue";
 
 const paso = ref(1);
 const formData: any = ref({});
+const data: any = ref({
+  cliente: {
+    fechaNacimiento: "2025-10-10",
+    nombre: "Jesus",
+    segundoNombre: "Ramon",
+    apellidoPaterno: "Chavez",
+    apellidoMaterno: "Quiroz",
+    curp: "CAQJ",
+    sexo: {
+      label: "Mujer",
+      id: "Mujer",
+    },
+    telefono: "7442077733",
+    correo: "de@de.com",
+    codigoPostal: "31304",
+    direccion: "JOSEFA ORTIZ DE DOMINGUEZ, CHIHUAHUA, CHIHUAHUA, CP 31304",
+    marca: "NISSAN",
+    modelo: "MARCH",
+    anio: "2019",
+    version: "SENSE 1.6L STD., 05 OCUP.",
+    colonia: "JOSEFA ORTIZ DE DOMINGUEZ",
+    municipio: "CHIHUAHUA",
+    estado: {
+      label: "Chihuahua",
+      id: 6,
+    },
+    nacionalidad: "Mexicana",
+    estadoNacimiento: {
+      label: "Guerrero",
+      id: 13,
+    },
+    rfc: "CAQJ",
+    tipoIdentificacion: "INE",
+    referenciaIdentificacion: "INE19992",
+    genero: true,
+    pais: "Mexico",
+    calle: "dede",
+    numeroExterior: "dede",
+    telefonoFijo: "dedede",
+    celular: "dede",
+    profesion: "dede",
+    ocupacion: "dede",
+    giro: "dedede",
+    isPolitico: true,
+  },
+  asegurado: {
+    fechaNacimiento: "2025-10-10",
+    nombre: "Jesus",
+    segundoNombre: "Ramon",
+    apellidoPaterno: "Chavez",
+    apellidoMaterno: "Quiroz",
+    curp: "CAQJ",
+    sexo: {
+      label: "Mujer",
+      id: "Mujer",
+    },
+    telefono: "7442077733",
+    correo: "de@de.com",
+    codigoPostal: "31304",
+    direccion: "JOSEFA ORTIZ DE DOMINGUEZ, CHIHUAHUA, CHIHUAHUA, CP 31304",
+    marca: "NISSAN",
+    modelo: "MARCH",
+    anio: "2019",
+    version: "SENSE 1.6L STD., 05 OCUP.",
+    colonia: "JOSEFA ORTIZ DE DOMINGUEZ",
+    municipio: "CHIHUAHUA",
+    estado: {
+      label: "Chihuahua",
+      id: 6,
+    },
+    nacionalidad: "Mexicana",
+    estadoNacimiento: {
+      label: "Guerrero",
+      id: 13,
+    },
+    rfc: "CAQJ",
+    tipoIdentificacion: "INE",
+    referenciaIdentificacion: "INE19992",
+    genero: true,
+    pais: "Mexico",
+    calle: "dede",
+    numeroExterior: "dede",
+    telefonoFijo: "dedede",
+    celular: "dede",
+    profesion: "dede",
+    ocupacion: "dede",
+    giro: "dedede",
+    isPolitico: true,
+  },
+});
+
+const emit = defineEmits<{
+  (event: "cancelar"): void;
+}>();
 
 const props = withDefaults(
   defineProps<{
@@ -32,17 +126,17 @@ const opciones = {
 
 // prettier-ignore
 const formSchema = [
-  { label: "Nacionalidad",                  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "nacionalidad"},
-  { label: "Estado de nacimiento",          type: "select",   classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "estadoNacimiento", catalogo: "estados" },
-  { label: "Nombres",                       type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "nombre" },
-  { label: "Apellido paterno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "apellidoPaterno" },
-  { label: "Apellido materno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "apellidoMaterno" },
-  { label: "Fecha de nacimiento",           type: "date",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "fechaNacimiento" },
-  { label: "CURP",                          type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "curp" },
-  { label: "RFC",                           type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "rfc" },
-  { label: "Tipo de identificación",        type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "tipoIdentificacion" },
-  { label: "Referencia de identificación",  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "referenciaIdentificacion" },
-  { label: "Género",                        type: "switch",   classElement: " col-sm-12 col-md-6  col-lg-6 ", required:true,model: "genero", options: [ {label:"Hombre",id:"Hombre"}, {label:"Mujer",id:"Mujer"} ]},
+  { label: "Nacionalidad",                  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "nacionalidad"},
+  { label: "Estado de nacimiento",          type: "select",   classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "estadoNacimiento", catalogo: "estados" },
+  { label: "Nombres",                       type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "nombre" },
+  { label: "Apellido paterno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "apellidoPaterno" },
+  { label: "Apellido materno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "apellidoMaterno" },
+  { label: "Fecha de nacimiento",           type: "date",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "fechaNacimiento" },
+  { label: "CURP",                          type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "curp" },
+  { label: "RFC",                           type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "rfc" },
+  { label: "Tipo de identificación",        type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "tipoIdentificacion" },
+  { label: "Referencia de identificación",  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "referenciaIdentificacion" },
+  { label: "Género",                        type: "switch",   classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "genero", options: [ {label:"Hombre",id:"Hombre"}, {label:"Mujer",id:"Mujer"} ]},
   
 
   // Domicilio
@@ -61,9 +155,10 @@ const formSchema = [
   { label: "Ocupación",         type: "text",    classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "ocupacion" },
   { label: "Giro",              type: "text",    classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "giro" },
   { label: "¿Es político?",     type: "switch",  classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "isPolitico" },
+];
 
-  // Vehículo
-  { label: "Datos del auto",    type: "separador", classElement: " col-12 ",},
+// prettier-ignore
+let formSchemaCarro = [
   { label: "Conductor habitual",  type: "text",   classElement: " col-12 ", model: "conductorHabitual" },
   { label: "Placas",              type: "text",   classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "placas" },
   { label: "Número de serie",     type: "text",   classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "numeroSerie" },
@@ -71,10 +166,9 @@ const formSchema = [
   { label: "Color",               type: "text",   classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "color" },
   { label: "Repuve",              type: "text",   classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "repuve" },
   { label: "Número económico",    type: "text",   classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "numeroEconomico" },
-];
+]
 
 function handleCliente(accion: string) {
-  console.log("Acción seleccionada para cliente:", accion);
   switch (accion) {
     case "nuevo":
       paso.value = 3; // Ir al formulario de nuevo cliente
@@ -94,11 +188,21 @@ function handleAsegurado(accion: string) {
 }
 
 function handleTerminar() {
-  paso.value = paso.value > 4 ? 8 : 4;
+  data.value.carro = { ...formData.value };
+  paso.value = 9;
 }
 
 function handleFormSubmit() {
-  alert("Formulario enviado");
+  let isCliente = paso.value < 4;
+  if (isCliente) {
+    data.value.cliente = { ...formData.value };
+    formData.value = {};
+    paso.value = 4;
+  } else {
+    data.value.asegurado = { ...formData.value };
+    formData.value = {};
+    paso.value = 8;
+  }
 }
 
 onBeforeMount(() => {
@@ -128,7 +232,7 @@ onBeforeMount(() => {
     <OpcionSelector
       v-if="paso === 1"
       :config="{
-        titulo: 'Cliente',
+        titulo: 'Información del cliente',
         subtitulo:
           'Elige una opción para continuar con la gestión de tu seguro.',
         tipo: 'cards',
@@ -163,25 +267,11 @@ onBeforeMount(() => {
     />
 
     <div v-else-if="paso === 2 || paso === 3 || paso === 6 || paso === 7">
-      <div v-if="paso === 2 || paso === 6">
-        <ModuladorFormFactory
-          class="col-sm-10 col-md-8 col-lg-8 mx-auto"
-          title="Titular"
-          :titleClass="' mb9 '"
-          :schema="formSchema"
-          :formLive="true"
-          :modelValue="formData"
-          :isDialogVisible="false"
-          :textButtonSubmit="'Siguiente pregunta'"
-          :showIconButtonSubmit="false"
-          :showButtonCancel="false"
-          @submit="handleFormSubmit"
-        />
-      </div>
+      <div v-if="paso === 2 || paso === 6">panel de busqueda</div>
       <div v-if="paso === 3 || paso === 7">
         <ModuladorFormFactory
           class="col-sm-10 col-md-8 col-lg-8 mx-auto"
-          title="Titular2"
+          :title="'Información del ' + (paso === 3 ? 'cliente' : 'asegurado')"
           :titleClass="' mb12 '"
           :customTitle="true"
           :divCard="true"
@@ -196,6 +286,31 @@ onBeforeMount(() => {
         />
       </div>
       <!-- Aquí puedes colocar tu formulario final -->
+    </div>
+    <div>
+      <div v-if="paso === 8">
+        <!-- <pre>{{ data }}</pre> -->
+        <ModuladorFormFactory
+          class="col-sm-10 col-md-8 col-lg-8 mx-auto"
+          :title="'Información del Carro'"
+          :titleClass="' mb12 '"
+          :customTitle="true"
+          :divCard="true"
+          :schema="formSchemaCarro"
+          :formLive="true"
+          :modelValue="formData"
+          :isDialogVisible="false"
+          :textButtonSubmit="'Continuar'"
+          :showIconButtonSubmit="false"
+          :showButtonCancel="false"
+          @submit="handleTerminar"
+        />
+      </div>
+      <panelValidarAntesEmitir
+        v-if="paso === 9"
+        :data="data"
+        @cancelar="$emit('cancelar')"
+      />
     </div>
   </div>
 </template>

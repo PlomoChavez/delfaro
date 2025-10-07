@@ -71,6 +71,7 @@ declare module 'vue' {
     Notifications: typeof import('./src/@core/components/Notifications.vue')['default']
     OpcionSelector: typeof import('./src/components/custom/OpcionSelector.vue')['default']
     PanelEmision: typeof import('./src/components/forms/cotizaciones/PanelEmision.vue')['default']
+    PanelValidarAntesEmitir: typeof import('./src/components/forms/cotizaciones/panelValidarAntesEmitir.vue')['default']
     PaymentProvidersDialog: typeof import('./src/components/dialogs/PaymentProvidersDialog.vue')['default']
     PolizaAsegurados: typeof import('./src/components/forms/polizas/PolizaAsegurados.vue')['default']
     PolizaHistorial: typeof import('./src/components/forms/polizas/PolizaHistorial.vue')['default']

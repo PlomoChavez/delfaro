@@ -33,6 +33,7 @@ const props = withDefaults(
     showIconButtonCancel?: boolean;
     showButtonSubmit?: boolean;
     showButtonCancel?: boolean;
+    formRequired?: boolean;
   }>(),
   {
     title: null,
@@ -40,6 +41,7 @@ const props = withDefaults(
     divCard: false,
     formLive: false,
     isDisabled: false,
+    formRequired: false,
     showButtonsAction: true,
     showIconButtonSubmit: true,
     isDialogVisible: false,
@@ -87,8 +89,9 @@ function handleCancel() {
           <FormFactory
           :schema="props.schema"
           :modelValue="props.modelValue"
-          :isDialogVisible="props.isDialogVisible"
           :isDisabled="props.isDisabled"
+          :formRequired="props.formRequired"
+          :isDialogVisible="props.isDialogVisible"
           :showButtonsAction="props.showButtonsAction"
           @submit="handleSubmit"
           @cancel="handleCancel"
@@ -106,11 +109,12 @@ function handleCancel() {
         </h1>
         <FormFactory
           :schema="props.schema"
-          :modelValue="props.modelValue"
-          :isDialogVisible="props.isDialogVisible"
-          :isDisabled="props.isDisabled"
           :formLive="props.formLive"
+          :modelValue="props.modelValue"
+          :isDisabled="props.isDisabled"
           @update:modelValue="handleUpdate"
+          :formRequired="props.formRequired"
+          :isDialogVisible="props.isDialogVisible"
           :showButtonsAction="props.showButtonsAction"
           :showIconButtonSubmit="props.showIconButtonSubmit"
           :showIconButtonCancel="props.showIconButtonCancel"
