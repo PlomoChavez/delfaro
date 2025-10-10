@@ -116,52 +116,22 @@ exports.search = async (req, res) => {
         message: "El estado de cliente es requerido",
       });
     }
-
-    let id = data.id ? Number(data.id) : null;
-    // Validar unicidad de RFC y CURP excluyendo el id actual (si existe)
-
-    if (id) {
-      filtroRFC.id = { $ne: Number(data.id) }; // Si usas MongoDB
-      filtroCURP.id = { $ne: Number(data.id) };
-      // Si usas SQL/Prisma, puedes hacer la exclusión en el filtro
-    }
-
-    const resultadoRFC = await getAllFrom("clientes", filtroRFC);
-    const resultadoCURP = await getAllFrom("clientes", filtroCURP);
-
-    const existe = resultadoRFC.length > 0 || resultadoCURP.length > 0;
-
-    if (existe) {
-      return res.json({
-        result: false,
-        message: "El RFC o la curp ya está registrado",
-      });
-    }
-
-    if (id) {
-      delete data.id;
-    }
-
-    /* prettier-ignore */
-    let cliente = {
-      nombre: data.nombre + " " + (data.segundoNombre || "") + " " + (data.apellidoPaterno || "") + " " + (data.apellidoMaterno || ""),
-      rfc: data.rfc,
-      curp: data.curp,
-      data: { ...data },
+    const filtro = {
+      $or: [
+        { rfc: data.referencia },
+        { curp: data.referencia },
+        { nombre: data.referencia },
+      ],
+      isCliente: data.isCliente ? 1 : 0,
     };
 
-    cliente.id = id;
-    cliente.isCliente = data.isCliente ? 1 : 0;
-    cliente.data = JSON.stringify(cliente.data || {});
+    const rows = await getAllFrom("clientes", filtro);
 
-    const response = await createOrUpdate({
-      tabla: "clientes",
-      estatusDefault: false,
-      data: { ...cliente },
-      returnResponse: true,
+    return res.json({
+      result: true,
+      data: rows,
+      message: "Consulta exitosa",
     });
-
-    return res.json(response);
   } catch (e) {
     res.json({
       result: false,

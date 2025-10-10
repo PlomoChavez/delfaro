@@ -31,7 +31,7 @@
           <VBtn
             class="stch-clientebuscador-btn"
             variant="tonal"
-            @click="doSearchImmediate"
+            @click="doSearch"
             :disabled="loading"
           >
             <VIcon end class="font-bold" icon="tabler-search" size="20" />
@@ -219,16 +219,16 @@ const displayCountText = computed(
   () => `${displayItems.value.length} resultados encontrados`
 );
 
-async function doSearch(q?: string) {
-  const term = (q ?? (query.value || "")).trim();
-  hasSearched.value = true;
-  if (!term || term.length < minChars.value) {
-    results.value = [];
-    error.value = null;
-    loading.value = false;
-    focusedIndex.value = -1;
-    return;
-  }
+async function doSearch() {
+  const term = (query.value || "").trim();
+  //   hasSearched.value = true;
+  //   if (!term || term.length < minChars.value) {
+  //     results.value = [];
+  //     error.value = null;
+  //     loading.value = false;
+  //     focusedIndex.value = -1;
+  //     return;
+  //   }
 
   loading.value = true;
   error.value = null;
@@ -242,21 +242,19 @@ async function doSearch(q?: string) {
 
   try {
     const resp = await customRequest({
-      url: "",
+      url: "/api/clientes/search",
       method: "POST",
       data: requestData,
     });
-    const respData = resp?.data;
-    console.log("Simulated search response:", respData);
+
+    const respData = resp.data;
     showCount.value = true;
-    // if (respData && respData.result) {
-    //   results.value = Array.isArray(respData.data) ? respData.data : [];
-    //   emit("search", { q: term, results: results.value });
-    // } else {
-    //   results.value = [];
-    //   error.value = respData?.message || "Error en la búsqueda";
-    //   emit("search", { q: term, results: [] });
-    // }
+    if (respData && respData.result) {
+      results.value = Array.isArray(respData.data) ? respData.data : [];
+    } else {
+      results.value = [];
+      error.value = respData?.message || "Error en la búsqueda";
+    }
   } catch (err: any) {
     results.value = [];
     error.value = err?.message || "Error de red";

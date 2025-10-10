@@ -7,6 +7,7 @@ const { executeQuery } = require("../executeQuery");
  *
  * @param {string} modelo - Nombre de la tabla principal desde la que se obtendrán los registros.
  * @param {object} filtros - Objeto con los filtros a aplicar en el WHERE.
+ *                          Soporta: claves simples, sufijo _not, arrays (IN), $or (array de objetos), $and (array de objetos).
  * @param {Array} [include] - Arreglo de objetos que define las relaciones a incluir.
  * @returns {Promise<Array>} - Arreglo de objetos con los registros encontrados.
  */
@@ -17,39 +18,66 @@ const getAllFrom = async (
   printSQL = false
 ) => {
   try {
-    // 1. Construcción del WHERE y parámetros mejorada
+    // 1. Construcción del WHERE y parámetros (soporta $or y $and)
     let whereClause = "";
     let params = [];
+
+    // helper: procesa una entrada simple (key, value) y añade parámetros en orden, devuelve condición SQL
+    const processEntry = (key, value) => {
+      let field = key;
+      let op = "=";
+
+      if (key.endsWith("_not")) {
+        field = key.replace(/_not$/, "");
+        op = "!=";
+      }
+
+      // valor array -> IN / NOT IN
+      if (Array.isArray(value)) {
+        const placeholders = value.map((val) => {
+          params.push(val);
+          return `$${params.length}`;
+        });
+        const operator = op === "!=" ? "NOT IN" : "IN";
+        return `\`${modelo}\`.\`${field}\` ${operator} (${placeholders.join(
+          ", "
+        )})`;
+      } else {
+        params.push(value);
+        return `\`${modelo}\`.\`${field}\` ${op} $${params.length}`;
+      }
+    };
+
     if (filtros && Object.keys(filtros).length) {
-      const conditions = Object.keys(filtros).map((key, idx) => {
-        let field = key;
-        let op = "=";
-        let value = filtros[key];
+      const parts = [];
 
-        // Soporte para _not
-        if (key.endsWith("_not")) {
-          field = key.replace(/_not$/, "");
-          op = "!=";
-        }
+      // Soporte para $or: array de objetos => ( (a AND b) OR (c) OR ... )
+      if (Array.isArray(filtros.$or)) {
+        const orParts = filtros.$or.map((sub) => {
+          const subConds = Object.keys(sub).map((k) => processEntry(k, sub[k]));
+          return `(${subConds.join(" AND ")})`;
+        });
+        if (orParts.length) parts.push(`(${orParts.join(" OR ")})`);
+      }
 
-        // Si el valor es array, usar IN o NOT IN
-        if (Array.isArray(value)) {
-          if (key.endsWith("_not")) {
-            op = "NOT IN";
-          } else {
-            op = "IN";
-          }
-          params.push(...value);
-          const placeholders = value
-            .map((_, i) => `$${params.length - value.length + i + 1}`)
-            .join(", ");
-          return `\`${modelo}\`.\`${field}\` ${op} (${placeholders})`;
-        } else {
-          params.push(value);
-          return `\`${modelo}\`.\`${field}\` ${op} $${params.length}`;
-        }
-      });
-      whereClause = `WHERE ${conditions.join(" AND ")}`;
+      // Soporte para $and: array de objetos => ( (a) AND (b) AND ... )
+      if (Array.isArray(filtros.$and)) {
+        const andParts = filtros.$and.map((sub) => {
+          const subConds = Object.keys(sub).map((k) => processEntry(k, sub[k]));
+          return `(${subConds.join(" AND ")})`;
+        });
+        if (andParts.length) parts.push(`(${andParts.join(" AND ")})`);
+      }
+
+      // Procesar claves simples (excluyendo $or y $and)
+      const simpleKeys = Object.keys(filtros).filter(
+        (k) => k !== "$or" && k !== "$and"
+      );
+      for (const key of simpleKeys) {
+        parts.push(processEntry(key, filtros[key]));
+      }
+
+      whereClause = parts.length ? `WHERE ${parts.join(" AND ")}` : "";
     }
 
     // 2. Procesar include: asegurar que cada relación tenga 'tipo', 'integrado' y 'customName'
