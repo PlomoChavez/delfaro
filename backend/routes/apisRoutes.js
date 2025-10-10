@@ -75,6 +75,7 @@ router.post('/api/clientes/get', clienteController.getAll);
 router.post('/api/clientes/create', clienteController.createOrUpdate);
 router.post('/api/clientes/update', clienteController.createOrUpdate);
 router.post('/api/clientes/delete', clienteController.delete);
+router.post('/api/clientes/search', clienteController.search);
 
 // Usuarios
 router.post('/api/usuarios/get', usuarioController.getAll);

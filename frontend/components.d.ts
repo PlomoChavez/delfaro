@@ -37,6 +37,7 @@ declare module 'vue' {
     CardStatisticsHorizontal: typeof import('./src/@core/components/cards/CardStatisticsHorizontal.vue')['default']
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsVerticalSimple: typeof import('./src/@core/components/CardStatisticsVerticalSimple.vue')['default']
+    ClienteBuscador: typeof import('./src/components/forms/clientes/clienteBuscador.vue')['default']
     ClientesV1: typeof import('./src/components/forms/clientes/ClientesV1.vue')['default']
     CompaniasFormEdit: typeof import('./src/components/forms/companias/CompaniasFormEdit.vue')['default']
     CompaniasProductos: typeof import('./src/components/forms/companias/CompaniasProductos.vue')['default']

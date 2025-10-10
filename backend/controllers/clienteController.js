@@ -1,13 +1,18 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
-const { deleteById, getAllFrom } = require("./controller");
+const { getAllFromCustom } = require("../db/customFunctions");
+const {
+  findOne,
+  getAllFrom,
+  deleteById,
+  createOrUpdate,
+} = require("../db/functionsSQL");
 /**
  * Obtener todos los registros de la tabla clientes.
  */
 exports.getAll = async (req, res) => {
   // Puedes recibir filtros por body o query
   const filtros = req.body || {};
-  res.json(getAllFromCustom("cliente", filtros));
+  let datos = await getAllFromCustom("clientes");
+  res.json(datos);
 };
 
 /**
@@ -15,7 +20,7 @@ exports.getAll = async (req, res) => {
  */
 exports.delete = async (req, res) => {
   const { id } = req.body;
-  const result = await deleteById("cliente", id);
+  const result = await deleteById("clientes", id);
   return res.json(result);
 };
 
@@ -40,66 +45,127 @@ exports.createOrUpdate = async (req, res) => {
       });
     }
 
-    // Validar unicidad de RFC
-    const rfcExiste = await prisma.cliente.findFirst({
-      where: {
-        rfc: data.rfc,
-        ...(data.id ? { NOT: { id: Number(data.id) } } : {}),
-      },
-    });
-    if (rfcExiste) {
-      return res.json({ result: false, message: "El RFC ya está registrado" });
+    let id = data.id ? Number(data.id) : null;
+    // Validar unicidad de RFC y CURP excluyendo el id actual (si existe)
+    const filtroRFC = { rfc: data.rfc };
+    const filtroCURP = { curp: data.curp };
+
+    if (id) {
+      filtroRFC.id = { $ne: Number(data.id) }; // Si usas MongoDB
+      filtroCURP.id = { $ne: Number(data.id) };
+      // Si usas SQL/Prisma, puedes hacer la exclusión en el filtro
     }
 
-    // Si viene estado como objeto, extraer el id
-    if (data.estado && data.estado.id) {
-      data.estado_id = data.estado.id;
+    const resultadoRFC = await getAllFrom("clientes", filtroRFC);
+    const resultadoCURP = await getAllFrom("clientes", filtroCURP);
+
+    const existe = resultadoRFC.length > 0 || resultadoCURP.length > 0;
+
+    if (existe) {
+      return res.json({
+        result: false,
+        message: "El RFC o la curp ya está registrado",
+      });
     }
 
-    // Preparar datos para Prisma
-    const clienteData = {
-      nombre: data.nombre,
+    if (id) {
+      delete data.id;
+    }
+
+    /* prettier-ignore */
+    let cliente = {
+      nombre: data.nombre + " " + (data.segundoNombre || "") + " " + (data.apellidoPaterno || "") + " " + (data.apellidoMaterno || ""),
       rfc: data.rfc,
-      fechaNacimiento: new Date(data.fechaNacimiento),
-      direccion: data.direccion || null,
-      colonia: data.colonia || null,
-      codigoPostal: data.codigoPostal || null,
-      estado_id: data.estado_id || null,
-      ciudad: data.ciudad || null,
-      correo: data.correo || null,
-      telefono: data.telefono || null,
-      celular: data.celular || null,
-      oficina: data.oficina || null,
-      casa: data.casa || null,
-      observaciones: data.observaciones || null,
+      curp: data.curp,
+      data: { ...data },
     };
 
-    let cliente;
-    if (data.id) {
-      // Actualizar
-      cliente = await prisma.cliente.update({
-        where: { id: Number(data.id) },
-        data: clienteData,
-      });
+    cliente.id = id;
+    cliente.isCliente = data.isCliente ? 1 : 0;
+    cliente.data = JSON.stringify(cliente.data || {});
+
+    const response = await createOrUpdate({
+      tabla: "clientes",
+      estatusDefault: false,
+      data: { ...cliente },
+      returnResponse: true,
+    });
+
+    return res.json(response);
+  } catch (e) {
+    res.json({
+      result: false,
+      message: "Error al actualizar los productos: " + e.message,
+    });
+  }
+};
+/**
+ * Crear o actualizar un registro en la tabla clientes.
+ */
+exports.search = async (req, res) => {
+  try {
+    const data = req.body;
+
+    // Validación básica (puedes usar una librería como Joi para validaciones más robustas)
+    if (!data.referencia || typeof data.referencia !== "string") {
+      return res.json({ result: false, message: "La referencia es requerida" });
+    }
+    if (!data.isCliente || typeof data.isCliente !== "boolean") {
       return res.json({
-        result: true,
-        message: "Registro actualizado con éxito",
-        data: cliente,
-      });
-    } else {
-      // Crear
-      cliente = await prisma.cliente.create({ data: clienteData });
-      return res.json({
-        result: true,
-        message: "Registro creado con éxito",
-        data: cliente,
+        result: false,
+        message: "El estado de cliente es requerido",
       });
     }
+
+    let id = data.id ? Number(data.id) : null;
+    // Validar unicidad de RFC y CURP excluyendo el id actual (si existe)
+
+    if (id) {
+      filtroRFC.id = { $ne: Number(data.id) }; // Si usas MongoDB
+      filtroCURP.id = { $ne: Number(data.id) };
+      // Si usas SQL/Prisma, puedes hacer la exclusión en el filtro
+    }
+
+    const resultadoRFC = await getAllFrom("clientes", filtroRFC);
+    const resultadoCURP = await getAllFrom("clientes", filtroCURP);
+
+    const existe = resultadoRFC.length > 0 || resultadoCURP.length > 0;
+
+    if (existe) {
+      return res.json({
+        result: false,
+        message: "El RFC o la curp ya está registrado",
+      });
+    }
+
+    if (id) {
+      delete data.id;
+    }
+
+    /* prettier-ignore */
+    let cliente = {
+      nombre: data.nombre + " " + (data.segundoNombre || "") + " " + (data.apellidoPaterno || "") + " " + (data.apellidoMaterno || ""),
+      rfc: data.rfc,
+      curp: data.curp,
+      data: { ...data },
+    };
+
+    cliente.id = id;
+    cliente.isCliente = data.isCliente ? 1 : 0;
+    cliente.data = JSON.stringify(cliente.data || {});
+
+    const response = await createOrUpdate({
+      tabla: "clientes",
+      estatusDefault: false,
+      data: { ...cliente },
+      returnResponse: true,
+    });
+
+    return res.json(response);
   } catch (e) {
-    return res.json({
+    res.json({
       result: false,
-      message: "Error al crear o actualizar el registro: " + e.message,
-      data: [],
+      message: "Error al actualizar los productos: " + e.message,
     });
   }
 };

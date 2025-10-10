@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { createCliente } from "@/apis/clienteApi";
 import OpcionSelector from "@/components/custom/OpcionSelector.vue";
+import ClienteBuscador from "@/components/forms/clientes/clienteBuscador.vue";
 import { ref } from "vue";
 
 const paso = ref(1);
@@ -129,6 +131,7 @@ const formSchema = [
   { label: "Nacionalidad",                  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "nacionalidad"},
   { label: "Estado de nacimiento",          type: "select",   classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "estadoNacimiento", catalogo: "estados" },
   { label: "Nombres",                       type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "nombre" },
+  { label: "Segundo nombre",                type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "segundoNombre" },
   { label: "Apellido paterno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "apellidoPaterno" },
   { label: "Apellido materno",              type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "apellidoMaterno" },
   { label: "Fecha de nacimiento",           type: "date",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "fechaNacimiento" },
@@ -192,16 +195,17 @@ function handleTerminar() {
   paso.value = 9;
 }
 
-function handleFormSubmit() {
+async function handleFormSubmit() {
+  let response: any;
   let isCliente = paso.value < 4;
-  if (isCliente) {
-    data.value.cliente = { ...formData.value };
+  let payload: any = { ...formData.value, isCliente };
+  console.log(payload);
+  let tipo = isCliente ? "cliente" : "asegurado";
+  response = await createCliente(payload);
+  if (response.result) {
+    data.value[tipo] = payload;
     formData.value = {};
-    paso.value = 4;
-  } else {
-    data.value.asegurado = { ...formData.value };
-    formData.value = {};
-    paso.value = 8;
+    paso.value = isCliente ? 4 : 8;
   }
 }
 
@@ -267,7 +271,9 @@ onBeforeMount(() => {
     />
 
     <div v-else-if="paso === 2 || paso === 3 || paso === 6 || paso === 7">
-      <div v-if="paso === 2 || paso === 6">panel de busqueda</div>
+      <div v-if="paso === 2 || paso === 6">
+        <ClienteBuscador />
+      </div>
       <div v-if="paso === 3 || paso === 7">
         <ModuladorFormFactory
           class="col-sm-10 col-md-8 col-lg-8 mx-auto"
@@ -287,30 +293,28 @@ onBeforeMount(() => {
       </div>
       <!-- Aquí puedes colocar tu formulario final -->
     </div>
-    <div>
-      <div v-if="paso === 8">
-        <!-- <pre>{{ data }}</pre> -->
-        <ModuladorFormFactory
-          class="col-sm-10 col-md-8 col-lg-8 mx-auto"
-          :title="'Información del Carro'"
-          :titleClass="' mb12 '"
-          :customTitle="true"
-          :divCard="true"
-          :schema="formSchemaCarro"
-          :formLive="true"
-          :modelValue="formData"
-          :isDialogVisible="false"
-          :textButtonSubmit="'Continuar'"
-          :showIconButtonSubmit="false"
-          :showButtonCancel="false"
-          @submit="handleTerminar"
-        />
-      </div>
-      <panelValidarAntesEmitir
-        v-if="paso === 9"
-        :data="data"
-        @cancelar="$emit('cancelar')"
+    <div v-if="paso === 8">
+      <!-- <pre>{{ data }}</pre> -->
+      <ModuladorFormFactory
+        class="col-sm-10 col-md-8 col-lg-8 mx-auto"
+        :title="'Información del Carro'"
+        :titleClass="' mb12 '"
+        :customTitle="true"
+        :divCard="true"
+        :schema="formSchemaCarro"
+        :formLive="true"
+        :modelValue="formData"
+        :isDialogVisible="false"
+        :textButtonSubmit="'Continuar'"
+        :showIconButtonSubmit="false"
+        :showButtonCancel="false"
+        @submit="handleTerminar"
       />
     </div>
+    <panelValidarAntesEmitir
+      v-if="paso === 9"
+      :data="data"
+      @cancelar="$emit('cancelar')"
+    />
   </div>
 </template>
