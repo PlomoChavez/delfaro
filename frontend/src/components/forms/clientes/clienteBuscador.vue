@@ -3,10 +3,12 @@
     <VCardText>
       <!-- titulo -->
       <div class="stch-clientebuscador-hero-left">
-        <h1 class="stch-clientebuscador-title">Buscar cliente</h1>
+        <h1 class="stch-clientebuscador-title">
+          Buscar {{ isCliente ? "cliente" : "asegurado" }}
+        </h1>
         <p class="stch-clientebuscador-lead">
-          Encuentra clientes por nombre, RFC o CURP — escribe al menos
-          {{ minChars }} caracteres.
+          Encuentra {{ isCliente ? "clientes" : "asegurados" }} por nombre, RFC
+          o CURP — escribe al menos {{ minChars }} caracteres.
         </p>
       </div>
 
@@ -29,7 +31,7 @@
         </div>
         <div class="stch-clientebuscador-search-right">
           <VBtn
-            class="stch-clientebuscador-btn"
+            class="stch-clientebuscador-arrow"
             variant="tonal"
             @click="doSearch"
             :disabled="loading"
@@ -111,7 +113,15 @@
                 >
               </div>
             </div>
-            <div class="stch-clientebuscador-arrow" aria-hidden="true">›</div>
+            <VBtn
+              variant="tonal"
+              class="ml-auto textDark"
+              icon
+              rounded
+              @click="openModal(item)"
+            >
+              <VIcon color="black" icon="tabler-info-circle" size="20" />
+            </VBtn>
           </li>
         </ul>
       </div>
@@ -127,12 +137,53 @@
       </div>
     </VCardText>
   </VCard>
+  <!-- Modal: muestra información del cliente solo al hacer click en la flecha -->
+  <VDialog v-model="showModal" max-width="520">
+    <VCard>
+      <VCardText>
+        <h3 class="stch-modal-name">{{ modalItem?.nombre || "—" }}</h3>
+
+        <div class="stch-modal-row">
+          <strong>CURP:</strong> {{ modalItem?.curp || "—" }}
+        </div>
+        <div class="stch-modal-row">
+          <strong>RFC:</strong> {{ modalItem?.rfc || "—" }}
+        </div>
+        <div class="stch-modal-row">
+          <strong>Teléfono:</strong> {{ modalItem?.telefono || "—" }}
+        </div>
+        <div class="stch-modal-row">
+          <strong>Correo:</strong> {{ modalItem?.correo || "—" }}
+        </div>
+        <div class="stch-modal-row">
+          <strong>Domicilio:</strong> {{ modalItem?.direccion || "—" }}
+        </div>
+      </VCardText>
+
+      <VCardActions>
+        <VBtn variant="outlined" color="secondary" @click="closeModal"
+          >Cerrar</VBtn
+        >
+        <VBtn color="primary" :disabled="!modalItem" @click="selectFromModal"
+          >Seleccionar</VBtn
+        >
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>
 
 <script setup lang="ts">
 import { customRequest } from "@/utils/axiosInstance";
-import { computed, onMounted, ref } from "vue";
-import { VBtn, VCard, VCardText, VIcon, VTextField } from "vuetify/components";
+import { computed, ref } from "vue";
+import {
+  VBtn,
+  VCard,
+  VCardActions,
+  VCardText,
+  VDialog,
+  VIcon,
+  VTextField,
+} from "vuetify/components";
 
 const props = withDefaults(
   defineProps<{
@@ -209,26 +260,86 @@ const showCount = ref(false);
 const focusedIndex = ref(-1);
 const inputEl = ref<any | null>(null);
 const selectedItem = ref<any | null>(null);
+const showModal = ref(false);
+const modalItem = ref<any | null>(null);
 
 const displayItems = computed(() => results.value);
 const minChars = computed(() => 3);
 const activeDescId = computed<string | undefined>(() =>
   focusedIndex.value >= 0 ? `stch-cb-item-${focusedIndex.value}` : undefined
 );
+
 const displayCountText = computed(
   () => `${displayItems.value.length} resultados encontrados`
 );
 
+function openModal(item: any) {
+  modalItem.value = item;
+  showModal.value = true;
+}
+
+function closeModal() {
+  showModal.value = false;
+  // mantener modalItem si quieres revisar después, o limpiar:
+  modalItem.value = null;
+}
+
+// Función helper para procesar datos de cliente (reutilizable)
+function processClientData(item: any) {
+  try {
+    const rawItem = toRaw(item);
+    const baseItem = {
+      ...rawItem,
+      nombreCompleto: rawItem.nombre || "",
+    };
+
+    if (rawItem.data && typeof rawItem.data === "string") {
+      try {
+        const parsedData = JSON.parse(rawItem.data);
+
+        // prettier-ignore
+        return {
+          ...baseItem,
+          ...parsedData,
+          // Preservar campos críticos
+          id: baseItem.id,
+          nombre: baseItem.nombre || parsedData.nombre,
+          nombreCompleto: baseItem.nombreCompleto,
+          direccion: parsedData.colonia + ", " + parsedData.municipio + ", " + parsedData.estado.label + ", CP " + parsedData.codigoPostal,
+        };
+      } catch (error) {
+        console.warn("Error parsing client data:", error);
+        return baseItem;
+      }
+    }
+
+    if (rawItem.data && typeof rawItem.data === "object") {
+      return { ...baseItem, ...rawItem.data };
+    }
+
+    return baseItem;
+  } catch (error) {
+    console.error("Error in processClientData:", error);
+    return item; // fallback completo
+  }
+}
+
+function selectFromModal() {
+  if (!modalItem.value) return;
+
+  try {
+    const processedItem = processClientData(modalItem.value);
+    onSelect(processedItem);
+  } catch (error) {
+    console.error("Error processing modal item:", error);
+    onSelect(modalItem.value); // fallback
+  }
+
+  closeModal();
+}
+
 async function doSearch() {
   const term = (query.value || "").trim();
-  //   hasSearched.value = true;
-  //   if (!term || term.length < minChars.value) {
-  //     results.value = [];
-  //     error.value = null;
-  //     loading.value = false;
-  //     focusedIndex.value = -1;
-  //     return;
-  //   }
 
   loading.value = true;
   error.value = null;
@@ -249,8 +360,20 @@ async function doSearch() {
 
     const respData = resp.data;
     showCount.value = true;
+
     if (respData && respData.result) {
-      results.value = Array.isArray(respData.data) ? respData.data : [];
+      let rawResults = Array.isArray(respData.data) ? respData.data : [];
+
+      if (rawResults.length > 0) {
+        const processedResults = rawResults.map((item: any) => {
+          return processClientData(item);
+        });
+
+        console.log("Processed search results:", processedResults);
+        results.value = processedResults;
+      } else {
+        results.value = [];
+      }
     } else {
       results.value = [];
       error.value = respData?.message || "Error en la búsqueda";
@@ -278,29 +401,26 @@ function doSearchImmediate() {
 function onSelect(item: any, idx?: number) {
   selectedItem.value = item;
   if (typeof idx === "number") focusedIndex.value = idx;
-  emit("select", item);
 }
 
 function onContinue() {
   if (!selectedItem.value) return;
-  emit("select", selectedItem.value);
+
+  try {
+    const processedItem = processClientData(selectedItem.value);
+    emit("select", processedItem);
+  } catch (error) {
+    console.error("Error processing selected item:", error);
+    emit("select", selectedItem.value); // fallback
+  }
 }
 
 function onCancelar() {
   emit("cancelar");
 }
 function onEnter() {
-  if (focusedIndex.value >= 0 && displayItems.value[focusedIndex.value]) {
-    onSelect(displayItems.value[focusedIndex.value], focusedIndex.value);
-  } else {
-    doSearchImmediate();
-  }
+  doSearch();
 }
-
-onMounted(() => {
-  // optional: focus input
-  // inputEl.value?.focus();
-});
 </script>
 
 <style scoped>
@@ -315,6 +435,17 @@ onMounted(() => {
   --cb-border: #e6edf0;
   --cb-radius: 10px;
   --cb-shadow: 0 6px 18px rgba(15, 23, 32, 0.06);
+}
+
+.stch-modal-name {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+.stch-modal-row {
+  margin: 6px 0;
+  color: #334155;
+  font-size: 0.95rem;
 }
 
 /* Contenedor principal */
@@ -517,7 +648,7 @@ onMounted(() => {
   box-shadow: inset 0 0 0 3px rgba(11, 99, 168, 0.06);
 }
 .stch-selected {
-  background: rgba(11, 99, 168, 0.08);
+  background: rgba(0, 53, 211, 0.257);
   border-left: 3px solid var(--cb-primary);
   padding-left: 13px;
 }

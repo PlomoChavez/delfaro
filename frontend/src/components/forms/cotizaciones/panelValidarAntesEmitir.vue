@@ -32,7 +32,7 @@
               <VIcon start class="font-bold" icon="tabler-x" size="24" />
               Cancelar
             </VBtn>
-            <VBtn variant="tonal" class="ml-auto">
+            <VBtn variant="tonal" class="ml-auto" @click="$emit('continuar')">
               Emitir poliza
               <VIcon
                 end
@@ -53,6 +53,7 @@ import { VCard, VCardText } from "vuetify/components";
 
 const emit = defineEmits<{
   (event: "cancelar"): void;
+  (event: "continuar"): void;
 }>();
 const props = withDefaults(
   defineProps<{

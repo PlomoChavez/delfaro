@@ -24,6 +24,12 @@
         <span class="btnText">{{ opcion.label }}</span>
       </button>
     </div>
+    <!-- Acciones: continuar cuando un elemento esté seleccionado -->
+    <div class="stch-clientebuscador-actions">
+      <VBtn color="secondary" variant="outlined" @click="onCancelar">
+        Cancelar
+      </VBtn>
+    </div>
   </div>
   <div v-else class="error-config">
     <span>Error: configuración de opciones no válida.</span>
@@ -35,17 +41,29 @@ import { defineEmits, defineProps, ref } from "vue";
 
 const pnl = ref("");
 
-const props = defineProps<{
-  config: any;
-  widthCard?: string;
-  widthIcon?: string;
-}>();
+// Definir props con valores por defecto usando withDefaults
+const props = withDefaults(
+  defineProps<{
+    config: any;
+    widthCard?: string;
+    widthIcon?: string;
+    btnCancelar?: boolean;
+  }>(),
+  {
+    btnCancelar: false,
+    widthCard: "120px",
+    widthIcon: "100px",
+  }
+);
 
-const emit = defineEmits(["accionSeleccionada"]);
+const emit = defineEmits(["accionSeleccionada", "cancelar"]);
 
 function seleccionarOpcion(opcion: any) {
   pnl.value = opcion.accion;
   emit("accionSeleccionada", opcion.accion);
+}
+function onCancelar() {
+  emit("cancelar");
 }
 </script>
 

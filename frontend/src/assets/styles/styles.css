@@ -3,9 +3,11 @@
 .textDanger { color: red !important; } 
 .textSuccess { color: var(--v-theme-success)!important; } 
 .textSecondary { color: #717171 !important; } 
+.textSecondary { color: #717171 !important; } 
 
 .text-muted { color: #6b7280 !important; }
 .text-dark { color: #23272f !important; }
+.textDark { color: #23272f !important; }
 .font-bold { font-weight: 700 !important; } 
 
 

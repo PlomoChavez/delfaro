@@ -121,8 +121,8 @@ const opciones = {
     { label: "No, es diferente",  accion: "diferente",  icono: "fa fa-user-edit fa-2x",  },
   ],
   asegurado: [
-    { label: "Registro nuevo asegurado",  accion: "nuevoAsegurado", icono: "fa fa-user-plus fa-2x",},
-    { label: "Buscar asegurado existente",accion: "buscarAsegurado",icono: "fa fa-search fa-2x",   },
+    { label: "Registro nuevo asegurado",  accion: "nuevo", icono: "fa fa-user-plus fa-2x",},
+    { label: "Buscar asegurado existente",accion: "buscar",icono: "fa fa-search fa-2x",   },
   ],
 };
 
@@ -171,23 +171,24 @@ let formSchemaCarro = [
   { label: "Número económico",    type: "text",   classElement: " col-sm-12 col-md-6 col-lg-6 ", model: "numeroEconomico" },
 ]
 
-function handleCliente(accion: string) {
-  switch (accion) {
-    case "nuevo":
-      paso.value = 3; // Ir al formulario de nuevo cliente
-      break;
-    case "buscar":
-      paso.value = 2; // Ir al formulario de búsqueda de cliente
-      break;
+function handleContinuar(accion: string) {
+  let isCliente = paso.value < 4;
+  if (isCliente) {
+    paso.value = accion === "nuevo" ? 3 : 2;
+  } else {
+    paso.value = accion === "nuevo" ? 7 : 6;
   }
 }
 
 function handleAseguradoIgual(accion: string) {
+  if (accion == "igual") {
+    data.value.asegurado = { ...data.value.cliente };
+  }
   paso.value = accion === "igual" ? 8 : 5;
 }
 
-function handleAsegurado(accion: string) {
-  paso.value = accion === "nuevoAsegurado" ? 7 : 6;
+function handleEmitir() {
+  console.log("Emitir acción:", toRaw(data.value));
 }
 
 function handleTerminar() {
@@ -199,13 +200,32 @@ async function handleFormSubmit() {
   let response: any;
   let isCliente = paso.value < 4;
   let payload: any = { ...formData.value, isCliente };
-  console.log(payload);
   let tipo = isCliente ? "cliente" : "asegurado";
   response = await createCliente(payload);
   if (response.result) {
     data.value[tipo] = payload;
     formData.value = {};
     paso.value = isCliente ? 4 : 8;
+  }
+}
+
+async function handleContinue(dataCliente: any) {
+  let isCliente = paso.value < 4;
+  let payload: any = { ...dataCliente, isCliente };
+  let tipo = isCliente ? "cliente" : "asegurado";
+  data.value[tipo] = payload;
+  formData.value = {};
+  paso.value = isCliente ? 4 : 8;
+}
+
+async function handleCancelar() {
+  let isCliente = paso.value < 5;
+  if (paso.value == 1) {
+    emit("cancelar");
+  } else if (paso.value == 5) {
+    paso.value = 4;
+  } else {
+    paso.value = isCliente ? 1 : 5;
   }
 }
 
@@ -243,7 +263,9 @@ onBeforeMount(() => {
         opciones: opciones.cliente,
       }"
       :widthCard="'200px'"
-      @accionSeleccionada="handleCliente"
+      :btnCancelar="true"
+      @accionSeleccionada="handleContinuar"
+      @cancelar="handleCancelar"
     />
 
     <OpcionSelector
@@ -255,7 +277,9 @@ onBeforeMount(() => {
         opciones: opciones.aseguradoIgual,
       }"
       :widthCard="'200px'"
+      :btnCancelar="true"
       @accionSeleccionada="handleAseguradoIgual"
+      @cancelar="handleCancelar"
     />
 
     <OpcionSelector
@@ -267,12 +291,18 @@ onBeforeMount(() => {
         opciones: opciones.asegurado,
       }"
       :widthCard="'200px'"
-      @accionSeleccionada="handleAsegurado"
+      :btnCancelar="true"
+      @accionSeleccionada="handleContinuar"
+      @cancelar="handleCancelar"
     />
 
     <div v-else-if="paso === 2 || paso === 3 || paso === 6 || paso === 7">
       <div v-if="paso === 2 || paso === 6">
-        <ClienteBuscador />
+        <ClienteBuscador
+          :isCliente="paso < 4"
+          @select="handleContinue"
+          @cancelar="handleCancelar"
+        />
       </div>
       <div v-if="paso === 3 || paso === 7">
         <ModuladorFormFactory
@@ -287,8 +317,8 @@ onBeforeMount(() => {
           :isDialogVisible="false"
           :textButtonSubmit="'Siguiente pregunta'"
           :showIconButtonSubmit="false"
-          :showButtonCancel="false"
           @submit="handleFormSubmit"
+          @cancel="handleCancelar"
         />
       </div>
       <!-- Aquí puedes colocar tu formulario final -->
@@ -307,14 +337,15 @@ onBeforeMount(() => {
         :isDialogVisible="false"
         :textButtonSubmit="'Continuar'"
         :showIconButtonSubmit="false"
-        :showButtonCancel="false"
         @submit="handleTerminar"
+        @cancel="handleCancelar"
       />
     </div>
     <panelValidarAntesEmitir
       v-if="paso === 9"
       :data="data"
       @cancelar="$emit('cancelar')"
+      @continuar="handleEmitir"
     />
   </div>
 </template>
