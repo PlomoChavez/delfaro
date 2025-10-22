@@ -56,7 +56,7 @@ function safeParseConfig(configString: any) {
 }
 
 const handleActionsEdit = (dataRow: any) => {
-  let tmp = dataRow;
+  let tmp = toRaw(dataRow);
   let tmpConfig = safeParseConfig(dataRow.configuracion);
   tmp.configuracion = tmpConfig;
 
@@ -69,7 +69,7 @@ const handleActionsEdit = (dataRow: any) => {
       return;
     }
   }
-
+  console.log("Editar acción:", tmp);
   dataLocal.value = tmp;
   showWizard.value = true;
 };

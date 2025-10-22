@@ -3,6 +3,7 @@ const { ejecutarCotizacion } = require("../bots/planSeguroCotizacion");
 const CotizadorAutosAXA = require("../bots/cotizadorAutosAXA");
 const CotizadorAutosHDI = require("../bots/cotizadorAutosHDI");
 const CotizadorAutosQualitas = require("../bots/qualitas/cotizadorAutosQualitas");
+const EmitirPolizaQualitas = require("../bots/qualitas/emitirPolizaQualitas");
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -61,6 +62,19 @@ exports.handleEstimarCotizaciones = async (data) => {
 
     default:
       resultado = "Bot no encontrado, " + data.compania;
+  }
+
+  return resultado;
+};
+
+exports.handleEmitirPolizas = async (data) => {
+  let resultado = null;
+  let compania = data.compania.toLowerCase() || null;
+  console.log("Emitiendo poliza para la compañia:", compania);
+  switch (compania) {
+    case "qualitas":
+      resultado = await EmitirPolizaQualitas.handleEmitirPoliza(data);
+      break;
   }
 
   return resultado;

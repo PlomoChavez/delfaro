@@ -6,96 +6,7 @@ import { ref } from "vue";
 
 const paso = ref(1);
 const formData: any = ref({});
-const data: any = ref({
-  cliente: {
-    fechaNacimiento: "2025-10-10",
-    nombre: "Jesus",
-    segundoNombre: "Ramon",
-    apellidoPaterno: "Chavez",
-    apellidoMaterno: "Quiroz",
-    curp: "CAQJ",
-    sexo: {
-      label: "Mujer",
-      id: "Mujer",
-    },
-    telefono: "7442077733",
-    correo: "de@de.com",
-    codigoPostal: "31304",
-    direccion: "JOSEFA ORTIZ DE DOMINGUEZ, CHIHUAHUA, CHIHUAHUA, CP 31304",
-    marca: "NISSAN",
-    modelo: "MARCH",
-    anio: "2019",
-    version: "SENSE 1.6L STD., 05 OCUP.",
-    colonia: "JOSEFA ORTIZ DE DOMINGUEZ",
-    municipio: "CHIHUAHUA",
-    estado: {
-      label: "Chihuahua",
-      id: 6,
-    },
-    nacionalidad: "Mexicana",
-    estadoNacimiento: {
-      label: "Guerrero",
-      id: 13,
-    },
-    rfc: "CAQJ",
-    tipoIdentificacion: "INE",
-    referenciaIdentificacion: "INE19992",
-    genero: true,
-    pais: "Mexico",
-    calle: "dede",
-    numeroExterior: "dede",
-    telefonoFijo: "dedede",
-    celular: "dede",
-    profesion: "dede",
-    ocupacion: "dede",
-    giro: "dedede",
-    isPolitico: true,
-  },
-  asegurado: {
-    fechaNacimiento: "2025-10-10",
-    nombre: "Jesus",
-    segundoNombre: "Ramon",
-    apellidoPaterno: "Chavez",
-    apellidoMaterno: "Quiroz",
-    curp: "CAQJ",
-    sexo: {
-      label: "Mujer",
-      id: "Mujer",
-    },
-    telefono: "7442077733",
-    correo: "de@de.com",
-    codigoPostal: "31304",
-    direccion: "JOSEFA ORTIZ DE DOMINGUEZ, CHIHUAHUA, CHIHUAHUA, CP 31304",
-    marca: "NISSAN",
-    modelo: "MARCH",
-    anio: "2019",
-    version: "SENSE 1.6L STD., 05 OCUP.",
-    colonia: "JOSEFA ORTIZ DE DOMINGUEZ",
-    municipio: "CHIHUAHUA",
-    estado: {
-      label: "Chihuahua",
-      id: 6,
-    },
-    nacionalidad: "Mexicana",
-    estadoNacimiento: {
-      label: "Guerrero",
-      id: 13,
-    },
-    rfc: "CAQJ",
-    tipoIdentificacion: "INE",
-    referenciaIdentificacion: "INE19992",
-    genero: true,
-    pais: "Mexico",
-    calle: "dede",
-    numeroExterior: "dede",
-    telefonoFijo: "dedede",
-    celular: "dede",
-    profesion: "dede",
-    ocupacion: "dede",
-    giro: "dedede",
-    isPolitico: true,
-  },
-});
+const data: any = ref({});
 
 const emit = defineEmits<{
   (event: "cancelar"): void;
@@ -114,7 +25,7 @@ const props = withDefaults(
 const opciones = {
   cliente: [
     { label: "Registro nuevo", accion: "nuevo",   icono: "fa fa-user-plus fa-2x",},
-    { label: "Buscar cliente", accion: "buscar",  icono: "fa fa-search fa-2x",   }, 
+    { label: "Buscar cliente", accion: "buscar",  icono: "fa fa-search fa-2x",   },
   ],
   aseguradoIgual: [
     { label: "Sí, es el mismo",   accion: "igual",      icono: "fa fa-user-check fa-2x", },
@@ -140,7 +51,7 @@ const formSchema = [
   { label: "Tipo de identificación",        type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "tipoIdentificacion" },
   { label: "Referencia de identificación",  type: "text",     classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "referenciaIdentificacion" },
   { label: "Género",                        type: "switch",   classElement: " col-sm-12 col-md-6  col-lg-6 ", model: "genero", options: [ {label:"Hombre",id:"Hombre"}, {label:"Mujer",id:"Mujer"} ]},
-  
+
 
   // Domicilio
   { label: "Domicilio",         type: "separador", classElement: " col-12 ",},
@@ -188,7 +99,10 @@ function handleAseguradoIgual(accion: string) {
 }
 
 function handleEmitir() {
-  console.log("Emitir acción:", toRaw(data.value));
+  let tmp = toRaw(data.value);
+  tmp.cotizacion = toRaw(props.registro);
+  tmp.compania = tmp.cotizacion.compania.toLowerCase();
+  console.log("Emitir acción:", tmp);
 }
 
 function handleTerminar() {

@@ -1,0 +1,9 @@
+Solo se puede emitir una cotizacion,
+las selecciones seleccionadas para emitir estan en el objeto de configuracion en 
+la propiedad seleccionadas es un array, se toma por defecto la posicion 0.
+
+
+
+Mejorar los procesos para ahorrar tiempo
+Mejorar los procesos para refactorizar
+Eliminar console

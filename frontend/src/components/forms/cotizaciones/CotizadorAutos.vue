@@ -396,107 +396,11 @@ onMounted(async () => {
 
 watch(step, async (nuevoValor, valorAnterior) => {
   if (nuevoValor === 3) {
-    let typ = false;
-    if (typ) {
-      let tmo = {
-        id: 56,
-        nombre: "Jesus Ramon Chavez Quiroz",
-        fechaNacimiento: "1899-11-30T06:36:36.000Z",
-        estatus: "Borrador",
-        configuracion: {
-          titular: {
-            nombre: "Jesus",
-            segundoNombre: "Ramon",
-            apellidoPaterno: "Chavez",
-            apellidoMaterno: "Quiroz",
-            fechaNacimiento: "1994-06-10",
-            sexo: {
-              label: "Hombre",
-              id: "Hombre",
-            },
-            telefono: "7442077733",
-            correo: "jesus@gmail.com",
-            marca: "HONDA",
-            modelo: "CR-V",
-            anio: "2020",
-            version: "Extendida",
-          },
-          companias: [
-            {
-              compania_id: 10,
-              companiaCorto: "QUALITAS",
-              compania: "QUALITAS",
-              companias_productos: [
-                {
-                  id: 13,
-                  compania_id: 10,
-                  ramo_id: 3,
-                  nombre: "AUTOS INDIVIDUAL",
-                  created_at: "2025-07-02T07:02:03.000Z",
-                  updated_at: "2025-07-02T07:02:03.000Z",
-                  estatus: 1,
-                },
-              ],
-              ramo: "AUTOS",
-              ramo_id: 3,
-            },
-          ],
-          step: 3,
-          cotizaciones: [
-            {
-              id: 1,
-              compania_id: 10,
-              companiaCorto: "QUALITAS",
-              compania: "QUALITAS",
-              companias_productos: [
-                {
-                  id: 13,
-                  compania_id: 10,
-                  ramo_id: 3,
-                  nombre: "AUTOS INDIVIDUAL",
-                  created_at: "2025-07-02T07:02:03.000Z",
-                  updated_at: "2025-07-02T07:02:03.000Z",
-                  estatus: 1,
-                },
-              ],
-              ramo: "AUTOS",
-              ramo_id: 3,
-              titular: {
-                nombre: "Jesus",
-                segundoNombre: "Ramon",
-                apellidoPaterno: "Chavez",
-                apellidoMaterno: "Quiroz",
-                fechaNacimiento: "1994-06-10",
-                sexo: {
-                  label: "Hombre",
-                  id: "Hombre",
-                },
-                telefono: "7442077733",
-                correo: "jesus@gmail.com",
-                marca: "HONDA",
-                modelo: "CR-V",
-                anio: "2020",
-                version: "Extendida",
-              },
-            },
-          ],
-          tiempoEstimacion: "10-07-2025 / 4:04:24 PM",
-        },
-        documentos: null,
-        created_at: "10/07/2025 2:55 PM",
-        updated_at: "2025-07-10T22:04:24.000Z",
-        ramo: "AUTOS",
-        ramo_id: 3,
-      };
-
-      await updateCotizacion(tmo);
-    } else {
-      await handleFiltrandoCotizacionesPorCompania();
-      // prettier-ignore
-      let canEstimar = await handleCotizacionesParaEstimar(deepToRaw(localData.value.configuracion.cotizaciones));
-      if (canEstimar == true) {
-        // estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
-      }
+    await handleFiltrandoCotizacionesPorCompania();
+    // prettier-ignore
+    let canEstimar = await handleCotizacionesParaEstimar(deepToRaw(localData.value.configuracion.cotizaciones));
+    if (canEstimar == true) {
+      // estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
     }
   }
 });

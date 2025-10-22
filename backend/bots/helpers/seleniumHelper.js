@@ -3,6 +3,7 @@ const chrome = require("selenium-webdriver/chrome");
 const fs = require("fs");
 const fsPromises = require("fs").promises;
 const path = require("path");
+const os = require("os");
 
 function getBy(by, locator) {
   switch (by) {
@@ -18,6 +19,33 @@ function getBy(by, locator) {
       return By.linkText(locator);
     default:
       throw new Error(`Tipo de búsqueda no soportado: ${by}`);
+  }
+}
+
+async function esperarCargaCompleta(driver, timeout = 10000) {
+  try {
+    // Esperar a que document.readyState sea 'complete'
+    // prettier-ignore
+    await driver.wait(async () => {
+      const readyState = await driver.executeScript("return document.readyState");
+      return readyState === "complete";
+    }, timeout);
+
+    // Esperar a que no haya requests AJAX pendientes (si usa jQuery)
+    // prettier-ignore
+    await driver.wait(async () => {
+      try {
+        const ajaxActive = await driver.executeScript('return typeof jQuery !== "undefined" ? jQuery.active : 0');
+        return ajaxActive === 0;
+      } catch (e) {
+        return true; // Si no hay jQuery, continuar
+      }
+    }, 3000);
+
+    return true;
+  } catch (error) {
+    console.log("⚠️ Timeout esperando carga completa:", error.message);
+    return false;
   }
 }
 
@@ -527,6 +555,7 @@ async function guardarEnArchivo(data, filename = null, directory = null) {
     };
   }
 }
+
 async function getElementValue(
   driver,
   { locator, by = "id", timeout = 10000, selectReturnType = "value" }
@@ -677,6 +706,22 @@ async function getElementValue(
   }
 }
 
+async function redireccionarPagina(driver, options = {}) {
+  const { urlEmision = null, esperarCarga = false } = options;
+
+  if (!urlEmision) {
+    throw new Error("urlEmision es obligatorio para redireccionarPagina");
+  }
+
+  await driver.get(urlEmision);
+
+  if (esperarCarga) {
+    await esperarCargaCompleta(driver);
+  }
+
+  return true; // Tiempo de espera agotado sin encontrar elementos
+}
+
 async function esperarElementosAlternativosCustom(driver, options = {}) {
   const {
     errorSelector = "modalErrorWithQuoteInfo",
@@ -720,7 +765,511 @@ async function esperarElementosAlternativosCustom(driver, options = {}) {
 
   return false; // Tiempo de espera agotado sin encontrar elementos
 }
+
+async function validarExisteOption(driver, options = {}) {
+  const {
+    locator,
+    by = "id",
+    valueOption = null,
+    tipoValor = "value", // value, label
+    formatoComparacion = "original", // original, mayusculas, minusculas, capitalizar, camelCase, kebab-case, snake_case
+  } = options;
+
+  if (!locator || valueOption === null) {
+    // prettier-ignore
+    throw new Error("locator y valueOption son obligatorios en validarExisteOption");
+  }
+
+  // Validar formatoComparacion
+  const formatosValidos = [
+    "original",
+    "mayusculas",
+    "minusculas",
+    "capitalizar",
+    "camelCase",
+    "kebab-case",
+    "snake_case",
+    "upper",
+    "lower",
+    "capitalize",
+    "normal",
+  ];
+
+  if (!formatosValidos.includes(formatoComparacion)) {
+    // prettier-ignore
+    throw new Error(`formatoComparacion debe ser uno de: ${formatosValidos.join(", ")}. Recibido: "${formatoComparacion}"`);
+  }
+
+  let selectOptions = await getSelectOptions(driver, {
+    sleeptime: 1000,
+    locator,
+    by,
+  });
+
+  if (selectOptions.length === 0) {
+    throw new Error("No se encontraron opciones en el select");
+  }
+
+  // Normalizar opciones según el formato de comparación
+  selectOptions.forEach((opt) => {
+    opt.label = formatearTexto(opt.label, formatoComparacion);
+    if (typeof opt.value === "string") {
+      opt.value = formatearTexto(opt.value, formatoComparacion);
+    }
+  });
+
+  // Normalizar valor a buscar usando la función genérica
+  const valorParaComparar = formatearTexto(valueOption, formatoComparacion);
+
+  let existe = false;
+
+  if (tipoValor === "value") {
+    existe = selectOptions.some((opt) => opt.value === valorParaComparar);
+  } else if (tipoValor === "label") {
+    existe = selectOptions.some((opt) => opt.label === valorParaComparar);
+  }
+
+  return existe;
+}
+
+function formatearTexto(texto, formato = "original") {
+  const textoStr = String(texto);
+
+  switch (formato) {
+    case "mayusculas":
+    case "upper":
+      return textoStr.toUpperCase();
+
+    case "minusculas":
+    case "lower":
+      return textoStr.toLowerCase();
+
+    case "capitalizar":
+    case "capitalize":
+      return textoStr.charAt(0).toUpperCase() + textoStr.slice(1).toLowerCase();
+
+    case "camelCase":
+      return textoStr
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase());
+
+    case "kebab-case":
+      return textoStr
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+    case "snake_case":
+      return textoStr
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+
+    case "original":
+    case "normal":
+    default:
+      return textoStr;
+  }
+}
+
+async function closeModal(driver, options = {}) {
+  const {
+    locator,
+    by = "id",
+    btnLabel = "Aceptar",
+    message,
+    timeout = 10000,
+    sleepBefore = 1000,
+    sleepAfter = 1000,
+    autoClose = true,
+  } = options;
+
+  if (!locator) {
+    throw new Error("El parámetro 'locator' es obligatorio en closeModal");
+  }
+
+  try {
+    // Esperar después de cerrar
+    if (sleepBefore > 0) {
+      await sleep(sleepBefore);
+    }
+    // Esperar a que aparezca el modal
+    await waitForElement(driver, { locator, by, timeout });
+
+    let mensajeTexto = "";
+    let botonUsado = "";
+    let modalCerrado = false;
+
+    // Obtener el mensaje si se especifica el ID
+    if (message) {
+      try {
+        mensajeTexto = await getElementText(driver, {
+          locator: message,
+          by: "id",
+        });
+      } catch (messageError) {
+        // prettier-ignore
+        console.log(`⚠️ No se pudo obtener el mensaje con ID '${message}':`,messageError.message);
+      }
+    }
+
+    // Selectores más específicos para encontrar el botón solicitado
+    const buttonSelectorsEspecificos = [
+      // Buscar exactamente el texto del botón
+      `//button[normalize-space(text())='${btnLabel}']`,
+      `//button[normalize-space()='${btnLabel}']`,
+      `//button[text()='${btnLabel}']`,
+
+      // Buscar que contenga el texto
+      `//button[contains(normalize-space(text()), '${btnLabel}')]`,
+      `//button[contains(text(), '${btnLabel}')]`,
+
+      // Buscar en inputs
+      `//input[@type='button' and normalize-space(@value)='${btnLabel}']`,
+      `//input[@type='submit' and normalize-space(@value)='${btnLabel}']`,
+
+      // Buscar en enlaces
+      `//a[normalize-space(text())='${btnLabel}']`,
+      `//a[contains(text(), '${btnLabel}')]`,
+
+      // Buscar con data-dismiss y que contenga el texto
+      `//button[@data-dismiss='modal' and contains(text(), '${btnLabel}')]`,
+
+      // Buscar dentro del modal específico
+      `//*[@id='${locator}']//button[contains(text(), '${btnLabel}')]`,
+      `//*[@id='${locator}']//button[normalize-space(text())='${btnLabel}']`,
+    ];
+
+    // Intentar encontrar el botón específico solicitado
+    for (const selector of buttonSelectorsEspecificos) {
+      try {
+        const elements = await driver.findElements(getBy("xpath", selector));
+
+        if (elements.length > 0) {
+          for (const button of elements) {
+            try {
+              const isVisible = await button.isDisplayed();
+              const isEnabled = await button.isEnabled();
+
+              if (isVisible && isEnabled) {
+                await button.click();
+                botonUsado = btnLabel;
+                modalCerrado = true;
+                break;
+              }
+            } catch (buttonClickError) {
+              continue;
+            }
+          }
+
+          if (modalCerrado) break;
+        }
+      } catch (selectorError) {
+        continue;
+      }
+    }
+
+    // Si no se encontró el botón específico y autoClose es true
+    if (!modalCerrado && autoClose) {
+      // Selectores para cerrar automáticamente
+      const autoCloseSelectors = [
+        // Botones "Close"
+        { xpath: `//button[normalize-space(text())='Close']`, tipo: "Close" },
+        { xpath: `//button[contains(text(), 'Close')]`, tipo: "Close" },
+        { xpath: `//button[@aria-label='Close']`, tipo: "Close" },
+
+        // Botones con data-dismiss
+        { css: `button[data-dismiss='modal']`, tipo: "Close" },
+        { css: `.btn[data-dismiss='modal']`, tipo: "Close" },
+
+        // Botones de cerrar genéricos
+        { css: `.close`, tipo: "Close" },
+        { css: `.btn-close`, tipo: "Close" },
+        { xpath: `//button[contains(@class, 'close')]`, tipo: "Close" },
+
+        // Cualquier botón dentro del modal
+        { css: `.modal-footer .btn`, tipo: "Generic" },
+        { css: `.modal-content .btn`, tipo: "Generic" },
+      ];
+
+      for (const selectorObj of autoCloseSelectors) {
+        try {
+          const { xpath, css, tipo } = selectorObj;
+          const selector = xpath || css;
+          const byType = xpath ? "xpath" : "css";
+
+          const elements = await driver.findElements(getBy(byType, selector));
+
+          if (elements.length > 0) {
+            const button = elements[0];
+            const isVisible = await button.isDisplayed();
+            const isEnabled = await button.isEnabled();
+
+            if (isVisible && isEnabled) {
+              await button.click();
+
+              botonUsado = tipo;
+              modalCerrado = true;
+              break;
+            }
+          }
+        } catch (autoCloseError) {
+          continue;
+        }
+      }
+
+      // Si aún no se pudo cerrar, usar tecla ESC
+      if (!modalCerrado) {
+        try {
+          await driver.actions().sendKeys("\uE00C").perform(); // ESC key
+          botonUsado = "ESC";
+          modalCerrado = true;
+        } catch (escError) {
+          // prettier-ignore
+          throw new Error("No se pudo cerrar el modal con ningún método disponible");
+        }
+      }
+    }
+
+    // Si autoClose es false y no se encontró el botón, no cerrar
+    if (!modalCerrado && !autoClose) {
+      return {
+        result: false,
+        mensaje: mensajeTexto,
+        cerradoCon: null,
+        modalEncontrado: true,
+        error: `No se encontró el botón "${btnLabel}" y autoClose está deshabilitado`,
+      };
+    }
+
+    // Esperar después de cerrar
+    if (modalCerrado && sleepAfter > 0) {
+      await sleep(sleepAfter);
+    }
+
+    return {
+      result: modalCerrado,
+      mensaje: mensajeTexto,
+      cerradoCon: botonUsado,
+      modalEncontrado: true,
+    };
+  } catch (error) {
+    if (error.name === "TimeoutError") {
+      // prettier-ignore
+      console.log(`⚠️ Timeout: No se encontró el modal con locator '${locator}' en ${timeout}ms`);
+      return {
+        result: false,
+        mensaje: "",
+        cerradoCon: null,
+        modalEncontrado: false,
+        error: "Timeout esperando modal",
+      };
+    } else {
+      console.log("❌ Error en closeModal:", error.message);
+      throw error;
+    }
+  }
+}
+
+// Función específica para tu formulario
+async function clickButtonInContenedor(driver, options = {}) {
+  const { contenedor = null, labelButton = null } = options;
+
+  if (!contenedor) {
+    throw new Error("El parámetro 'contenedor' es obligatorio");
+  }
+  if (!labelButton) {
+    throw new Error("El parámetro 'labelButton' es obligatorio");
+  }
+  const resultado = await driver.executeScript(`
+    const boton = document.querySelector('#${contenedor} button[type="submit"]') ||
+                  [...document.querySelectorAll('button')].find(btn => 
+                    btn.textContent.includes('${labelButton}'));
+
+    if (boton) {
+      boton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await new Promise(resolve => setTimeout(resolve, 500));
+      boton.click();
+      return { result: true, text: boton.textContent.trim() };
+    }
+    return { result: false, error: 'Botón   no encontrado' };
+  `);
+
+  if (!resultado.result) {
+    throw new Error(resultado.error);
+  }
+
+  return resultado;
+}
+
+async function esperarArchivoDescargado(options = {}) {
+  const {
+    archivosAntes = [],
+    downloadPath = path.join(os.homedir(), "Downloads"),
+    extensiones = [".zip", ".pdf"],
+    palabrasClave = ["download", "files"],
+    maxIntentos = 30,
+    intervalo = 2000,
+    nuevoNombre = null,
+    logs = false,
+  } = options;
+
+  if (logs) {
+    console.log("⏳ Esperando archivo descargado...");
+    console.log("📁 Carpeta de descarga:", downloadPath);
+  }
+
+  let archivoDescargado = null;
+  let intentos = 0;
+
+  while (!archivoDescargado && intentos < maxIntentos) {
+    await sleep(intervalo);
+    intentos++;
+
+    try {
+      // Obtener archivos actuales
+      const archivosActuales = fs.existsSync(downloadPath)
+        ? fs.readdirSync(downloadPath)
+        : [];
+
+      // Buscar archivos nuevos
+      const archivosNuevos = archivosActuales.filter(
+        (archivo) => !archivosAntes.includes(archivo)
+      );
+
+      if (logs) {
+        console.log(
+          `🔍 Intento ${intentos}/${maxIntentos} - Archivos nuevos:`,
+          archivosNuevos.length
+        );
+      }
+
+      if (archivosNuevos.length > 0 && logs) {
+        console.log("📁 Archivos nuevos encontrados:", archivosNuevos);
+      }
+
+      // Buscar archivo que coincida con los criterios
+      const archivoEncontrado = archivosNuevos.find((archivo) => {
+        const archivoLower = archivo.toLowerCase();
+
+        // Verificar extensión
+        const tieneExtensionCorrecta = extensiones.some((ext) =>
+          archivoLower.endsWith(ext.toLowerCase())
+        );
+
+        // Verificar palabras clave (si se especifican)
+        const tienePalabraClave =
+          palabrasClave.length === 0 ||
+          palabrasClave.some((palabra) =>
+            archivoLower.includes(palabra.toLowerCase())
+          );
+
+        return tieneExtensionCorrecta || tienePalabraClave;
+      });
+
+      if (archivoEncontrado) {
+        const rutaCompleta = path.join(downloadPath, archivoEncontrado);
+
+        // Verificar que el archivo existe y tiene contenido
+        if (fs.existsSync(rutaCompleta)) {
+          const stats = fs.statSync(rutaCompleta);
+
+          if (stats.size > 0) {
+            // Esperar para asegurar que la descarga terminó
+            await sleep(2000);
+            const statsNuevos = fs.statSync(rutaCompleta);
+
+            if (stats.size === statsNuevos.size) {
+              archivoDescargado = {
+                nombreOriginal: archivoEncontrado,
+                rutaCompleta: rutaCompleta,
+                tamaño: stats.size,
+              };
+
+              if (logs) {
+                console.log(
+                  `✅ Archivo descargado: ${archivoEncontrado} (${stats.size} bytes)`
+                );
+              }
+            } else if (logs) {
+              console.log(
+                `⏳ Descarga en progreso: ${archivoEncontrado} (${stats.size} -> ${statsNuevos.size} bytes)`
+              );
+            }
+          }
+        }
+      }
+    } catch (error) {
+      if (logs) {
+        console.log(`⚠️ Error verificando descarga: ${error.message}`);
+      }
+    }
+  }
+
+  if (archivoDescargado) {
+    // Renombrar el archivo si se especifica
+    if (nuevoNombre && archivoDescargado.nombreOriginal !== nuevoNombre) {
+      try {
+        const extension = path.extname(archivoDescargado.nombreOriginal);
+        const nombreCompleto = nuevoNombre.endsWith(extension)
+          ? nuevoNombre
+          : nuevoNombre + extension;
+        const nuevaRuta = path.join(downloadPath, nombreCompleto);
+
+        fs.renameSync(archivoDescargado.rutaCompleta, nuevaRuta);
+
+        if (logs) {
+          console.log(`📝 Archivo renombrado a: ${nombreCompleto}`);
+        }
+
+        archivoDescargado.rutaCompleta = nuevaRuta;
+        archivoDescargado.nombreFinal = nombreCompleto;
+      } catch (renameError) {
+        if (logs) {
+          console.log(`⚠️ No se pudo renombrar: ${renameError.message}`);
+        }
+        archivoDescargado.nombreFinal = archivoDescargado.nombreOriginal;
+      }
+    } else {
+      archivoDescargado.nombreFinal = archivoDescargado.nombreOriginal;
+    }
+
+    return {
+      result: true,
+      nombreArchivo: archivoDescargado.nombreFinal,
+      rutaCompleta: archivoDescargado.rutaCompleta,
+      tamaño: archivoDescargado.tamaño,
+      message: "Descarga completada exitosamente",
+    };
+  } else {
+    if (logs) {
+      console.log("❌ La descarga no se completó en el tiempo esperado");
+
+      // Debug: mostrar archivos actuales
+      const archivosFinales = fs.existsSync(downloadPath)
+        ? fs.readdirSync(downloadPath)
+        : [];
+      console.log(
+        "📁 Archivos actuales en Downloads:",
+        archivosFinales.slice(0, 10)
+      );
+    }
+
+    return {
+      result: false,
+      error: `Timeout: La descarga no se completó en ${
+        (maxIntentos * intervalo) / 1000
+      } segundos`,
+    };
+  }
+}
 module.exports = {
+  closeModal,
+  esperarArchivoDescargado,
+  clickButtonInContenedor,
+  validarExisteOption,
+  redireccionarPagina,
+  esperarCargaCompleta,
   acercarHaElemento,
   openPage,
   switchToWindow,
@@ -750,4 +1299,5 @@ module.exports = {
   obtenerCantidadFilasTablaCotizaciones,
   guardarEnArchivo,
   saveCurrentHtmlToTxt,
+  getBy,
 };
