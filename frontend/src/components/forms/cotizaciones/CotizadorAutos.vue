@@ -98,19 +98,20 @@ await function handleGoEmitir() {
 };
 
 const handleAddCotizacionesEstimadas = async (data: any) => {
+  let tmpData = deepClone(toRaw(localData.value));
   data = data.filter((item: any) => {
-    const idx = localData.value.configuracion.cotizaciones.findIndex(
+    const idx = tmpData.value.configuracion.cotizaciones.findIndex(
       (c: any) => c.id === item.id
     );
     if (idx !== -1) {
       // Si existe, reemplaza la cotización
-      localData.value.configuracion.cotizaciones[idx] = item;
+      tmpData.value.configuracion.cotizaciones[idx] = item;
       return false; // Elimínala del array data
     }
-    localData.value.configuracion.cotizaciones.push(item);
+    tmpData.value.configuracion.cotizaciones.push(item);
   });
 
-  localData.value.configuracion.cotizaciones.push(...data);
+  localData.value = deepClone(tmpData);
 };
 
 const handleSelectCompania = (item: any) => {
@@ -173,10 +174,10 @@ const handleUpdateCotizaciones = async (data: any) => {
   tmp.configuracion.cotizaciones = data;
 
   localData.value = deepClone(tmp);
-  setTimeout(async () => {
-    agregandoCotizaciones.value = !agregandoCotizaciones.value;
-  }, 10);
-  console.log("Actualizando cotizaciones...", deepToRaw(data));
+
+  // prettier-ignore
+  setTimeout(async () => { agregandoCotizaciones.value = !agregandoCotizaciones.value; }, 10);
+
   await handleUpdateCotizacion();
 };
 
@@ -210,8 +211,8 @@ const getCompanias = async () => {
   }
 };
 
-const handleUpdateCotizacion = async () => {
-  let localDataRaw = deepToRaw(localData.value);
+const handleUpdateCotizacion = async (data = null) => {
+  let localDataRaw = deepToRaw(data ? data : localData.value);
 
   // prettier-ignore
   let nombreCompleto = (localDataRaw?.configuracion?.titular.nombre ?? "") + " " + (localDataRaw?.configuracion?.titular.segundoNombre ?? "") + " " + (localDataRaw?.configuracion?.titular.apellidoPaterno ?? "") + " " + (localDataRaw?.configuracion?.titular.apellidoMaterno ?? "")
@@ -228,12 +229,33 @@ const handleUpdateCotizacion = async () => {
   };
   await updateCotizacion(tmp);
 };
+const handleUpdateCotizacionParaEmitir = async (data = null) => {
+  let localDataRaw = deepToRaw(localData.value);
+
+  // prettier-ignore
+  let nombreCompleto = (localDataRaw?.configuracion?.titular.nombre ?? "") + " " + (localDataRaw?.configuracion?.titular.segundoNombre ?? "") + " " + (localDataRaw?.configuracion?.titular.apellidoPaterno ?? "") + " " + (localDataRaw?.configuracion?.titular.apellidoMaterno ?? "")
+
+  // prettier-ignore
+  let tmp = {
+    ...localDataRaw,
+    nombre: nombreCompleto,
+    configuracion: {
+      ...localDataRaw.configuracion,
+      dataEmitir: data,
+      step: step.value,
+    },
+  };
+
+  await updateCotizacion(tmp);
+};
 
 const updateCotizacion = async (data: any, editando = false) => {
+  let tmpData = deepToRaw(data);
+
   const response = await customRequest({
     url: "/api/cotizaciones/update",
     method: "POST",
-    data: data,
+    data: tmpData,
   });
   const dataResponse = response.data;
   if (dataResponse.result) {
@@ -333,14 +355,12 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
   const dataResponse = response.data;
 
   if (dataResponse.result) {
-    if (flujoNormal) {
-      localData.value.configuracion.cotizaciones = dataResponse.data;
-    } else {
-      await handleAddCotizacionesEstimadas(dataResponse.data);
-      // prettier-ignore
-      setTimeout(async () => { await handleUpdateCotizacion(); }, 10);
-    }
+    localData.value.configuracion.cotizaciones = dataResponse.data;
+
     localData.value.configuracion.tiempoEstimacion = await getFechaAMPM();
+
+    // prettier-ignore
+    setTimeout(async () => { await handleUpdateCotizacion(); }, 10);
   } else {
     showErrorMessage({
       title: "Error",
@@ -365,7 +385,7 @@ const handleActualizarCotizacion = async (cotizacionData: any) => {
   localData.value = deepClone(tmpRegistro);
   await handleUpdateCotizacion();
   // prettier-ignore
-  setTimeout(async () => { await estimarCotizaciones(tmpRegistro, true); }, 10);
+  setTimeout(async () => { await estimarCotizaciones(tmpRegistro, false); }, 10);
 };
 
 const handleRefreshEstimar = async () => {
@@ -464,25 +484,6 @@ watch(step, async (nuevoValor, valorAnterior) => {
       <div v-if="step == 3">
         <div v-if="!cotizacion">
           <div>
-            <VBtn
-              color="dark"
-              variant="outlined"
-              @click="handleRefreshEstimar"
-              class="mr-4"
-            >
-              Refrescar estimación
-            </VBtn>
-
-            <!-- prettier-ignore -->
-            <VBtn
-            color="dark"
-            variant="outlined"
-            @click=" () => { console.log(deepToRaw(localData)); } "
-          >
-            Print cotizaciones
-          </VBtn>
-          </div>
-          <div>
             <div class="card cardForm mx-auto mt-3">
               <div class="d-flex align-center justify-space-between mb-2">
                 <h2 class="mb-0">Detalles del titular:</h2>
@@ -555,7 +556,9 @@ watch(step, async (nuevoValor, valorAnterior) => {
       <!-- Emision de cotizaciones -->
       <div v-if="step == 4">
         <PanelEmision
+          :dataEmitir="localData.configuracion.dataEmitir"
           :registro="localData.configuracion.seleccionadas[0]"
+          :actualizarFN="handleUpdateCotizacionParaEmitir"
           @cancelar="handleCancelarCotizacion"
         />
       </div>

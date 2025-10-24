@@ -86,22 +86,10 @@ exports.createOrUpdateCotizacion = async (req, res) => {
   try {
     let data = { ...req.body };
 
-    // Si configuracion ya es string, intenta parsear para evitar doble serialización
-    if (typeof data.configuracion === "string") {
-      try {
-        data.configuracion = JSON.parse(data.configuracion);
-      } catch (e) {
-        // Si falla el parseo, deja el string como está (puede ser un string plano)
-      }
+    // Sanitizar y procesar la configuración
+    if (data.configuracion) {
+      data.configuracion = JSON.stringify(data.configuracion);
     }
-
-    // Escapa barras invertidas en todo el objeto antes de serializar
-    if (typeof data.configuracion === "object" && data.configuracion !== null) {
-      escaparBarras(data.configuracion);
-    }
-
-    // Ahora serializa correctamente
-    data.configuracion = JSON.stringify(data.configuracion || {});
 
     let tipoResponse = data.id ? false : "id";
 
@@ -120,3 +108,143 @@ exports.createOrUpdateCotizacion = async (req, res) => {
     });
   }
 };
+
+// Función para sanitizar la configuración antes de guardarla
+function sanitizeConfiguration(configuracion) {
+  try {
+    let config = configuracion;
+
+    // Si es string, intentar parsearlo
+    if (typeof config === "string") {
+      try {
+        config = JSON.parse(config);
+      } catch (parseError) {
+        console.warn(
+          "Error al parsear configuración string:",
+          parseError.message
+        );
+        // Si no se puede parsear, intentar reparar el JSON
+        config = repairJsonString(config);
+      }
+    }
+
+    // Si no es objeto después del procesamiento, crear objeto vacío
+    if (typeof config !== "object" || config === null) {
+      console.warn("Configuración no es objeto válido, usando objeto vacío");
+      config = {};
+    }
+
+    // Limpiar el objeto de propiedades problemáticas
+    config = cleanObjectForJSON(config);
+
+    // Escapar barras invertidas si existe la función helper
+    if (typeof escaparBarras === "function") {
+      escaparBarras(config);
+    }
+
+    // Convertir a JSON string de forma segura
+    return JSON.stringify(config, (key, value) => {
+      // Filtrar propiedades problemáticas de Vue
+      if (
+        key.startsWith("__v_") ||
+        key === "$" ||
+        typeof value === "function"
+      ) {
+        return undefined;
+      }
+
+      // Manejar valores especiales
+      if (value === undefined || (typeof value === "number" && isNaN(value))) {
+        return null;
+      }
+
+      return value;
+    });
+  } catch (error) {
+    console.error("Error en sanitizeConfiguration:", error);
+    // En caso de error total, retornar JSON vacío
+    return JSON.stringify({});
+  }
+}
+
+// Función para limpiar objetos recursivamente
+function cleanObjectForJSON(obj, seen = new WeakSet()) {
+  // Prevenir referencias circulares
+  if (obj !== null && typeof obj === "object") {
+    if (seen.has(obj)) {
+      return {}; // Retornar objeto vacío para referencias circulares
+    }
+    seen.add(obj);
+  }
+
+  // Si no es objeto, retornar tal como está
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+
+  // Si es array
+  if (Array.isArray(obj)) {
+    return obj.map((item) => cleanObjectForJSON(item, seen));
+  }
+
+  // Si es objeto, procesar propiedades
+  const cleaned = {};
+  for (const [key, value] of Object.entries(obj)) {
+    // Saltar propiedades problemáticas
+    if (
+      key.startsWith("__v_") ||
+      key === "$" ||
+      key === "_isVue" ||
+      typeof value === "function"
+    ) {
+      continue;
+    }
+
+    try {
+      cleaned[key] = cleanObjectForJSON(value, seen);
+    } catch (error) {
+      console.warn(`Error procesando propiedad ${key}:`, error.message);
+      // Si hay error con una propiedad, omitirla
+      continue;
+    }
+  }
+
+  return cleaned;
+}
+
+// Función para intentar reparar JSON strings corruptos
+function repairJsonString(jsonString) {
+  try {
+    // Limpiar caracteres de control
+    let cleaned = jsonString.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+
+    // Intentar parsear el string limpio
+    let parsed = JSON.parse(cleaned);
+    return parsed;
+  } catch (repairError) {
+    console.warn("No se pudo reparar el JSON string:", repairError.message);
+
+    // Último intento: extraer lo que se pueda
+    try {
+      // Buscar patrones básicos y crear un objeto mínimo
+      const basicData = {};
+
+      // Intentar extraer titular si existe
+      const titularMatch = jsonString.match(/"titular":\s*{[^}]+}/);
+      if (titularMatch) {
+        try {
+          basicData.titular = JSON.parse(
+            `{${titularMatch[0].split(":").slice(1).join(":")}}`
+          );
+        } catch (e) {
+          // Ignorar si no se puede parsear
+        }
+      }
+
+      return basicData;
+    } catch (finalError) {
+      console.error("Error final en reparación de JSON:", finalError);
+      return {}; // Retornar objeto vacío como último recurso
+    }
+  }
+}

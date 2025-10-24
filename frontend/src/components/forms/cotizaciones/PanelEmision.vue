@@ -14,12 +14,98 @@ const emit = defineEmits<{
 
 const props = withDefaults(
   defineProps<{
+    dataEmitir: any;
     registro: any;
+    actualizarFN: any;
   }>(),
   {
     registro: null,
+    dataEmitir: null,
   }
 );
+
+// prettier-ignore
+function convertirDatosSeguro(data :  any) {
+  const resultado : any = {
+    accesorios: [],
+    coberturasBasicas: []
+  };
+
+  // Procesar accesorios seleccionados
+  data.accesorios.forEach((accesorio :  any) => {
+    if (accesorio.selected) {
+      const accesorioSimplificado :  any = {
+        nombre: accesorio.nombre,
+        valores: []
+      };
+
+      // Extraer valores de los hijos
+      accesorio.hijos.forEach((hijo :  any) => {
+        if (hijo.tag === 'input' && hijo.label) {
+          accesorioSimplificado.valores.push({
+            campo: hijo.label,
+            valor: hijo.valor
+          });
+        } else if (hijo.tag === 'select' && hijo.label) {
+          accesorioSimplificado.valores.push({
+            campo: hijo.label,
+            valor: hijo.valor
+          });
+        } else if (hijo.label && !hijo.tag) {
+          // Para casos como deducible que no tienen tag
+          accesorioSimplificado.valores.push({
+            campo: hijo.label,
+            valor: hijo.valor
+          });
+        }
+      });
+
+      resultado.accesorios.push(accesorioSimplificado);
+    }
+  });
+
+  // Procesar coberturas básicas
+  data.coberturasBasicas.forEach((cobertura :  any) => {
+    const coberturaSimplificada :  any = {
+      cobertura: cobertura.cobertura,
+      sumaAsegurada: null,
+      deducible: null,
+      prima: cobertura.prima.texto
+    };
+
+    // Extraer suma asegurada
+    if (Array.isArray(cobertura.sumaSegura)) {
+      // Si es array, buscar el valor relevante
+      cobertura.sumaSegura.forEach((item :  any) => {
+        if (item.tag === 'input') {
+          coberturaSimplificada.sumaAsegurada = item.valor;
+        } else if (item.tag === 'select') {
+          coberturaSimplificada.sumaAsegurada = item.valor.texto || item.valor;
+        } else if (item.tag === 'p') {
+          coberturaSimplificada.sumaAsegurada = item.texto;
+        }
+      });
+    } else if (cobertura.sumaSegura) {
+      // Si es objeto único
+      if (cobertura.sumaSegura.tag === 'input') {
+        coberturaSimplificada.sumaAsegurada = cobertura.sumaSegura.valor;
+      } else if (cobertura.sumaSegura.tag === 'select') {
+        coberturaSimplificada.sumaAsegurada = cobertura.sumaSegura.valor.texto || cobertura.sumaSegura.valor;
+      } else if (cobertura.sumaSegura.tag === 'p') {
+        coberturaSimplificada.sumaAsegurada = cobertura.sumaSegura.texto;
+      }
+    }
+
+    // Extraer deducible
+    if (cobertura.deducible && cobertura.deducible.valor) {
+      coberturaSimplificada.deducible = cobertura.deducible.valor.texto || cobertura.deducible.valor;
+    }
+
+    resultado.coberturasBasicas.push(coberturaSimplificada);
+  });
+
+  return resultado;
+}
 
 // prettier-ignore
 const opciones = {
@@ -102,7 +188,20 @@ function handleEmitir() {
   let tmp = toRaw(data.value);
   tmp.cotizacion = toRaw(props.registro);
   tmp.compania = tmp.cotizacion.compania.toLowerCase();
-  console.log("Emitir acción:", tmp);
+  if (!props.dataEmitir) {
+    let tmpt = convertirDatosSeguro(tmp.cotizacion.detalles);
+    tmp.cotizacion.detalles.accesorios = tmpt.accesorios;
+    tmp.cotizacion.detalles.coberturasBasicas = tmpt.coberturasBasicas;
+  }
+
+  delete tmp.cliente.data;
+  delete tmp.asegurado.data;
+  delete tmp.cotizacion.vehiculo;
+  delete tmp.cotizacion.titular.direcciones;
+  delete tmp.cotizacion.detalles.frecuenciasPago;
+  delete tmp.cotizacion.detalles.titular;
+
+  props.actualizarFN(tmp);
 }
 
 function handleTerminar() {
@@ -160,13 +259,17 @@ onBeforeMount(() => {
     delete tmp.versiones;
 
     formData.value = tmp;
+    if (props.dataEmitir) {
+      paso.value = 9;
+      data.value = { ...props.dataEmitir };
+    }
   }
 });
 </script>
 
 <template>
   <div>
-    <pre>{{ paso }}</pre>
+    <pre>Paso: {{ paso }}</pre>
     <OpcionSelector
       v-if="paso === 1"
       :config="{
