@@ -189,6 +189,8 @@ async function handleEmitir() {
   let tmp = toRaw(data.value);
   tmp.cotizacion = toRaw(props.registro);
   tmp.compania = tmp.cotizacion.compania.toLowerCase();
+  tmp.cliente.isCliente = true;
+  tmp.asegurado.isCliente = false;
   if (!props.dataEmitir) {
     let tmpt = convertirDatosSeguro(tmp.cotizacion.detalles);
     tmp.cotizacion.detalles.accesorios = tmpt.accesorios;

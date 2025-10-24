@@ -148,110 +148,124 @@ async function buscarCotizacionEnTabla(driver, data) {
   );
 }
 
-async function insertarDatos(driver, data) {
-  console.log("Insertando datos del cliente...");
+// prettier-ignore
+async function insertarDatos(driver, data, esContratante = false) {
+  console.log(`Insertando datos del ${esContratante ? 'contratante' : 'asegurado'}...`);
+  
   let tmpIsCliente = !data.isCliente;
   let labelNuevo = tmpIsCliente ? "Nuevo" : "nuevo-contratante";
   let labelNuevoTipo = tmpIsCliente
     ? "persona_fisica"
     : "persona_fisica_contratante";
 
+  // Definir sufijos según el tipo
+  const sufijo = esContratante ? "_contratanteFisica" : "";
+  
   console.log("tmpIsCliente", tmpIsCliente);
   console.log("labelNuevo", labelNuevo);
   console.log("labelNuevoTipo", labelNuevoTipo);
+  
   // Seleccionar nuevo cliente
   await clickElement(driver, {
-    locator: `label[for='${labelNuevo}']`, // Selector del label
+    locator: `label[for='${labelNuevo}']`,
     sleeptime: 1000,
     by: "css",
   });
 
-  // Seleccionar nuevo cliente
+  // Seleccionar tipo de persona
   await clickElement(driver, {
-    locator: `label[for='${labelNuevoTipo}']`, // Selector del label
+    locator: `label[for='${labelNuevoTipo}']`,
     sleeptime: 1000,
     by: "css",
   });
-  if (!tmpIsCliente) {
+  
+  // Solo para asegurado (comportamiento original)
+  if (!tmpIsCliente && !esContratante) {
     await sleep(100000);
   }
 
   // Insertando la nacionalidad
   await selectOptionInSelect(driver, {
     esperarHabilitado: true,
-    locator: "selectNationality",
+    locator: `selectNationality${sufijo}`,
     tipoValor: "label",
     sleeptime: 1000,
     value: data.nacionalidad ?? "Mexicana",
     by: "id",
   });
 
-  // Insertando la nacionalidad
+  // Insertando el estado
   await selectOptionInSelect(driver, {
     esperarHabilitado: true,
-    locator: "selectState",
+    locator: `selectState${sufijo}`,
     tipoValor: "label",
     sleeptime: 1000,
     value: data.estado.label.toUpperCase(),
     by: "id",
   });
 
-  // prettier-ignore
+  // Nombre
   await setInputValue(driver, {
-    locator: "name",
+    locator: `name${sufijo}`,
     esperarHabilitado: true,
-    value:data.nombre + " " + data.segundoNombre,
+    value: data.nombre + " " + data.segundoNombre,
     sleeptime: 1000,
   });
 
+  // Apellido paterno
   await setInputValue(driver, {
-    locator: "lastName",
+    locator: `lastName${sufijo}`,
     esperarHabilitado: true,
     value: data.apellidoPaterno,
     sleeptime: 1000,
   });
 
+  // Apellido materno
   await setInputValue(driver, {
-    locator: "motherLastName",
+    locator: `motherLastName${sufijo}`,
     esperarHabilitado: true,
     value: data.apellidoMaterno,
     sleeptime: 1000,
   });
 
-  // prettier-ignore
+  // Fecha de nacimiento
   const [year, month, day] = data.fechaNacimiento.split("-");
   let fechaNacimiento = `${day}/${month}/${year}`;
 
   await setInputValue(driver, {
-    locator: "dateOfBirth",
+    locator: `dateOfBirth${sufijo}`,
     esperarHabilitado: true,
     value: fechaNacimiento,
     sleeptime: 1000,
   });
 
+  // CURP
   await setInputValue(driver, {
-    locator: "CURP",
+    locator: `CURP${sufijo}`,
     esperarHabilitado: true,
     value: data.curp,
     sleeptime: 1000,
   });
 
+  // Número de identificación
   await setInputValue(driver, {
-    locator: "idNumber",
+    locator: `idNumber${sufijo}`,
     esperarHabilitado: true,
     value: data.referenciaIdentificacion,
     sleeptime: 1000,
   });
 
+  // RFC
   await setInputValue(driver, {
-    locator: "RFC",
+    locator: `RFC${sufijo}`,
     esperarHabilitado: true,
     value: data.rfc,
     sleeptime: 1000,
   });
 
+  // Validar y seleccionar colonia
   const existeColonia = await validarExisteOption(driver, {
-    locator: "selectSuburb",
+    locator: `selectSuburb${sufijo}`,
     valueOption: data.colonia.toUpperCase(),
     tipoValor: "label",
     formatoComparacion: "mayusculas",
@@ -259,10 +273,9 @@ async function insertarDatos(driver, data) {
 
   console.log("existeColonia", existeColonia);
   if (existeColonia) {
-    // Insertando la colonia
     await selectOptionInSelect(driver, {
       esperarHabilitado: true,
-      locator: "selectSuburb",
+      locator: `selectSuburb${sufijo}`,
       tipoValor: "label",
       sleeptime: 1000,
       value: data.colonia.toUpperCase(),
@@ -270,77 +283,87 @@ async function insertarDatos(driver, data) {
     });
   }
 
+  // Calle
   await setInputValue(driver, {
-    locator: "street",
+    locator: `street${sufijo}`,
     esperarHabilitado: true,
     value: data.calle,
     sleeptime: 1000,
   });
 
+  // Número exterior
   await setInputValue(driver, {
-    locator: "outdoorNumber",
+    locator: `outdoorNumber${sufijo}`,
     esperarHabilitado: true,
     value: data.numeroExterior,
     sleeptime: 1000,
   });
 
+  // Teléfono fijo
   await setInputValue(driver, {
-    locator: "Landline",
+    locator: `Landline${sufijo}`,
     esperarHabilitado: true,
     value: data.telefonoFijo,
     sleeptime: 1000,
   });
 
+  // Celular
   await setInputValue(driver, {
-    locator: "cellPhone",
+    locator: `cellPhone${sufijo}`,
     esperarHabilitado: true,
     value: data.celular,
     sleeptime: 1000,
   });
 
+  // Email
   await setInputValue(driver, {
-    locator: "email",
+    locator: `email${sufijo}`,
     esperarHabilitado: true,
     value: data.correo,
     sleeptime: 1000,
   });
 
-  // Insertando la nacionalidad
+  // Profesión
   await selectOptionInSelect(driver, {
     esperarHabilitado: true,
-    locator: "selectProfession",
+    locator: `selectProfession${sufijo}`,
     tipoValor: "label",
     sleeptime: 1000,
     value: "OTRO",
     by: "id",
   });
 
-  // Insertando la nacionalidad
+  // Ocupación
   await selectOptionInSelect(driver, {
     esperarHabilitado: true,
-    locator: "selectOccupation",
+    locator: `selectOccupation${sufijo}`,
     tipoValor: "label",
     sleeptime: 1000,
     value: "OTRO",
     by: "id",
   });
 
+  // Otra ocupación (campo específico según el tipo)
+  const campoOtraOcupacion = esContratante ? "otherOcupationContratante" : "otherOcupation";
   await setInputValue(driver, {
-    locator: "otherOcupation",
+    locator: campoOtraOcupacion,
     esperarHabilitado: true,
     value: data.ocupacion,
     sleeptime: 1000,
   });
 
   await sleep(2000);
-  console.log("Guardando asegurado...");
+  console.log(`Guardando ${esContratante ? 'contratante' : 'asegurado'}...`);
 
   await scrollToBottom(driver);
 
+  // Botón de guardar específico según el tipo
+  const botonGuardar = esContratante ? "saveButton_contratanteFisica" : "saveButton_AseguradoFisica";
   await clickElement(driver, {
-    locator: "saveButton_AseguradoFisica", // Selector del label
+    locator: botonGuardar,
     sleeptime: 1000,
   });
+  
   await sleep(2000);
 
   const resultadoModal = await validarModalAbierto(driver);
@@ -352,215 +375,10 @@ async function insertarDatos(driver, data) {
     });
   }
 
+  // Botón siguiente específico según el tipo
+  const botonSiguiente = esContratante ? "nextButton_contratanteFisica" : "nextButton_AseguradoFisica";
   await clickElement(driver, {
-    locator: "nextButton_AseguradoFisica", // Selector del label
-    sleeptime: 1000,
-  });
-}
-
-async function insertarDatos2(driver, data) {
-  console.log("Insertando datos del cliente...");
-  let tmpIsCliente = !data.isCliente;
-  let labelNuevo = tmpIsCliente ? "Nuevo" : "nuevo-contratante";
-  let labelNuevoTipo = tmpIsCliente
-    ? "persona_fisica"
-    : "persona_fisica_contratante";
-
-  console.log("tmpIsCliente", tmpIsCliente);
-  console.log("labelNuevo", labelNuevo);
-  console.log("labelNuevoTipo", labelNuevoTipo);
-  // Seleccionar nuevo cliente
-  await clickElement(driver, {
-    locator: `label[for='${labelNuevo}']`, // Selector del label
-    sleeptime: 1000,
-    by: "css",
-  });
-
-  // Seleccionar nuevo cliente
-  await clickElement(driver, {
-    locator: `label[for='${labelNuevoTipo}']`, // Selector del label
-    sleeptime: 1000,
-    by: "css",
-  });
-
-  // Insertando la nacionalidad
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectNationality_contratanteFisica",
-    tipoValor: "label",
-    sleeptime: 1000,
-    value: data.nacionalidad ?? "",
-    by: "id",
-  });
-
-  // Insertando la nacionalidad
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectState_contratanteFisica",
-    tipoValor: "label",
-    sleeptime: 1000,
-    value: data.estado.label.toUpperCase(),
-    by: "id",
-  });
-
-  // prettier-ignore
-  await setInputValue(driver, {
-    locator: "name_contratanteFisica",
-    esperarHabilitado: true,
-    value:data.nombre + " " + data.segundoNombre,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "lastName_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.apellidoPaterno,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "motherLastName_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.apellidoMaterno,
-    sleeptime: 1000,
-  });
-
-  // prettier-ignore
-  const [year, month, day] = data.fechaNacimiento.split("-");
-  let fechaNacimiento = `${day}/${month}/${year}`;
-
-  await setInputValue(driver, {
-    locator: "dateOfBirth_contratanteFisica",
-    esperarHabilitado: true,
-    value: fechaNacimiento,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "CURP_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.curp,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "idNumber_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.referenciaIdentificacion,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "RFC_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.rfc,
-    sleeptime: 1000,
-  });
-
-  const existeColonia = await validarExisteOption(driver, {
-    locator: "selectSuburb_contratanteFisica",
-    valueOption: data.colonia.toUpperCase(),
-    tipoValor: "label",
-    formatoComparacion: "mayusculas",
-  });
-
-  console.log("existeColonia", existeColonia);
-  if (existeColonia) {
-    // Insertando la colonia
-    await selectOptionInSelect(driver, {
-      esperarHabilitado: true,
-      locator: "selectSuburb_contratanteFisica",
-      tipoValor: "label",
-      sleeptime: 1000,
-      value: data.colonia.toUpperCase(),
-      by: "id",
-    });
-  }
-
-  await setInputValue(driver, {
-    locator: "street_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.calle,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "outdoorNumber_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.numeroExterior,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "Landline_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.telefonoFijo,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "cellPhone_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.celular,
-    sleeptime: 1000,
-  });
-
-  await setInputValue(driver, {
-    locator: "email_contratanteFisica",
-    esperarHabilitado: true,
-    value: data.correo,
-    sleeptime: 1000,
-  });
-
-  // Insertando la nacionalidad
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectProfession_contratanteFisica",
-    tipoValor: "label",
-    sleeptime: 1000,
-    value: "OTRO",
-    by: "id",
-  });
-
-  // Insertando la nacionalidad
-  await selectOptionInSelect(driver, {
-    esperarHabilitado: true,
-    locator: "selectOccupation_contratanteFisica",
-    tipoValor: "label",
-    sleeptime: 1000,
-    value: "OTRO",
-    by: "id",
-  });
-
-  await setInputValue(driver, {
-    locator: "otherOcupationContratante",
-    esperarHabilitado: true,
-    value: data.ocupacion,
-    sleeptime: 1000,
-  });
-
-  await sleep(2000);
-  console.log("Guardando asegurado...");
-
-  await scrollToBottom(driver);
-
-  await clickElement(driver, {
-    locator: "saveButton_contratanteFisica", // Selector del label
-    sleeptime: 1000,
-  });
-  await sleep(2000);
-
-  const resultadoModal = await validarModalAbierto(driver);
-  console.log("resultadoModal", resultadoModal);
-  if (!resultadoModal.continue) {
-    return await formatearData({
-      mssgError: resultadoModal.mensaje,
-      result: false,
-    });
-  }
-
-  await clickElement(driver, {
-    locator: "nextButton_contratanteFisica", // Selector del label
+    locator: botonSiguiente,
     sleeptime: 1000,
   });
 }
@@ -637,6 +455,18 @@ async function insertandoDatosCarro(driver, data) {
     value: data.repuve,
     sleeptime: 1000,
   });
+  // await setInputValue(driver, {
+  //   locator: "detailSpecialEquip",
+  //   esperarHabilitado: true,
+  //   value: data.detallesEquipoEspecial ?? "Ninguno",
+  //   sleeptime: 1000,
+  // });
+  // await setInputValue(driver, {
+  //   locator: "detailAdaptaciones",
+  //   esperarHabilitado: true,
+  //   value: data.detallesAdaptaciones ?? "Ninguno",
+  //   sleeptime: 1000,
+  // });
 
   await setInputValue(driver, {
     locator: "numeroEconomico",
@@ -1241,10 +1071,6 @@ async function procesarArchivosConPortada(options = {}) {
 }
 
 async function formatearRegistroPoliza(data) {
-  console.log("Formateando data de póliza...");
-  // const datosConvertidos = convertirDatosSeguro(data.cotizacion.detalles);
-  console.log(data.cotizacion.detalles.accesorios);
-  console.log(data.cotizacion.detalles.coberturasBasicas);
   let tmp = {
     numeroPoliza: data.numeroPoliza,
     cliente_id: data.cliente.id,
@@ -1352,27 +1178,55 @@ async function handleEmitirPoliza(data) {
     await buscarPoliza(driver, data);
 
     // Insertando datos del asegurado
-    await insertarDatos(driver, data.asegurado);
+    await insertarDatos(driver, data.asegurado, false);
 
     // Insertando datos del carro
     await insertandoDatosCarro(driver, data.carro);
 
     // Insertando datos del cliente
-    await insertarDatos2(driver, data.cliente);
+    await insertarDatos(driver, data.cliente, true);
 
+    await sleep(2000);
+
+    console.log("Btn de vigencia");
     await clickElement(driver, {
       locator: "btnVigencia",
       sleeptime: 100,
     });
 
+    await sleep(1000);
+    await scrollToBottom(driver);
+
+    console.log("Btn de emisión");
     await clickElement(driver, {
       locator: "btnEmision",
       sleeptime: 1000,
     });
+    console.log("Esperando modal de emisión...");
     // // *****************************************************
 
     // await consultaPoliza(driver, data);
+    console.log("Esperando 5 segundos antes de la descarga...");
+    await sleep(5000);
 
+    console.log("Iniciando espera de carga completa...");
+    await esperarCargaCompleta(driver);
+
+    console.log("Esperando número de póliza...");
+    await waitForElement(driver, {
+      locator: "nPol",
+      by: "id",
+    });
+
+    console.log("Esperando info de consulta de póliza...");
+    await waitForElement(driver, {
+      locator: "info-consulta-poliza",
+      by: "id",
+    });
+
+    console.log("Esperando para descargar");
+    console.log("Esperando 5 segundos antes de la descarga...");
+    await sleep(5000);
     // // Si hay tabla, obtener la informacion de la poliza
     // // prettier-ignore
     const numeroPoliza = await getElementText(driver, { locator: "nPol" });
