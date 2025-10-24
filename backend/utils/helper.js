@@ -173,9 +173,146 @@ function traducirError(error, prefijo = "Error: ") {
   return `${prefijo}${mensajeError}`;
 }
 
+function printDeep(
+  obj,
+  {
+    label = "Objeto",
+    maxDepth = null,
+    showFunctions = false,
+    showUndefined = true,
+    colors = true,
+    exclude = [], // Propiedades a excluir
+    include = [], // Solo estas propiedades
+  } = {}
+) {
+  const visited = new Set();
+
+  function shouldIncludeProperty(key, value) {
+    // Si hay lista de inclusión, solo mostrar esas propiedades
+    if (include.length > 0 && !include.includes(key)) {
+      return false;
+    }
+
+    // Excluir propiedades especificadas
+    if (exclude.includes(key)) {
+      return false;
+    }
+
+    // Filtrar funciones si no se desean
+    if (!showFunctions && typeof value === "function") {
+      return false;
+    }
+
+    // Filtrar undefined si no se desean
+    if (!showUndefined && value === undefined) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function printValue(value, depth = 0, currentPath = "") {
+    const indent = "  ".repeat(depth);
+
+    // Controlar profundidad máxima
+    if (maxDepth !== null && depth > maxDepth) {
+      return colors
+        ? "\x1b[90m[Max depth reached]\x1b[0m"
+        : "[Max depth reached]";
+    }
+
+    // Manejar null y undefined
+    if (value === null) {
+      return colors ? "\x1b[90mnull\x1b[0m" : "null";
+    }
+    if (value === undefined) {
+      return colors ? "\x1b[90mundefined\x1b[0m" : "undefined";
+    }
+
+    // Manejar primitivos
+    if (typeof value === "string") {
+      return colors ? `\x1b[32m"${value}"\x1b[0m` : `"${value}"`;
+    }
+    if (typeof value === "number") {
+      return colors ? `\x1b[33m${value}\x1b[0m` : value.toString();
+    }
+    if (typeof value === "boolean") {
+      return colors ? `\x1b[35m${value}\x1b[0m` : value.toString();
+    }
+    if (typeof value === "function") {
+      const funcStr = value.toString().split("\n")[0];
+      return colors
+        ? `\x1b[36m[Function: ${funcStr}]\x1b[0m`
+        : `[Function: ${funcStr}]`;
+    }
+
+    // Detectar referencias circulares
+    if (typeof value === "object" && visited.has(value)) {
+      return colors
+        ? "\x1b[31m[Circular Reference]\x1b[0m"
+        : "[Circular Reference]";
+    }
+
+    if (typeof value === "object") {
+      visited.add(value);
+
+      // Manejar arrays
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          visited.delete(value);
+          return "[]";
+        }
+
+        let result = "[\n";
+        value.forEach((item, index) => {
+          if (shouldIncludeProperty(index.toString(), item)) {
+            result += `${indent}  ${index}: ${printValue(
+              item,
+              depth + 1,
+              `${currentPath}[${index}]`
+            )},\n`;
+          }
+        });
+        result += `${indent}]`;
+        visited.delete(value);
+        return result;
+      }
+
+      // Manejar objetos
+      const keys = Object.keys(value);
+      if (keys.length === 0) {
+        visited.delete(value);
+        return "{}";
+      }
+
+      let result = "{\n";
+      keys.forEach((key) => {
+        if (shouldIncludeProperty(key, value[key])) {
+          const keyColor = colors ? `\x1b[34m${key}\x1b[0m` : key;
+          result += `${indent}  ${keyColor}: ${printValue(
+            value[key],
+            depth + 1,
+            `${currentPath}.${key}`
+          )},\n`;
+        }
+      });
+      result += `${indent}}`;
+      visited.delete(value);
+      return result;
+    }
+
+    return value.toString();
+  }
+
+  const labelColor = colors ? `\x1b[1m\x1b[36m${label}\x1b[0m` : label;
+  console.log(`\n🔍 ${labelColor}:`);
+  console.log(printValue(obj));
+}
+
 module.exports = {
   escaparBarras,
   deepPrint,
+  printDeep,
   formatearData,
   traducirError,
 };

@@ -55,6 +55,7 @@ const {
 
 // prettier-ignore
 const { 
+  printDeep,
   formatearData, 
   traducirError
 } = require("../../utils/helper");
@@ -1113,6 +1114,114 @@ async function eliminarArchivosInnecesarios(options = {}) {
 }
 
 // prettier-ignore
+function convertirDatosSeguro(data) {
+  const resultado = {
+    accesorios: [],
+    coberturasBasicas: []
+  };
+
+  // Procesar accesorios seleccionados
+  data.accesorios.forEach(accesorio => {
+    if (accesorio.selected) {
+      const accesorioSimplificado = {
+        nombre: accesorio.nombre,
+        valores: []
+      };
+
+      // Extraer valores de los hijos
+      accesorio.hijos.forEach(hijo => {
+        if (hijo.tag === 'input' && hijo.label) {
+          accesorioSimplificado.valores.push({
+            campo: hijo.label,
+            valor: hijo.valor
+          });
+        } else if (hijo.tag === 'select' && hijo.label) {
+          accesorioSimplificado.valores.push({
+            campo: hijo.label,
+            valor: hijo.valor
+          });
+        } else if (hijo.label && !hijo.tag) {
+          // Para casos como deducible que no tienen tag
+          accesorioSimplificado.valores.push({
+            campo: hijo.label,
+            valor: hijo.valor
+          });
+        }
+      });
+
+      resultado.accesorios.push(accesorioSimplificado);
+    }
+  });
+
+  // Procesar coberturas básicas
+  data.coberturasBasicas.forEach(cobertura => {
+    const coberturaSimplificada = {
+      cobertura: cobertura.cobertura,
+      sumaAsegurada: null,
+      deducible: null,
+      prima: cobertura.prima.texto
+    };
+
+    // Extraer suma asegurada
+    if (Array.isArray(cobertura.sumaSegura)) {
+      // Si es array, buscar el valor relevante
+      cobertura.sumaSegura.forEach(item => {
+        if (item.tag === 'input') {
+          coberturaSimplificada.sumaAsegurada = item.valor;
+        } else if (item.tag === 'select') {
+          coberturaSimplificada.sumaAsegurada = item.valor.texto || item.valor;
+        } else if (item.tag === 'p') {
+          coberturaSimplificada.sumaAsegurada = item.texto;
+        }
+      });
+    } else if (cobertura.sumaSegura) {
+      // Si es objeto único
+      if (cobertura.sumaSegura.tag === 'input') {
+        coberturaSimplificada.sumaAsegurada = cobertura.sumaSegura.valor;
+      } else if (cobertura.sumaSegura.tag === 'select') {
+        coberturaSimplificada.sumaAsegurada = cobertura.sumaSegura.valor.texto || cobertura.sumaSegura.valor;
+      } else if (cobertura.sumaSegura.tag === 'p') {
+        coberturaSimplificada.sumaAsegurada = cobertura.sumaSegura.texto;
+      }
+    }
+
+    // Extraer deducible
+    if (cobertura.deducible && cobertura.deducible.valor) {
+      coberturaSimplificada.deducible = cobertura.deducible.valor.texto || cobertura.deducible.valor;
+    }
+
+    resultado.coberturasBasicas.push(coberturaSimplificada);
+  });
+
+  return resultado;
+}
+
+async function publicURLToFiles(data = []) {
+  if (data.length === 0) {
+    return {
+      result: false,
+      error: "No se proporcionaron datos para procesar",
+    };
+  }
+  const files = {};
+  for (const item of data) {
+    try {
+      let tmpURL = await filePathToPublicUrl(item.ruta);
+      item.url = tmpURL;
+    } catch (error) {
+      return {
+        result: false,
+        error: `Error descargando archivo ${item.nombre}: ${error.message}`,
+      };
+    }
+  }
+  return {
+    result: true,
+    data,
+  };
+}
+
+// prettier-ignore
 async function procesarArchivosConPortada(options = {}) {
   const { archivos = [], logs = false } = options;
   
@@ -1132,9 +1241,21 @@ async function procesarArchivosConPortada(options = {}) {
     }
 
     try {
+      let nombreArchivo = archivo.nombre;
+      
+      // Formatear nombre para URLs públicas seguras
+      nombreArchivo = nombreArchivo
+        .replace(/\s+/g, '_')           // Reemplazar espacios con guiones bajos
+        .replace(/[^\w\-_.]/g, '')      // Quitar caracteres especiales excepto guiones, puntos y guiones bajos
+        .replace(/_{2,}/g, '_')         // Reemplazar múltiples guiones bajos con uno solo
+        .replace(/^_+|_+$/g, '')        // Quitar guiones bajos al inicio y final
+        .toLowerCase();                 // Convertir a minúsculas      
+
       const resultadoMerge = await mergePDFs({
         archivoOriginal: archivo.ruta,
         archivosMerge: rutaPlantilla,
+        eliminarOriginal : true,
+        newName : nombreArchivo
       });
 
       // 🚨 VERIFICAR ERROR EN MERGE
@@ -1147,7 +1268,7 @@ async function procesarArchivosConPortada(options = {}) {
         return {
           result: false,
           error: `Error haciendo merge del archivo ${archivo.nombreOriginal}: ${resultadoMerge.error}`,
-          archivoConError: archivo.nombreOriginal,
+          archivoConError: archivo.nombre,
           indiceError: i,
           archivosExitosos: archivosExitosos.length,
           archivosRestantes: archivos.length - i - 1,
@@ -1157,7 +1278,8 @@ async function procesarArchivosConPortada(options = {}) {
 
       // ✅ MERGE EXITOSO
       archivosExitosos.push({
-        nombreOriginal: archivo.nombreOriginal,
+        nombreOriginal: archivo.nombre,
+        nombreFormateado: nombreArchivo,
         ruta: archivo.ruta,
         archivoSalida: resultadoMerge.archivoSalida,
         totalPaginas: resultadoMerge.totalPaginas
@@ -1200,6 +1322,36 @@ async function procesarArchivosConPortada(options = {}) {
       errores: 0
     }
   };
+}
+
+async function formatearRegistroPoliza(data) {
+  console.log("Formateando data de póliza...");
+  // const datosConvertidos = convertirDatosSeguro(data.cotizacion.detalles);
+  console.log(data.cotizacion.detalles.accesorios);
+  console.log(data.cotizacion.detalles.coberturasBasicas);
+  let tmp = {
+    numeroPoliza: data.numeroPoliza,
+    cliente_id: data.cliente.id,
+    subAgente_id: data.cliente.id,
+    compania_id: data.cotizacion.compania_id,
+    ramo_id: data.cotizacion.ramo_id,
+    producto_id: data.cotizacion.companiaProducto_id,
+
+    primaAnual: data.cotizacion.detalles.primaAnual,
+    primaTotal: data.cotizacion.detalles.primaTotal,
+    pagoInicial: data.cotizacion.detalles.primerPago,
+    pagoSubsecuente: data.cotizacion.detalles.pagoSubsecuente,
+    financiamiento: data.cotizacion.detalles.financiamiento,
+    archivos: JSON.stringify(data.archivos),
+    // data: JSON.stringify(data),
+  };
+  tmp.frecuenciaPago_id = "";
+  tmp.metodoPago_id = "";
+  tmp.inicioVigencia = "";
+  tmp.finVigencia = "";
+  tmp.comisionAgent = "";
+
+  return tmp;
 }
 
 async function descargarTodosLosDocumentos(driver, options = {}) {
@@ -1350,19 +1502,41 @@ async function handleEmitirPoliza(data) {
     }
 
     showConsoleLog("Procesando archivos con portada");
+
     // Eliminar el archivo ZIP descargado
     let procesadaMerge = await procesarArchivosConPortada({
       archivos: procesoEliminacion.archivosConservados,
     });
 
-    // showConsoleLog("✅ procesadaMerge:", procesadaMerge);
+    await eliminarArchivo(rutaCompleta);
 
     if (!procesadaMerge.result) {
       return await formatearData(procesadaMerge);
     }
+    let archivos = [];
 
-    await eliminarArchivo(rutaCompleta);
-    console.log("✅ procesadaMerge:", data);
+    for (const archivo of procesadaMerge.archivosExitosos) {
+      archivos.push({
+        nombreOriginal: archivo.nombreOriginal,
+        nombre: archivo.nombreFormateado,
+        ruta: archivo.archivoSalida,
+      });
+    }
+
+    let procesoURL = await publicURLToFiles(archivos);
+
+    if (!procesoURL.result) {
+      return await formatearData(procesoURL);
+    }
+
+    data.archivos = procesoURL.data;
+    data.numeroPoliza = numeroPoliza;
+
+    let registroPoliza = await formatearRegistroPoliza(data);
+
+    console.log("Archivos procesados con portada:", registroPoliza);
+
+    // console.log("✅ procesadaMerge:", data);
     showConsoleLog("🎉 Proceso completado exitosamente.");
     // // prettier-ignore
     // dataResponse = await generadorCotizacion(driver, data);

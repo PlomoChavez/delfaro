@@ -30,6 +30,7 @@ async function mergePDFs(options = {}) {
     newName = null,
     orden = "asc",
     reubicar = null,
+    eliminarOriginal = false,
     logs = false,
   } = options;
 
@@ -97,7 +98,6 @@ async function mergePDFs(options = {}) {
     const archivosIncluidos = [];
     const erroresProcesamiento = [];
 
-    // 🔥 SOLUCIÓN: QUITAR EL RETURN DE AQUÍ Y PROCESAR TODOS LOS ARCHIVOS
     for (let i = 0; i < todosLosArchivos.length; i++) {
       const rutaArchivo = todosLosArchivos[i];
       const esOriginal = rutaArchivo === archivoOriginal;
@@ -136,9 +136,6 @@ async function mergePDFs(options = {}) {
         if (logs) {
           console.log(`   ✅ Incluido: ${pdfOriginal.getPageCount()} páginas`);
         }
-
-        // 🚨 PROBLEMA SOLUCIONADO: ELIMINAR ESTE RETURN
-        // return { ... } ← ESTO CAUSABA QUE SOLO PROCESARA EL PRIMER ARCHIVO
       } catch (error) {
         erroresProcesamiento.push({
           archivo: path.basename(rutaArchivo),
@@ -239,7 +236,49 @@ async function mergePDFs(options = {}) {
       };
     }
 
-    // ✅ PASO 8: RETURN EXITOSO CORRECTO (FUERA DEL LOOP)
+    // ✅ PASO 8: Eliminar archivo original si está habilitado
+    let archivoOriginalEliminado = false;
+    let errorEliminacion = null;
+
+    if (eliminarOriginal && archivoSalida !== archivoOriginal) {
+      try {
+        const resultadoEliminacion = await eliminarArchivo(archivoOriginal, {
+          logs,
+        });
+
+        if (resultadoEliminacion.result) {
+          archivoOriginalEliminado = true;
+          if (logs) {
+            console.log(
+              `🗑️ Archivo original eliminado: ${path.basename(archivoOriginal)}`
+            );
+          }
+        } else {
+          errorEliminacion = resultadoEliminacion.error;
+          if (logs) {
+            console.log(
+              `⚠️ No se pudo eliminar archivo original: ${errorEliminacion}`
+            );
+          }
+        }
+      } catch (error) {
+        errorEliminacion = error.message;
+        if (logs) {
+          console.log(
+            `⚠️ Error eliminando archivo original: ${errorEliminacion}`
+          );
+        }
+      }
+    } else if (eliminarOriginal && archivoSalida === archivoOriginal) {
+      if (logs) {
+        console.log(
+          `⚠️ No se puede eliminar archivo original: es el mismo archivo de salida`
+        );
+      }
+      errorEliminacion = "El archivo de salida es el mismo que el original";
+    }
+
+    // ✅ PASO 9: RETURN EXITOSO CORRECTO
     const totalPaginas = archivosIncluidos.reduce(
       (sum, archivo) => sum + archivo.paginas,
       0
@@ -254,6 +293,14 @@ async function mergePDFs(options = {}) {
       console.log(
         `   📐 Tamaño final: ${fs.statSync(archivoSalida).size} bytes`
       );
+
+      if (eliminarOriginal) {
+        if (archivoOriginalEliminado) {
+          console.log(`   🗑️ Archivo original eliminado exitosamente`);
+        } else if (errorEliminacion) {
+          console.log(`   ⚠️ Error eliminando original: ${errorEliminacion}`);
+        }
+      }
 
       if (erroresProcesamiento.length > 0) {
         console.log(`   ❌ Errores: ${erroresProcesamiento.length}`);
@@ -272,6 +319,8 @@ async function mergePDFs(options = {}) {
       directorio: directorioDestino,
       nombrePersonalizado: newName && typeof newName === "string",
       reubicado: reubicar && typeof reubicar === "string",
+      archivoOriginalEliminado,
+      errorEliminacion,
       erroresProcesamiento,
       message: "Merge de PDFs completado exitosamente",
     };
