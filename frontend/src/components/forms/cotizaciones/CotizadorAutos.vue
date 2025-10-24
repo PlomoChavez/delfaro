@@ -229,6 +229,7 @@ const handleUpdateCotizacion = async (data = null) => {
   };
   await updateCotizacion(tmp);
 };
+
 const handleUpdateCotizacionParaEmitir = async (data = null) => {
   let localDataRaw = deepToRaw(localData.value);
 

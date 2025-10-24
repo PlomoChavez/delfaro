@@ -21,6 +21,7 @@ const apiEndpoints = {
   update: "/api/cotizaciones/update", // Endpoint para actualizar un elemento
   delete: "/api/cotizaciones/delete", // Endpoint para eliminar un elemento
 };
+
 function safeParseConfig(configString: any) {
   // Si no hay configuración o ya es un objeto, retornarlo
   if (!configString || typeof configString === "object") {

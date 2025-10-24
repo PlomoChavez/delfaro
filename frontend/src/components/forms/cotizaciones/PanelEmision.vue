@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { createCliente } from "@/apis/clienteApi";
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import OpcionSelector from "@/components/custom/OpcionSelector.vue";
 import ClienteBuscador from "@/components/forms/clientes/clienteBuscador.vue";
 import { ref } from "vue";
-
+import { toast } from "vue3-toastify";
 const paso = ref(1);
 const formData: any = ref({});
 const data: any = ref({});
@@ -184,7 +185,7 @@ function handleAseguradoIgual(accion: string) {
   paso.value = accion === "igual" ? 8 : 5;
 }
 
-function handleEmitir() {
+async function handleEmitir() {
   let tmp = toRaw(data.value);
   tmp.cotizacion = toRaw(props.registro);
   tmp.compania = tmp.cotizacion.compania.toLowerCase();
@@ -196,12 +197,31 @@ function handleEmitir() {
 
   delete tmp.cliente.data;
   delete tmp.asegurado.data;
-  delete tmp.cotizacion.vehiculo;
   delete tmp.cotizacion.titular.direcciones;
   delete tmp.cotizacion.detalles.frecuenciasPago;
   delete tmp.cotizacion.detalles.titular;
 
   props.actualizarFN(tmp);
+
+  await handleEmitirApi(tmp);
+}
+
+async function handleEmitirApi(payload: any) {
+  const response = await customRequest({
+    url: "/api/cotizaciones/emitir",
+    method: "POST",
+    data: payload,
+  });
+  const dataResponse = response.data;
+  if (dataResponse.result) {
+    // prettier-ignore
+    toast.success("¡Cotización guardada!", { theme: "dark",});
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: dataResponse.message,
+    });
+  }
 }
 
 function handleTerminar() {

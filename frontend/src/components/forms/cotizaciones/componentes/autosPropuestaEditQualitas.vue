@@ -597,6 +597,9 @@ onMounted(() => {
       }
     }
     if ("detalles" in cotizacionTMP) {
+      if (!("frecuenciaPago" in cotizacionTMP.detalles)) {
+        cotizacionTMP.detalles.frecuenciaPago = "Contado";
+      }
       // prettier-ignore
       selectedFrecuencia.value = cotizacionTMP.detalles.frecuenciaPago || "Contado";
     }

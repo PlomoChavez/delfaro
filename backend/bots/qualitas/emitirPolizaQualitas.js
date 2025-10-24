@@ -98,8 +98,7 @@ async function buscarPoliza(driver, data) {
   await setInputValue(driver, {
     locator: "numcotizacion",
     esperarHabilitado: true,
-    value: "1032833958",
-    // value: data.cotizacion.detalles.numeroCotizacion,
+    value: data.cotizacion.detalles.numeroCotizacion,
     sleeptime: 1000,
   });
 
@@ -183,7 +182,7 @@ async function insertarDatos(driver, data) {
     locator: "selectNationality",
     tipoValor: "label",
     sleeptime: 1000,
-    value: data.nacionalidad,
+    value: data.nacionalidad ?? "Mexicana",
     by: "id",
   });
 
@@ -390,7 +389,7 @@ async function insertarDatos2(driver, data) {
     locator: "selectNationality_contratanteFisica",
     tipoValor: "label",
     sleeptime: 1000,
-    value: data.nacionalidad,
+    value: data.nacionalidad ?? "Mexicana",
     by: "id",
   });
 
@@ -1334,6 +1333,9 @@ async function handleEmitirPoliza(data) {
   let driver;
 
   try {
+    console.log("🚀 Iniciando proceso de emisión de póliza...");
+    console.log("Datos recibidos:", data);
+    console.log("Datos recibidos:", data.cotizacion.detalles);
     // prettier-ignore
     driver = await openPage("https://agentes360.qualitas.com.mx/", {
       headless: false,
@@ -1343,36 +1345,36 @@ async function handleEmitirPoliza(data) {
 
     await sleep(2000);
 
-    // // Redireccionar al buscador de cotiizaciones
-    // // prettier-ignore
-    // await driver.get("https://agentes360.qualitas.com.mx/group/guest/lista-de-cotizaciones");
-
-    // await buscarPoliza(driver, data);
-
-    // // Insertando datos del asegurado
-    // await insertarDatos(driver, data.asegurado);
-
-    // // Insertando datos del carro
-    // await insertandoDatosCarro(driver, data.carro);
-
-    // // Insertando datos del cliente
-    // await insertarDatos2(driver, data.cliente);
-
-    // await clickElement(driver, {
-    //   locator: "btnVigencia",
-    //   sleeptime: 100,
-    // });
-
-    // await clickElement(driver, {
-    //   locator: "btnEmision",
-    //   sleeptime: 1000,
-    // });
-    // *****************************************************
-
-    await consultaPoliza(driver, data);
-
-    // Si hay tabla, obtener la informacion de la poliza
+    // Redireccionar al buscador de cotiizaciones
     // prettier-ignore
+    await driver.get("https://agentes360.qualitas.com.mx/group/guest/lista-de-cotizaciones");
+
+    await buscarPoliza(driver, data);
+
+    // Insertando datos del asegurado
+    await insertarDatos(driver, data.asegurado);
+
+    // Insertando datos del carro
+    await insertandoDatosCarro(driver, data.carro);
+
+    // Insertando datos del cliente
+    await insertarDatos2(driver, data.cliente);
+
+    await clickElement(driver, {
+      locator: "btnVigencia",
+      sleeptime: 100,
+    });
+
+    await clickElement(driver, {
+      locator: "btnEmision",
+      sleeptime: 1000,
+    });
+    // // *****************************************************
+
+    // await consultaPoliza(driver, data);
+
+    // // Si hay tabla, obtener la informacion de la poliza
+    // // prettier-ignore
     const numeroPoliza = await getElementText(driver, { locator: "nPol" });
     // const numeroPoliza = "0810326356";
 
@@ -1451,7 +1453,7 @@ async function handleEmitirPoliza(data) {
 
     let registroPoliza = await formatearRegistroPoliza(data);
 
-    console.log("Archivos procesados con portada:", registroPoliza);
+    // console.log("Archivos procesados con portada:", registroPoliza);
 
     // console.log("✅ procesadaMerge:", data);
     showConsoleLog("🎉 Proceso completado exitosamente.");
@@ -1460,7 +1462,7 @@ async function handleEmitirPoliza(data) {
     // // let tmp = await formatearData(dataResponse);
 
     // dataResponse.estimar = false;
-    return await formatearData({});
+    return await formatearData(data);
   } catch (error) {
     error = traducirError(error, "Error general en la emitir la poliza: ");
     console.log(error);

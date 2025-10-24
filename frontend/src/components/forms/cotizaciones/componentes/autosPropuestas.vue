@@ -202,7 +202,6 @@ const companiasSeleccionadas = ref<number[]>([]);
 watch(
   () => props.configuracion.cotizaciones,
   (newVal) => {
-console.log("props.configuracion.cotizaciones changed:", deepToRaw(newVal));
     propuestas.value = newVal || [];
   },
   { immediate: true }
@@ -236,7 +235,6 @@ async function handleAgregarCotizacion() {
     ? props.configuracion.cotizaciones.length + 1
     : 1;
     
-  console.log("Companias seleccionadas:", toRaw(companiasSeleccionadas.value));
   companiasSeleccionadas.value.forEach((compania: any) => {
     tmp.push({
       id: index++,
@@ -264,8 +262,6 @@ async function deleteItem(item: any) {
   let tmp = (props.configuracion.cotizaciones || []).filter(
     (x: any) => x.id !== item.id
   );
-  console.log("Eliminar item:", item.id, deepToRaw(tmp));
-  console.log("Propuestas actuales:", tmp.length);
   emit("actualizar", tmp);
   moodDelete.value = false;
 }

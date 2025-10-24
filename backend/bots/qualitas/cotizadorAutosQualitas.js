@@ -129,6 +129,8 @@ async function getDetallesCotizacion(driver, data, darClick = true) {
       sleeptime: 1000,
       by: "xpath",
     });
+  } else {
+    data.detalles.frecuenciaPago = "Contado";
   }
 
   let frecuenciasPago = await obtenerFrecuenciasPago(driver);
