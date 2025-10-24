@@ -389,7 +389,7 @@ async function insertarDatos2(driver, data) {
     locator: "selectNationality_contratanteFisica",
     tipoValor: "label",
     sleeptime: 1000,
-    value: data.nacionalidad ?? "Mexicana",
+    value: data.nacionalidad ?? "",
     by: "id",
   });
 
