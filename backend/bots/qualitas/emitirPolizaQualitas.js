@@ -3,6 +3,13 @@ const os = require("os");
 const archivosNoPermitidos = ["Acuse-Poliza", "Carta de Bienvenida"];
 const showLogs = true;
 
+const {
+  findOne,
+  getAllFrom,
+  deleteById,
+  createOrUpdate,
+} = require("../../db/functionsSQL");
+
 // prettier-ignore
 const { 
   until, 
@@ -56,9 +63,12 @@ const {
 // prettier-ignore
 const { 
   printDeep,
+  extraerNumeroFlotante,
   formatearData, 
   traducirError
 } = require("../../utils/helper");
+
+const { sumarFechas, now } = require("../../utils/fechasHelper");
 
 function showConsoleLog(message, logs = showLogs) {
   if (logs) {
@@ -706,6 +716,114 @@ async function validarModalAbierto(driver, options = {}) {
   }
 }
 
+async function handleProcesarArchivosPoliza(driver, data, options = {}) {
+  console.log("Esperando 5 segundos antes de la descarga...");
+  await sleep(5000);
+
+  console.log("Iniciando espera de carga completa...");
+  await esperarCargaCompleta(driver);
+
+  console.log("Esperando número de póliza...");
+  await waitForElement(driver, {
+    locator: "nPol",
+    by: "id",
+  });
+
+  console.log("Esperando info de consulta de póliza...");
+  await waitForElement(driver, {
+    locator: "info-consulta-poliza",
+    by: "id",
+  });
+
+  console.log("Esperando para descargar");
+  console.log("Esperando 5 segundos antes de la descarga...");
+  await sleep(5000);
+  // // Si hay tabla, obtener la informacion de la poliza
+  // // prettier-ignore
+  const numeroPoliza = await getElementText(driver, { locator: "nPol" });
+  // const numeroPoliza = "0810326356";
+
+  console.log("numeroPoliza", numeroPoliza);
+
+  // prettier - ignore;
+  let resultadoDescarga = await descargarTodosLosDocumentos(driver, {
+    numeroPoliza,
+  });
+
+  if (!resultadoDescarga.result) {
+    return await formatearData(resultadoDescarga);
+  }
+
+  // prettier-ignore
+  const rutaCarpetaPolizas = obtenerRutaBackendFiles( "polizas", numeroPoliza );
+  // prettier-ignore
+  const rutaCompleta = resultadoDescarga.rutaCompleta;
+  // const rutaCompleta = "/Users/plomochavez/Downloads/Poliza_0810326356_Documentos.zip";
+
+  await existeCarpeta(rutaCarpetaPolizas, {
+    crearSiNoExiste: true,
+  });
+
+  showConsoleLog("Descomprimiento archivo ZIP de la poliza");
+  let procesoDescompresion = await descomprimirArchivo(
+    rutaCompleta,
+    rutaCarpetaPolizas
+  );
+
+  if (!procesoDescompresion.result) {
+    return await formatearData(procesoDescompresion);
+  }
+
+  // Eliminar archivos innecesarios
+  showConsoleLog("Eliminando archivos innecesarios");
+
+  let procesoEliminacion = await eliminarArchivosInnecesarios({
+    archivos: procesoDescompresion.archivosExtraidos,
+  });
+
+  if (!procesoEliminacion.result) {
+    return await formatearData(procesoEliminacion);
+  }
+
+  showConsoleLog("Procesando archivos con portada");
+
+  // Eliminar el archivo ZIP descargado
+  let procesadaMerge = await procesarArchivosConPortada({
+    archivos: procesoEliminacion.archivosConservados,
+  });
+
+  await eliminarArchivo(rutaCompleta);
+
+  if (!procesadaMerge.result) {
+    return await formatearData(procesadaMerge);
+  }
+  let archivos = [];
+
+  for (const archivo of procesadaMerge.archivosExitosos) {
+    archivos.push({
+      nombreOriginal: archivo.nombreOriginal,
+      nombre: archivo.nombreFormateado,
+      ruta: archivo.archivoSalida,
+    });
+  }
+
+  let procesoURL = await publicURLToFiles(archivos);
+
+  if (!procesoURL.result) {
+    return await formatearData(procesoURL);
+  }
+
+  data.archivos = procesoURL.data;
+  data.numeroPoliza = numeroPoliza;
+
+  let registroPoliza = await formatearRegistroPoliza(data);
+
+  return {
+    result: true,
+    data: registroPoliza,
+  };
+}
+
 async function validarTablaPoliza(driver) {
   await sleep(1500);
   console.log("Validando tabla de póliza...");
@@ -1070,7 +1188,45 @@ async function procesarArchivosConPortada(options = {}) {
   };
 }
 
+async function handleRegitroPoliza(data) {
+  try {
+    let registroPoliza = await formatearRegistroPoliza(data);
+
+    const responsePoliza = await createOrUpdate({
+      tabla: "polizas",
+      data: { ...registroPoliza },
+      returnResponse: true,
+    });
+
+    data.poliza_id = responsePoliza.data.id;
+
+    const responseCotizacion = await createOrUpdate({
+      tabla: "cotizaciones",
+      data: { id: data.cotizacion.id, estatus: "Emitida" },
+    });
+
+    await createRecibos(data);
+    return {
+      result: true,
+      message: "Póliza registrada exitosamente",
+    };
+  } catch (error) {
+    console.error("Error en handleRegistroPoliza:", error);
+    return {
+      result: false,
+      message: error.message,
+    };
+  }
+}
+
 async function formatearRegistroPoliza(data) {
+  const frecuenciasPagoInBD = await getAllFrom("formas_de_pago", {
+    label: data.cotizacion.detalles.frecuenciaPago,
+  });
+
+  let frecuenciaPagoId =
+    frecuenciasPagoInBD.length == 1 ? frecuenciasPagoInBD[0].id : 1;
+
   let tmp = {
     numeroPoliza: data.numeroPoliza,
     cliente_id: data.cliente.id,
@@ -1087,13 +1243,82 @@ async function formatearRegistroPoliza(data) {
     archivos: JSON.stringify(data.archivos),
     // data: JSON.stringify(data),
   };
-  tmp.frecuenciaPago_id = "";
-  tmp.metodoPago_id = "";
+  tmp.frecuenciaPago_id = frecuenciaPagoId;
   tmp.inicioVigencia = "";
   tmp.finVigencia = "";
-  tmp.comisionAgent = "";
 
   return tmp;
+}
+
+async function createRecibos(data) {
+  let frecuenciaPago = data.cotizacion.detalles.frecuenciaPago.toLowerCase();
+  let fechaInicio = data.cotizacion.detalles.inicioVigencia ?? now();
+
+  fechaInicio = sumarFechas(fechaInicio, {
+    formatoSalida: "dd/mm/yyyy",
+    operacion: "restar",
+    dias: 1,
+  });
+
+  let fechaFin = sumarFechas(fechaInicio, {
+    formatoSalida: "dd/mm/yyyy",
+    años: 1,
+  });
+
+  let frecuencias = {
+    anual: 1,
+    contado: 1,
+    semestral: 2,
+    trimestral: 3,
+    mensual: 4,
+  };
+
+  let aumentoFechas = {
+    anual: 12,
+    contado: 12,
+    semestral: 6,
+    trimestral: 3,
+    mensual: 1,
+  };
+
+  let numeroRecibos = frecuencias[frecuenciaPago] || 1;
+
+  for (let i = 0; i < numeroRecibos; i++) {
+    let montoRecibo =
+      numeroRecibos == 1
+        ? data.cotizacion.detalles.primerPago
+        : data.cotizacion.detalles.pagoSubsecuente;
+
+    montoRecibo = extraerNumeroFlotante(montoRecibo);
+
+    let fechaInicioRecibo = sumarFechas(fechaInicio, {
+      formatoSalida: "dd/mm/yyyy",
+    });
+
+    let fechaFinRecibo = sumarFechas(fechaInicioRecibo, {
+      meses: aumentoFechas[frecuenciaPago],
+      formatoSalida: "dd/mm/yyyy",
+    });
+
+    let fechaVencimiento = sumarFechas(fechaInicioRecibo, {
+      formatoSalida: "dd/mm/yyyy",
+      dias: 14,
+    });
+
+    let reciboData = {
+      poliza_id: data.poliza_id,
+      numeroRecibo: (i + 1).toString().padStart(3, "0"),
+      vencimiento: fechaVencimiento,
+      fechaInicio: fechaInicioRecibo,
+      fechaFin: fechaFinRecibo,
+      importe: montoRecibo,
+    };
+
+    const responseCotizacion = await createOrUpdate({
+      tabla: "poliza_recibos",
+      data: reciboData,
+    });
+  }
 }
 
 async function descargarTodosLosDocumentos(driver, options = {}) {
@@ -1202,120 +1427,13 @@ async function handleEmitirPoliza(data) {
       locator: "btnEmision",
       sleeptime: 1000,
     });
-    console.log("Esperando modal de emisión...");
-    // // *****************************************************
 
-    // await consultaPoliza(driver, data);
-    console.log("Esperando 5 segundos antes de la descarga...");
-    await sleep(5000);
+    await handleProcesarArchivosPoliza(driver, data);
 
-    console.log("Iniciando espera de carga completa...");
-    await esperarCargaCompleta(driver);
+    await handleRegitroPoliza(data);
 
-    console.log("Esperando número de póliza...");
-    await waitForElement(driver, {
-      locator: "nPol",
-      by: "id",
-    });
-
-    console.log("Esperando info de consulta de póliza...");
-    await waitForElement(driver, {
-      locator: "info-consulta-poliza",
-      by: "id",
-    });
-
-    console.log("Esperando para descargar");
-    console.log("Esperando 5 segundos antes de la descarga...");
-    await sleep(5000);
-    // // Si hay tabla, obtener la informacion de la poliza
-    // // prettier-ignore
-    const numeroPoliza = await getElementText(driver, { locator: "nPol" });
-    // const numeroPoliza = "0810326356";
-
-    console.log("numeroPoliza", numeroPoliza);
-
-    // prettier - ignore;
-    let resultadoDescarga = await descargarTodosLosDocumentos(driver, {
-      numeroPoliza,
-    });
-
-    if (!resultadoDescarga.result) {
-      return await formatearData(resultadoDescarga);
-    }
-
-    // prettier-ignore
-    const rutaCarpetaPolizas = obtenerRutaBackendFiles( "polizas", numeroPoliza );
-    // prettier-ignore
-    const rutaCompleta = resultadoDescarga.rutaCompleta;
-    // const rutaCompleta = "/Users/plomochavez/Downloads/Poliza_0810326356_Documentos.zip";
-
-    await existeCarpeta(rutaCarpetaPolizas, {
-      crearSiNoExiste: true,
-    });
-
-    showConsoleLog("Descomprimiento archivo ZIP de la poliza");
-    let procesoDescompresion = await descomprimirArchivo(
-      rutaCompleta,
-      rutaCarpetaPolizas
-    );
-
-    if (!procesoDescompresion.result) {
-      return await formatearData(procesoDescompresion);
-    }
-
-    // Eliminar archivos innecesarios
-    showConsoleLog("Eliminando archivos innecesarios");
-
-    let procesoEliminacion = await eliminarArchivosInnecesarios({
-      archivos: procesoDescompresion.archivosExtraidos,
-    });
-
-    if (!procesoEliminacion.result) {
-      return await formatearData(procesoEliminacion);
-    }
-
-    showConsoleLog("Procesando archivos con portada");
-
-    // Eliminar el archivo ZIP descargado
-    let procesadaMerge = await procesarArchivosConPortada({
-      archivos: procesoEliminacion.archivosConservados,
-    });
-
-    await eliminarArchivo(rutaCompleta);
-
-    if (!procesadaMerge.result) {
-      return await formatearData(procesadaMerge);
-    }
-    let archivos = [];
-
-    for (const archivo of procesadaMerge.archivosExitosos) {
-      archivos.push({
-        nombreOriginal: archivo.nombreOriginal,
-        nombre: archivo.nombreFormateado,
-        ruta: archivo.archivoSalida,
-      });
-    }
-
-    let procesoURL = await publicURLToFiles(archivos);
-
-    if (!procesoURL.result) {
-      return await formatearData(procesoURL);
-    }
-
-    data.archivos = procesoURL.data;
-    data.numeroPoliza = numeroPoliza;
-
-    let registroPoliza = await formatearRegistroPoliza(data);
-
-    // console.log("Archivos procesados con portada:", registroPoliza);
-
-    // console.log("✅ procesadaMerge:", data);
     showConsoleLog("🎉 Proceso completado exitosamente.");
-    // // prettier-ignore
-    // dataResponse = await generadorCotizacion(driver, data);
-    // // let tmp = await formatearData(dataResponse);
 
-    // dataResponse.estimar = false;
     return await formatearData(data);
   } catch (error) {
     error = traducirError(error, "Error general en la emitir la poliza: ");
@@ -1328,4 +1446,38 @@ async function handleEmitirPoliza(data) {
     if (driver) await driver.quit();
   }
 }
+
+// async function handleEmitirPoliza(data) {
+//   let driver;
+
+//   try {
+//     console.log("🚀 Iniciando proceso de emisión de póliza...");
+//     driver = await openPage("https://agentes360.qualitas.com.mx/", {
+//       headless: false,
+//     });
+
+//     await iniciarSesion(driver, data);
+
+//     await sleep(2000);
+
+//     await consultaPoliza(driver, data);
+
+//     await handleProcesarArchivosPoliza(driver, data);
+
+//     await handleRegitroPoliza(data);
+
+//     showConsoleLog("🎉 Proceso completado exitosamente.");
+
+//     return await formatearData(data);
+//   } catch (error) {
+//     error = traducirError(error, "Error general en la emitir la poliza: ");
+//     console.log(error);
+//     return await formatearData({
+//       mssgError: error,
+//       result: false,
+//     });
+//   } finally {
+//     if (driver) await driver.quit();
+//   }
+// }
 module.exports = { handleEmitirPoliza };

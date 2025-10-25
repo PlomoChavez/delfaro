@@ -309,10 +309,33 @@ function printDeep(
   console.log(printValue(obj));
 }
 
+function extraerNumeroFlotante(cadenaConDinero) {
+  if (!cadenaConDinero) {
+    return 0;
+  }
+
+  // Convertir a string si no lo es
+  const cadena = String(cadenaConDinero);
+
+  // Remover símbolos de moneda ($, €, etc.), comas y espacios
+  // Mantener solo números, puntos y guiones (para negativos)
+  const numeroLimpio = cadena
+    .replace(/[$€£¥₹₽¢]/g, "") // Símbolos de moneda comunes
+    .replace(/[,\s]/g, "") // Comas y espacios
+    .replace(/[^\d.-]/g, ""); // Todo excepto dígitos, puntos y guiones
+
+  // Convertir a número flotante
+  const numero = parseFloat(numeroLimpio);
+
+  // Retornar 0 si no es un número válido
+  return isNaN(numero) ? 0 : numero;
+}
+
 module.exports = {
   escaparBarras,
   deepPrint,
   printDeep,
   formatearData,
   traducirError,
+  extraerNumeroFlotante,
 };
