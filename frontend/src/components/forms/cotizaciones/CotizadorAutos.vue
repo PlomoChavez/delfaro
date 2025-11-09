@@ -28,7 +28,6 @@ const step = ref(1);
 const companias: any = ref([]);
 const estimando: any = ref(false);
 const cotizacion: any = ref(null);
-const isEstimando: any = ref(false);
 const editandoTitular: any = ref(false);
 const agregandoCotizaciones: any = ref(false);
 
@@ -40,6 +39,10 @@ const localData: any = ref(props.registro ? { ...props.registro } : {
     cotizaciones: []
   }
 });
+
+await function handleGoEmitir() {
+  handleStepNext(false);
+};
 
 const handleStepPrev = () => {
   if (step.value === 1) {
@@ -91,27 +94,6 @@ const handleStepNext = (update: boolean = true) => {
   if (update) {
     handleUpdateCotizacion();
   }
-};
-
-await function handleGoEmitir() {
-  handleStepNext(false);
-};
-
-const handleAddCotizacionesEstimadas = async (data: any) => {
-  let tmpData = deepClone(toRaw(localData.value));
-  data = data.filter((item: any) => {
-    const idx = tmpData.value.configuracion.cotizaciones.findIndex(
-      (c: any) => c.id === item.id
-    );
-    if (idx !== -1) {
-      // Si existe, reemplaza la cotización
-      tmpData.value.configuracion.cotizaciones[idx] = item;
-      return false; // Elimínala del array data
-    }
-    tmpData.value.configuracion.cotizaciones.push(item);
-  });
-
-  localData.value = deepClone(tmpData);
 };
 
 const handleSelectCompania = (item: any) => {
@@ -324,22 +306,6 @@ const handleFiltrandoCotizacionesPorCompania = async () => {
   localData.value.configuracion.cotizaciones = cotizacionesFiltradas;
 };
 
-// prettier-ignore
-async function handleCotizacionesParaEstimar(arr: any[]) {
-  // Verificar si tiene inicial=true Y estimar=true
-  // prettier-ignore
-  const cumpleCondicion1 = await searchKeysInArray(arr, [{ key: "estimar", tipoValidacion: "igual", valor: true}], true);
-
-  // Verificar si tiene msgError
-  // prettier-ignore
-  const cumpleCondicion2 = await searchKeysInArray(arr, [{ key: "msgError"}], true);
-
-  // Retorna true si cumple cualquiera de las dos condiciones
-  const resultado = cumpleCondicion1 || !cumpleCondicion2;
-
-  return resultado;
-}
-
 const estimarCotizaciones = async (data = null, flujoNormal = false) => {
   estimando.value = true; // Indica que se está estimando
 
@@ -389,20 +355,6 @@ const handleActualizarCotizacion = async (cotizacionData: any) => {
   setTimeout(async () => { await estimarCotizaciones(tmpRegistro, false); }, 10);
 };
 
-const handleRefreshEstimar = async () => {
-  let data = deepToRaw(localData.value);
-
-  data.configuracion.cotizaciones.forEach((c: any) => {
-    delete c.numeroCotizacion;
-    delete c.archivo;
-    delete c.detalles;
-  });
-
-  localData.value.configuracion.cotizaciones = data.configuracion.cotizaciones;
-
-  await estimarCotizaciones();
-};
-
 onMounted(async () => {
   if (props.registro) {
     localData.value = { ...props.registro };
@@ -415,13 +367,12 @@ onMounted(async () => {
   }
 });
 
-watch(step, async (nuevoValor, valorAnterior) => {
+watch(step, async (nuevoValor) => {
   if (nuevoValor === 3) {
     await handleFiltrandoCotizacionesPorCompania();
     // prettier-ignore
-    let canEstimar = await handleCotizacionesParaEstimar(deepToRaw(localData.value.configuracion.cotizaciones));
-    if (canEstimar == true) {
-      // estimarCotizaciones(); // Llama a la función para estimar cotizaciones cuando se llega al paso 3
+    if (!toRaw(localData.value).estatus) {
+      estimarCotizaciones();
     }
   }
 });

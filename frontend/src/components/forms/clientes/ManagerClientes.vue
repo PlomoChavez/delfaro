@@ -116,6 +116,28 @@ const schemaForm : any = [
     model: "codigoPostal",
     classElement: " col-sm-12 col-md-6  col-lg-3 ",
   },
+  {
+    label: "Paquete de cobertura",
+    type: "select",
+    model: "paqueteCobertura",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
+      options: [
+      {label:"Basica",id:"Basica"},
+      {label:"Limitada",id:"Limitada"},
+      {label:"Amplia",id:"Amplia"},
+    ]
+  },
+  { 
+    label: "Obtener los detalles de accesorios",
+    type: "switch",
+    classElement: " col-12 col-md-6 col-lg-3 ",
+    model: "obtenerDetallesAccesorios",
+    options: [ 
+      {label:"Si",id:"Si"}, 
+      {label:"No",id:"No"} 
+    ]
+  },
+
 ];
 // prettier-ignore
 const schemaClienteCotizacion : any = [
@@ -171,6 +193,27 @@ const schemaClienteCotizacion : any = [
     type: "text",
     model: "codigoPostal",
     classElement: " col-sm-12 col-md-6  col-lg-3 ",
+  },
+  {
+    label: "Paquete de cobertura",
+    type: "select",
+    model: "paqueteCobertura",
+    classElement: " col-sm-12 col-md-6  col-lg-6 ",
+      options: [
+      {label:"Basica",id:"Basica"},
+      {label:"Limitada",id:"Limitada"},
+      {label:"Amplia",id:"Amplia"},
+    ]
+  },
+  { 
+    label: "Obtener los detalles de accesorios",
+    type: "switch",
+    classElement: " col-sm-12 col-md-6  col-lg-6 ",
+    model: "obtenerDetallesAccesorios",
+    options: [ 
+      {label:"Si",id:"Si"}, 
+      {label:"No",id:"No"} 
+    ]
   },
 ];
 // prettier-ignore
