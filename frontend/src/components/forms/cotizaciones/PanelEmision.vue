@@ -178,6 +178,25 @@ function handleContinuar(accion: string) {
   }
 }
 
+function handleBack(idx: number) {
+  switch (idx) {
+    case 0:
+      paso.value = 1;
+      break;
+    case 1:
+      paso.value = 4;
+      break;
+    case 2:
+      handleGetDataCarro();
+      paso.value = 8;
+      break;
+  }
+}
+
+function handleGetDataCarro() {
+  formData.value = { ...(data.value?.carro ?? {}) };
+}
+
 function handleAseguradoIgual(accion: string) {
   if (accion == "igual") {
     data.value.asegurado = { ...data.value.cliente };
@@ -287,6 +306,16 @@ onBeforeMount(() => {
     }
   }
 });
+
+watch(
+  () => paso.value,
+  (newVal) => {
+    if (newVal === 8) {
+      handleGetDataCarro();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -383,6 +412,7 @@ onBeforeMount(() => {
     <panelValidarAntesEmitir
       v-if="paso === 9"
       :data="data"
+      @back="handleBack"
       @cancelar="$emit('cancelar')"
       @continuar="handleEmitir"
     />

@@ -65,10 +65,10 @@ const {
   printDeep,
   extraerNumeroFlotante,
   formatearData, 
+  deepClone,
   traducirError
 } = require("../../utils/helper");
-
-const { sumarFechas, now } = require("../../utils/fechasHelper");
+const { calcularEdad, sumarFechas, now } = require("../../utils/fechasHelper");
 
 function showConsoleLog(message, logs = showLogs) {
   if (logs) {
@@ -575,38 +575,26 @@ async function validarModalAbierto(driver, options = {}) {
   ];
 
   try {
-    console.log("🔍 Esperando que aparezca un modal...");
     let modalEncontrado = null;
     let intentos = 0;
     const maxIntentos = 10; // 10 intentos = 20 segundos
 
     // BUCLE DE ESPERA - Intentar hasta que aparezca un modal
     while (!modalEncontrado && intentos < maxIntentos) {
-      console.log(
-        `🔎 Intento ${intentos + 1}/${maxIntentos} - Buscando modales...`
-      );
-
       // Buscar cada tipo de modal EN EL ORDEN ESPECÍFICO
       for (const modalConfig of modalesConfig) {
         try {
-          console.log(`   📋 Verificando: ${modalConfig.id}`);
-
           // USAR SELECTOR DIRECTO POR ID PRIMERO
           const modal = await driver.findElement(By.id(modalConfig.id));
           const isVisible = await modal.isDisplayed();
 
           if (isVisible) {
-            console.log(
-              `✅ ¡Modal encontrado!: ${modalConfig.tipo} (${modalConfig.id})`
-            );
-
             let mensaje = "";
             try {
               mensaje = await getElementText(driver, {
                 locator: modalConfig.messageSelector,
                 by: "css",
               });
-              console.log(`💬 Mensaje: "${mensaje}"`);
             } catch (messageError) {
               console.log("⚠️ No se pudo obtener el mensaje del modal");
             }
@@ -621,10 +609,6 @@ async function validarModalAbierto(driver, options = {}) {
 
             // CERRAR EL MODAL si se encuentra
             if (autoClose) {
-              console.log(
-                `🔄 Cerrando modal con botón: "${modalConfig.buttonText}"`
-              );
-
               try {
                 const resultadoCierre = await closeModal(driver, {
                   locator: modalConfig.id,
@@ -635,7 +619,6 @@ async function validarModalAbierto(driver, options = {}) {
                   sleepAfter: 1000,
                 });
 
-                console.log(`✅ Modal cerrado exitosamente`);
                 modalEncontrado.cerrado = resultadoCierre.result;
               } catch (closeError) {
                 console.log("❌ Error cerrando modal:", closeError.message);
@@ -741,7 +724,6 @@ async function handleProcesarArchivosPoliza(driver, data, options = {}) {
   // // Si hay tabla, obtener la informacion de la poliza
   // // prettier-ignore
   const numeroPoliza = await getElementText(driver, { locator: "nPol" });
-  // const numeroPoliza = "0810326356";
 
   console.log("numeroPoliza", numeroPoliza);
 
@@ -764,7 +746,6 @@ async function handleProcesarArchivosPoliza(driver, data, options = {}) {
     crearSiNoExiste: true,
   });
 
-  showConsoleLog("Descomprimiento archivo ZIP de la poliza");
   let procesoDescompresion = await descomprimirArchivo(
     rutaCompleta,
     rutaCarpetaPolizas
@@ -775,7 +756,6 @@ async function handleProcesarArchivosPoliza(driver, data, options = {}) {
   }
 
   // Eliminar archivos innecesarios
-  showConsoleLog("Eliminando archivos innecesarios");
 
   let procesoEliminacion = await eliminarArchivosInnecesarios({
     archivos: procesoDescompresion.archivosExtraidos,
@@ -785,14 +765,12 @@ async function handleProcesarArchivosPoliza(driver, data, options = {}) {
     return await formatearData(procesoEliminacion);
   }
 
-  showConsoleLog("Procesando archivos con portada");
-
   // Eliminar el archivo ZIP descargado
   let procesadaMerge = await procesarArchivosConPortada({
     archivos: procesoEliminacion.archivosConservados,
   });
 
-  await eliminarArchivo(rutaCompleta);
+  // await eliminarArchivo(rutaCompleta);
 
   if (!procesadaMerge.result) {
     return await formatearData(procesadaMerge);
@@ -826,7 +804,6 @@ async function handleProcesarArchivosPoliza(driver, data, options = {}) {
 
 async function validarTablaPoliza(driver) {
   await sleep(1500);
-  console.log("Validando tabla de póliza...");
 
   // Esperar tablaPrincipal
   await waitForElement(driver, {
@@ -834,7 +811,7 @@ async function validarTablaPoliza(driver) {
     timeout: 3000,
     by: "id",
   });
-  console.log("tablaPrincipal encontrada");
+
   // Verificar tabla
   try {
     await waitForElement(driver, {
@@ -1188,6 +1165,32 @@ async function procesarArchivosConPortada(options = {}) {
   };
 }
 
+async function handleCreateAsegurado(data) {
+  let tmpAsegurado = {
+    poliza_id: data.poliza_id,
+    cliente_id: data.asegurado.id,
+    rfc: data.asegurado.rfc,
+    edad: calcularEdad(data.asegurado.fechaNacimiento),
+    genero: data.asegurado.genero ? "Hombre" : "Mujer",
+    nombre: data.asegurado.nombreCompleto,
+    fechaNacimiento: data.asegurado.fechaNacimiento,
+    direccion: data.asegurado.direccion,
+    colonia: data.asegurado.colonia,
+    codigoPostal: data.asegurado.codigoPostal,
+    estado_id: data.asegurado.estado.id,
+    ciudad: data.asegurado.municipio,
+    correo: data.asegurado.correo,
+    telefono: data.asegurado.telefono,
+    celular: data.asegurado.celular,
+    oficina: data.asegurado.celular,
+  };
+
+  const responseCotizacion = await createOrUpdate({
+    tabla: "poliza_asegurados",
+    data: tmpAsegurado,
+  });
+}
+
 async function handleRegitroPoliza(data) {
   try {
     let registroPoliza = await formatearRegistroPoliza(data);
@@ -1198,7 +1201,7 @@ async function handleRegitroPoliza(data) {
       returnResponse: true,
     });
 
-    data.poliza_id = responsePoliza.data.id;
+    data.poliza_id = responsePoliza?.data?.id;
 
     const responseCotizacion = await createOrUpdate({
       tabla: "cotizaciones",
@@ -1206,6 +1209,9 @@ async function handleRegitroPoliza(data) {
     });
 
     await createRecibos(data);
+
+    await handleCreateAsegurado(data);
+
     return {
       result: true,
       message: "Póliza registrada exitosamente",
@@ -1220,57 +1226,78 @@ async function handleRegitroPoliza(data) {
 }
 
 async function formatearRegistroPoliza(data) {
-  const frecuenciasPagoInBD = await getAllFrom("formas_de_pago", {
-    label: data.cotizacion.detalles.frecuenciaPago,
-  });
+  try {
+    const frecuenciasPagoInBD = await getAllFrom("formas_de_pago", {
+      label: data.cotizacion.detalles.frecuenciaPago,
+    });
 
-  let frecuenciaPagoId =
-    frecuenciasPagoInBD.length == 1 ? frecuenciasPagoInBD[0].id : 1;
+    // prettier-ignore
+    let frecuenciaPagoId = frecuenciasPagoInBD.length == 1 ? frecuenciasPagoInBD[0].id : 1;
 
-  let tmp = {
-    numeroPoliza: data.numeroPoliza,
-    cliente_id: data.cliente.id,
-    subAgente_id: data.cliente.id,
-    compania_id: data.cotizacion.compania_id,
-    ramo_id: data.cotizacion.ramo_id,
-    producto_id: data.cotizacion.companiaProducto_id,
+    let dataTmp = deepClone(data);
 
-    primaAnual: data.cotizacion.detalles.primaAnual,
-    primaTotal: data.cotizacion.detalles.primaTotal,
-    pagoInicial: data.cotizacion.detalles.primerPago,
-    pagoSubsecuente: data.cotizacion.detalles.pagoSubsecuente,
-    financiamiento: data.cotizacion.detalles.financiamiento,
-    archivos: JSON.stringify(data.archivos),
-    // data: JSON.stringify(data),
+    dataTmp.detalles = dataTmp.cotizacion.detalles;
+    dataTmp.carro = { ...dataTmp.carro, ...dataTmp.cotizacion.vehiculo };
+
+    delete dataTmp.cliente;
+    delete dataTmp.asegurado;
+    delete dataTmp.carro.versiones;
+    delete dataTmp.cotizacion;
+    delete dataTmp.archivos;
+
+    // prettier-ignore
+    let tmp = {
+    numeroPoliza:      data.numeroPoliza,
+    frecuenciaPago_id: frecuenciaPagoId ?? '',
+    cliente_id:        data.cliente.id,
+    asegurado_id:      data.asegurado.id,
+    subAgente_id:      data.cliente.id,
+    compania_id:       data.cotizacion.compania_id,
+    cotizacion_id:     data.cotizacion.id,
+    ramo_id:           data.cotizacion.ramo_id,
+    producto_id:       data.cotizacion.companiaProducto_id,
+    frecuencia:        data.cotizacion.detalles.frecuenciaPago,
+    inicioVigencia:    data.cotizacion?.detalles?.inicioVigencia ?? '',
+    finVigencia:       data.cotizacion?.detalles?.finVigencia ?? '',
+    primaNeta:         extraerNumeroFlotante(data.cotizacion.detalles.primaNeta),
+    primaTotal:        extraerNumeroFlotante(data.cotizacion.detalles.subtotal),
+    pagoInicial:       extraerNumeroFlotante(data.cotizacion.detalles.primerPago),
+    pagoSubsecuente:   extraerNumeroFlotante(data.cotizacion.detalles.pagoSubsecuente),
+    financiamiento:    extraerNumeroFlotante(data.cotizacion.detalles.tasaFin),
+    // archivos:          JSON.stringify(data.archivos),
+    data:              JSON.stringify(dataTmp),
   };
-  tmp.frecuenciaPago_id = frecuenciaPagoId;
-  tmp.inicioVigencia = "";
-  tmp.finVigencia = "";
 
-  return tmp;
+    return tmp;
+  } catch (error) {
+    console.log("Error en formatearRegistroPoliza: ", error);
+  }
 }
 
 async function createRecibos(data) {
   let frecuenciaPago = data.cotizacion.detalles.frecuenciaPago.toLowerCase();
-  let fechaInicio = data.cotizacion.detalles.inicioVigencia ?? now();
+  let fechaInicio = data.cotizacion.detalles.inicioVigencia ?? null;
 
-  fechaInicio = sumarFechas(fechaInicio, {
-    formatoSalida: "dd/mm/yyyy",
-    operacion: "restar",
-    dias: 1,
-  });
+  if (fechaInicio == null) {
+    fechaInicio = now();
+
+    fechaInicio = sumarFechas(fechaInicio, {
+      operacion: "restar",
+      dias: 1,
+    });
+  }
 
   let fechaFin = sumarFechas(fechaInicio, {
-    formatoSalida: "dd/mm/yyyy",
-    años: 1,
+    formatoSalida: "DD/MM/YYYY",
+    meses: 12,
   });
 
   let frecuencias = {
     anual: 1,
     contado: 1,
     semestral: 2,
-    trimestral: 3,
-    mensual: 4,
+    trimestral: 4,
+    mensual: 12,
   };
 
   let aumentoFechas = {
@@ -1283,36 +1310,45 @@ async function createRecibos(data) {
 
   let numeroRecibos = frecuencias[frecuenciaPago] || 1;
 
+  let inicio = fechaInicio;
   for (let i = 0; i < numeroRecibos; i++) {
-    let montoRecibo =
-      numeroRecibos == 1
-        ? data.cotizacion.detalles.primerPago
-        : data.cotizacion.detalles.pagoSubsecuente;
+    // prettier-ignore
+    let montoRecibo = i == 0 ? data.cotizacion.detalles.primerPago : data.cotizacion.detalles.pagoSubsecuente;
 
     montoRecibo = extraerNumeroFlotante(montoRecibo);
 
-    let fechaInicioRecibo = sumarFechas(fechaInicio, {
-      formatoSalida: "dd/mm/yyyy",
-    });
+    let fechaInicioRecibo = inicio;
 
     let fechaFinRecibo = sumarFechas(fechaInicioRecibo, {
       meses: aumentoFechas[frecuenciaPago],
-      formatoSalida: "dd/mm/yyyy",
     });
 
     let fechaVencimiento = sumarFechas(fechaInicioRecibo, {
-      formatoSalida: "dd/mm/yyyy",
       dias: 14,
     });
 
+    // prettier-ignore
     let reciboData = {
-      poliza_id: data.poliza_id,
-      numeroRecibo: (i + 1).toString().padStart(3, "0"),
-      vencimiento: fechaVencimiento,
-      fechaInicio: fechaInicioRecibo,
-      fechaFin: fechaFinRecibo,
-      importe: montoRecibo,
+      poliza_id     : data.poliza_id,
+      numeroRecibo  : (i + 1).toString().padStart(3, "0"),
+      vencimiento   : new Date(fechaVencimiento).toISOString(),
+      fechaInicio   : new Date(fechaInicioRecibo).toISOString(),
+      fechaFin      : new Date(fechaFinRecibo).toISOString(),
+      importe       : montoRecibo,
     };
+
+    inicio = fechaFinRecibo;
+
+    if (i == 0) {
+      const responseCotizacion = await createOrUpdate({
+        tabla: "polizas",
+        data: {
+          id: data.poliza_id,
+          proximoPagoFecha: fechaInicio,
+          proximoPagoMonto: montoRecibo,
+        },
+      });
+    }
 
     const responseCotizacion = await createOrUpdate({
       tabla: "poliza_recibos",
@@ -1384,9 +1420,6 @@ async function handleEmitirPoliza(data) {
   let driver;
 
   try {
-    console.log("🚀 Iniciando proceso de emisión de póliza...");
-    console.log("Datos recibidos:", data);
-    console.log("Datos recibidos:", data.cotizacion.detalles);
     // prettier-ignore
     driver = await openPage("https://agentes360.qualitas.com.mx/", {
       headless: false,
@@ -1413,7 +1446,6 @@ async function handleEmitirPoliza(data) {
 
     await sleep(2000);
 
-    console.log("Btn de vigencia");
     await clickElement(driver, {
       locator: "btnVigencia",
       sleeptime: 100,
@@ -1422,7 +1454,6 @@ async function handleEmitirPoliza(data) {
     await sleep(1000);
     await scrollToBottom(driver);
 
-    console.log("Btn de emisión");
     await clickElement(driver, {
       locator: "btnEmision",
       sleeptime: 1000,
@@ -1431,8 +1462,6 @@ async function handleEmitirPoliza(data) {
     await handleProcesarArchivosPoliza(driver, data);
 
     await handleRegitroPoliza(data);
-
-    showConsoleLog("🎉 Proceso completado exitosamente.");
 
     return await formatearData(data);
   } catch (error) {
@@ -1451,7 +1480,6 @@ async function handleEmitirPoliza(data) {
 //   let driver;
 
 //   try {
-//     console.log("🚀 Iniciando proceso de emisión de póliza...");
 //     driver = await openPage("https://agentes360.qualitas.com.mx/", {
 //       headless: false,
 //     });
@@ -1465,8 +1493,6 @@ async function handleEmitirPoliza(data) {
 //     await handleProcesarArchivosPoliza(driver, data);
 
 //     await handleRegitroPoliza(data);
-
-//     showConsoleLog("🎉 Proceso completado exitosamente.");
 
 //     return await formatearData(data);
 //   } catch (error) {

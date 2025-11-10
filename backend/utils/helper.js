@@ -309,6 +309,10 @@ function printDeep(
   console.log(printValue(obj));
 }
 
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 function extraerNumeroFlotante(cadenaConDinero) {
   if (!cadenaConDinero) {
     return 0;
@@ -335,6 +339,7 @@ module.exports = {
   escaparBarras,
   deepPrint,
   printDeep,
+  deepClone,
   formatearData,
   traducirError,
   extraerNumeroFlotante,

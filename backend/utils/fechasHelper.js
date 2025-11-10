@@ -1,59 +1,51 @@
-function sumarFechas(fecha, options = {}) {
-  // Destructurar options con valores por defecto
-  const {
-    meses = 0,
-    dias = 0,
-    años = 0,
-    operacion = "sumar",
-    formatoSalida = null,
-  } = options;
+const moment = require("moment"); // Asegúrate de usar moment.js o una librería similar
+function sumarFechas(
+  fecha,
+  { formatoSalida, años = 0, meses = 0, dias = 0, operacion = "sumar" }
+) {
+  // Convertir la fecha a un objeto moment
+  let fechaMoment = moment(fecha, moment.ISO_8601, true);
 
-  // Si fecha es null o undefined, usar la fecha actual
-  let fechaObj;
-  if (!fecha) {
-    fechaObj = new Date(); // Fecha actual
-  } else if (typeof fecha === "string") {
-    // Intentar parsear diferentes formatos de fecha
-    fechaObj = parsearFechaString(fecha);
-  } else if (fecha instanceof Date) {
-    fechaObj = new Date(fecha);
+  if (!fechaMoment.isValid()) {
+    throw new Error(`La fecha proporcionada no es válida: ${fecha}`);
+  }
+
+  // Realizar la operación (sumar o restar)
+  if (operacion === "sumar") {
+    fechaMoment = fechaMoment
+      .add(años, "years")
+      .add(meses, "months")
+      .add(dias, "days");
+  } else if (operacion === "restar") {
+    fechaMoment = fechaMoment
+      .subtract(años, "years")
+      .subtract(meses, "months")
+      .subtract(dias, "days");
   } else {
-    throw new Error("Formato de fecha no válido");
+    throw new Error(
+      `Operación no válida: ${operacion}. Usa "sumar" o "restar".`
+    );
   }
 
-  // Verificar que la fecha sea válida
-  if (isNaN(fechaObj.getTime())) {
-    throw new Error(`Fecha no válida: ${fecha}`);
+  // Retornar la fecha en el formato deseado
+  return formatoSalida
+    ? fechaMoment.format(formatoSalida)
+    : fechaMoment.toISOString();
+}
+
+function calcularEdad(fechaNacimiento) {
+  const hoy = new Date();
+  const fechaNac = new Date(fechaNacimiento);
+
+  let edad = hoy.getFullYear() - fechaNac.getFullYear();
+  const mes = hoy.getMonth() - fechaNac.getMonth();
+
+  // Ajustar la edad si el cumpleaños aún no ha ocurrido este año
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+    edad--;
   }
 
-  // Determinar el multiplicador según la operación
-  const multiplicador = operacion.toLowerCase() === "restar" ? -1 : 1;
-
-  // Crear nueva fecha para no modificar la original
-  const nuevaFecha = new Date(fechaObj);
-
-  // Sumar/restar años
-  if (años !== 0) {
-    nuevaFecha.setFullYear(nuevaFecha.getFullYear() + años * multiplicador);
-  }
-
-  // Sumar/restar meses
-  if (meses !== 0) {
-    nuevaFecha.setMonth(nuevaFecha.getMonth() + meses * multiplicador);
-  }
-
-  // Sumar/restar días
-  if (dias !== 0) {
-    nuevaFecha.setDate(nuevaFecha.getDate() + dias * multiplicador);
-  }
-
-  // Si se especifica formato de salida, devolver string formateado
-  if (formatoSalida) {
-    return formatearFecha(nuevaFecha, formatoSalida);
-  }
-
-  // Por defecto devolver objeto Date
-  return nuevaFecha;
+  return edad;
 }
 
 // Nueva función para parsear diferentes formatos de fecha
@@ -163,5 +155,6 @@ module.exports = {
   sumarFechas,
   formatearFecha,
   now,
+  calcularEdad,
   parsearFechaString,
 };

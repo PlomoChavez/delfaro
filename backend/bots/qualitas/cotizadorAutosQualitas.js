@@ -377,13 +377,21 @@ async function getDetallesCotizacion(driver, data, darClick = true) {
           accesorio.prima = actualizacion.prima;
         }
       }
+
+      let resultadoModal = await validarModalAbierto(driver, {
+        maxIntentos: 3,
+      });
+
+      if (resultadoModal.continue) {
+        return await formatearData({
+          mssgError: resultadoModal.mensaje,
+          result: false,
+        });
+      }
     }
-  } else {
-    console.log("No se solicitaron detalles de accesorios.");
   }
 
   data.detalles.accesorios = accesorios;
-  // deepPrint(accesorios);
 
   return data;
 }
@@ -394,6 +402,14 @@ async function guardandoCambios(driver, data) {
 
   await sleep(1000);
   await scrollToBottom(driver);
+
+  await clickElement(driver, {
+    locator: "button.btn.btn-primary.saveChanges[type='submit']",
+    by: "css",
+  });
+
+  const mensajeError = await esperarQueNoExistaModalError(driver, 1500);
+  return mensajeError;
 }
 
 async function preparacionData(data) {
@@ -707,18 +723,8 @@ async function generadorCotizacion(driver, data) {
   }
 
   data = await getDetallesCotizacion(driver, data);
-  let resultadoModal = await validarModalAbierto(driver, {
-    maxIntentos: 5,
-  });
 
-  if (resultadoModal.continue) {
-    return await formatearData({
-      mssgError: resultadoModal.mensaje,
-      result: false,
-    });
-  }
-
-  await guardandoCambios(driver, data);
+  // await guardandoCambios(driver, data);
 
   await sleep(1000);
 
@@ -758,4 +764,5 @@ async function generadorCotizacion(driver, data) {
 
   return data;
 }
+
 module.exports = { ejecutarCotizacionAutos };

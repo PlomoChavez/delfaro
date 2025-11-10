@@ -5,10 +5,19 @@
       <VCard class="col-6 mx-auto">
         <VCardText>
           <div v-for="(section, idx) in sections" :key="idx" class="mb30">
-            <h2 class="mb-3 flex items-center gap-2">
-              <span :class="section.icono"></span>
-              {{ section.title }}
-            </h2>
+            <div class="d-flex align-center justify-space-between mb-2">
+              <h2 class="mb-3 flex items-center gap-2">
+                <span :class="section.icono"></span>
+                {{ section.title }}
+              </h2>
+
+              <i
+                class="fa fa-pencil font22 icono-accion text-warning"
+                aria-hidden="true"
+                title="Editar"
+                @click="handleAtras(idx)"
+              />
+            </div>
             <div class="w-full row">
               <div
                 v-for="(field, fidx) in section.fields"
@@ -54,6 +63,7 @@ import { VCard, VCardText } from "vuetify/components";
 const emit = defineEmits<{
   (event: "cancelar"): void;
   (event: "continuar"): void;
+  (event: "back", idx: number): void;
 }>();
 const props = withDefaults(
   defineProps<{
@@ -67,6 +77,12 @@ const props = withDefaults(
 // prettier-ignore
 function formatIdentificacion(data: any) {
   return data ? `${data.tipoIdentificacion ?? ""} - ${data.referenciaIdentificacion ?? ""}` : "";
+}
+
+// prettier-ignore
+function handleAtras(idx: any) {
+  emit("back", idx);
+  console.log("Editar sección:", idx);
 }
 
 // prettier-ignore
