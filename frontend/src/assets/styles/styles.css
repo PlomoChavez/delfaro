@@ -18,6 +18,63 @@
 .textDark { color: #23272f !important; }
 .font-bold { font-weight: 700 !important; } 
 
+/* Colores pastel */
+.bgTonalBlack {
+  background-color: #d3d3d3; /* Gris claro, simulando un negro pastel */
+  color: #333333; /* Texto oscuro */
+}
+.bgTonalGray {
+  background-color: #e5e7eb; /* Gris claro pastel */
+  color: #7f7f7f; /* Texto gris oscuro */
+}
+
+.bgTonalGreen {
+  background-color: #d4edda; /* Verde pastel */
+  color: #0bac30; /* Texto verde oscuro */
+}
+
+.bgTonalRed {
+  background-color: #f8d7da; /* Rojo pastel */
+  color: #e61e32; /* Texto rojo oscuro */
+}
+
+.bgTonalYellow {
+  background-color: #fff3cd; /* Amarillo pastel */
+  color: #856404; /* Texto amarillo oscuro */
+}
+
+.textTonalblue {
+  color: #0c5460; /* Texto azul oscuro */
+}
+.bgTonalGray {
+  background-color: #e5e7eb; /* Gris claro pastel */
+  color: #9a9a9a; /* Texto gris oscuro */
+}
+/* Colores pastel */
+.textTonalGray {
+  color: #7f7f7f; /* Texto oscuro */
+}
+/* Colores pastel */
+.textTonalBlack {
+  color: #333333; /* Texto oscuro */
+}
+
+.textTonalGreen {
+  color: #0bac30; /* Texto verde oscuro */
+}
+
+.textTonalRed {
+  color: #e61e32; /* Texto rojo oscuro */
+}
+
+.textTonalYellow {
+  color: #ecb100; /* Texto amarillo oscuro */
+}
+
+.textTonalblue {
+  color: #0152cb; /* Texto azul oscuro */
+}
+
 
 .w-fit { width: fit-content; }
 .wFull{ width: 100% !important;}

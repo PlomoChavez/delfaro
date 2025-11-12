@@ -14,8 +14,6 @@ exports.getAll = async (req, res) => {
     modelo,
     filtros,
     fieldsExclude: [
-      "data",
-      "archivos",
       "subAgente_id",
       "compania_id",
       "ramo_id",
@@ -30,27 +28,27 @@ exports.getAll = async (req, res) => {
     ],
 
     include: [
-      // {
-      //   tabla: "poliza_historial",
-      //   foreignKey: "poliza_id",
-      //   localKey: "id",
-      //   labelKey: "historial",
-      //   type: "many",
-      // },
-      // {
-      //   tabla: "poliza_asegurados",
-      //   foreignKey: "poliza_id",
-      //   localKey: "id",
-      //   labelKey: "asegurados",
-      //   type: "many",
-      // },
-      // {
-      //   tabla: "poliza_recibos",
-      //   foreignKey: "poliza_id",
-      //   localKey: "id",
-      //   labelKey: "recibos",
-      //   type: "many",
-      // },
+      {
+        tabla: "poliza_historial",
+        foreignKey: "poliza_id",
+        localKey: "id",
+        labelKey: "historial",
+        type: "many",
+      },
+      {
+        tabla: "poliza_asegurados",
+        foreignKey: "poliza_id",
+        localKey: "id",
+        labelKey: "asegurados",
+        type: "many",
+      },
+      {
+        tabla: "poliza_recibos",
+        foreignKey: "poliza_id",
+        localKey: "id",
+        labelKey: "recibos",
+        type: "many",
+      },
       {
         tabla: "clientes",
         foreignKey: "id",

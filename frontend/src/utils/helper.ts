@@ -172,14 +172,21 @@ export function diffObjects(obj1: any, obj2: any): any {
  * @returns {string} - El monto en formato moneda.
  */
 export function formatCurrency(
-  amount: number,
+  amount: string | number,
   locale: string = "es-MX",
   currency: string = "MXN"
 ): string {
+  const numericAmount =
+    typeof amount === "string" ? parseFloat(amount) : amount;
+
+  if (isNaN(numericAmount)) {
+    throw new Error("El valor proporcionado no es un número válido.");
+  }
+
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: currency,
-  }).format(amount);
+  }).format(numericAmount);
 }
 
 /**

@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { ref } from "vue";
+import PolizaAsegurados from "./polizas/PolizaAsegurados.vue";
 import PolizaDetalles from "./polizas/PolizaDetalles.vue";
+import PolizaReciboPago from "./polizas/PolizaReciboPago.vue";
+import PolizaRecibos from "./polizas/PolizaRecibos.vue";
 
 const currentTab = ref("item1");
 const panel = ref(1);
@@ -132,6 +135,10 @@ watch(
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  props.data.data = JSON.parse(props.data.data);
+});
 </script>
 
 <template>
@@ -150,19 +157,16 @@ watch(
       <!-- prettier-ignore -->
       <BtnAtras titulo="Volver al detalle de la póliza" @atras="handleChangePanel(1)" />
       <template v-if="panel == 2">
-        <p>Ver recibos</p>
-        <div class="wFull text-center"></div>
+        <PolizaAsegurados :registroId="props.data.id" />
       </template>
       <template v-if="panel == 3">
-        <p>Hacer pagos</p>
-        <div class="wFull text-center"></div>
+        <PolizaReciboPago :data="props.data" />
       </template>
       <template v-if="panel == 4">
-        <p>ver asegurados</p>
-        <div class="wFull text-center"></div>
+        <PolizaRecibos :registroId="props.data.id" />
       </template>
       <template v-if="panel == 5">
-        <p>ver asegurados</p>
+        <p>Panel 5</p>
         <div class="wFull text-center"></div>
       </template>
     </template>

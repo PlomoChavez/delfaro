@@ -156,6 +156,12 @@ const handleChangePanel = (idx?: any) => {
   emit("changePanel", idx);
 };
 
+const handleVerPoliza = () => {
+  let url =
+    "http://localhost:3000/files/polizas/qualitas/0810326356/poliza_040810326356000000.pdf";
+  window.open(url, "_blank");
+};
+
 watch(
   () => currentTab.value,
   (newValue) => {
@@ -171,6 +177,7 @@ watch(
 </script>
 
 <template>
+  <!-- <pre>{{ props.data }}</pre> -->
   <div class="w-full">
     <div class="text-right w-full mb-3">
       <!-- <VBtn
@@ -195,7 +202,7 @@ watch(
         class="ml-2"
         size="small"
         variant="outlined"
-        @click="handleShowModalContrasenia"
+        @click="handleVerPoliza"
       >
         <VIcon start icon="tabler-eye" />
         Ver póliza
