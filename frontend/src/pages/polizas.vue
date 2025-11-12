@@ -18,13 +18,6 @@ const showWizard = ref(false); // Referencia al componente FormFactory
 const tableHeaders = [
   { title: "ID", key: "id" },
   { title: "No. Poliza", key: "numeroPoliza" },
-  { title: "No. Cliente", key: "numeroCliente" },
-  { title: "Cliente", key: "cliente.nombre" },
-  { title: "Compañia", key: "compania.nombreCorto" },
-  { title: "Ramo", key: "ramo.label" },
-  { title: "Producto", key: "producto.nombre" },
-  { title: "Estatus", key: "estatus" },
-  { title: "Creación", key: "created_at" },
 ];
 
 const apiEndpoints = {

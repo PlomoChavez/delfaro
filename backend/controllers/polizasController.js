@@ -122,7 +122,11 @@ exports.getAll = async (req, res) => {
   let rows = [];
   rows = await queryWithRelations(query);
 
-  res.json(rows);
+  res.json({
+    result: true,
+    message: "Registros obtenidos con éxito",
+    data: rows,
+  });
 };
 
 /**
