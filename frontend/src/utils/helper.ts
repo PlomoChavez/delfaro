@@ -1,5 +1,6 @@
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import moment from "moment";
 import { isRef, toRaw } from "vue";
 
 // Función para formatear la fecha en un formato legible
@@ -162,4 +163,34 @@ export function diffObjects(obj1: any, obj2: any): any {
     // Si son primitivos
     return isEqual(obj1, obj2) ? null : obj1;
   }
+}
+/**
+ * Convierte un número a formato moneda.
+ * @param {number} amount - El monto a formatear.
+ * @param {string} locale - El idioma/localización (por defecto "es-MX").
+ * @param {string} currency - La moneda (por defecto "MXN").
+ * @returns {string} - El monto en formato moneda.
+ */
+export function formatCurrency(
+  amount: number,
+  locale: string = "es-MX",
+  currency: string = "MXN"
+): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency,
+  }).format(amount);
+}
+
+/**
+ * Convierte una fecha ISO a un formato legible.
+ * @param {string} date - La fecha en formato ISO.
+ * @param {string} locale - El idioma/localización (por defecto "es-MX").
+ * @returns {string} - La fecha formateada.
+ */
+export function formatDateMoment(
+  date: string,
+  format: any = "D [de] MMMM [de] YYYY"
+): string {
+  return moment(date).locale("es").format(format);
 }

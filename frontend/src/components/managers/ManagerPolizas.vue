@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
-import PolizaAsegurados from "@/components/forms/polizas/PolizaAsegurados.vue";
-import PolizaHistorial from "@/components/forms/polizas/PolizaHistorial.vue";
-import PolizaRecibos from "@/components/forms/polizas/PolizaRecibos.vue";
 import { ref } from "vue";
+import PolizaDetalles from "./polizas/PolizaDetalles.vue";
 
 const currentTab = ref("item1");
+const panel = ref(1);
 const modalContrasenia = ref(false);
 const formDisabled = ref(true);
 const dataContrasenia = ref({});
@@ -86,6 +85,12 @@ async function getHistorial() {
 const handleEditForm = () => { formDisabled.value = !formDisabled.value; };
 // prettier-ignore
 const handleBack = () => { emit("cancelar"); };
+// accept an optional index so the handler can be called with zero args
+const handleChangePanel = (idx?: any) => {
+  if (typeof idx !== "undefined") {
+    panel.value = idx;
+  }
+};
 
 watch(
   () => currentTab.value,
@@ -130,59 +135,36 @@ watch(
 </script>
 
 <template>
-  <div class="d-flex justify-start align-center mb-5">
-    <VBtn
-      icon="tabler-arrow-left"
-      class="cursor-pointer"
-      variant="text"
-      color="secondary"
-      @click="handleBack"
-    />
-    <!-- prettier-ignore -->
-    <h1 class="ml-4">{{ props.data.numeroPoliza }} - {{  props.data.ramo.label }} - {{ props.data.compania.nombreCorto }}</h1>
+  <div class="d-flex flex-column gap-4">
+    <template v-if="panel == 1">
+      <div class="w-full">
+        <!-- prettier-ignore -->
+        <BtnAtras titulo="Volver a polizas" @atras="handleBack" />
+
+        <!-- prettier-ignore -->
+        <h1 class="ml-4 wFull text-right">{{ props.data.numeroPoliza }} - {{  props.data.ramo.label }} - {{ props.data.compania.nombreCorto }}</h1>
+      </div>
+      <PolizaDetalles :data="props.data" @changePanel="handleChangePanel" />
+    </template>
+    <template v-if="panel != 1">
+      <!-- prettier-ignore -->
+      <BtnAtras titulo="Volver al detalle de la póliza" @atras="handleChangePanel(1)" />
+      <template v-if="panel == 2">
+        <p>Ver recibos</p>
+        <div class="wFull text-center"></div>
+      </template>
+      <template v-if="panel == 3">
+        <p>Hacer pagos</p>
+        <div class="wFull text-center"></div>
+      </template>
+      <template v-if="panel == 4">
+        <p>ver asegurados</p>
+        <div class="wFull text-center"></div>
+      </template>
+      <template v-if="panel == 5">
+        <p>ver asegurados</p>
+        <div class="wFull text-center"></div>
+      </template>
+    </template>
   </div>
-  <VCard>
-    <VTabs v-model="currentTab">
-      <VTab>Detalles</VTab>
-      <VTab>Asegurados</VTab>
-      <VTab>Pagos</VTab>
-      <VTab>Historial</VTab>
-    </VTabs>
-
-    <VCardText>
-      <VWindow v-model="currentTab">
-        <VWindowItem :value="`item1`">
-          <ModuladorFormFactory
-            :title="null"
-            :isDialogVisible="false"
-            :schema="formSchema"
-            :showTitle="false"
-            :isDisabled="formDisabled"
-            :showButtonsAction="!formDisabled"
-            :modelValue="props.data"
-            @cancel="formDisabled = true"
-          />
-
-          <div v-if="formDisabled" class="d-flex justify-end gap-3 mt-4">
-            <!-- prettier-ignore -->
-            <VBtn color="warning" @click="handleEditForm">
-              <VIcon start icon="tabler-edit" />
-              Editar
-            </VBtn>
-          </div>
-          <pre>{{ props.data }}</pre>
-          <!-- @submit="handleFormSubmit" -->
-        </VWindowItem>
-        <VWindowItem :value="`item2`">
-          <PolizaAsegurados :data="props.data" />
-        </VWindowItem>
-        <VWindowItem :value="`item3`">
-          <PolizaRecibos :recibos="recibos" />
-        </VWindowItem>
-        <VWindowItem :value="`item4`">
-          <PolizaHistorial :data="historial" />
-        </VWindowItem>
-      </VWindow>
-    </VCardText>
-  </VCard>
 </template>

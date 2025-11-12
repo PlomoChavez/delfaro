@@ -4,7 +4,15 @@
 .textSuccess { color: var(--v-theme-success)!important; } 
 .textSecondary { color: #717171 !important; } 
 .textSecondary { color: #717171 !important; } 
-
+.bgDiv { background-color: #ffffff!important; }
+.divCustom {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important; /* Borde gris claro */
+  border-radius: 8px !important; /* Bordes redondeados */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1) !important; /* Sombra ligera */
+  padding: 16px !important; /* Espaciado interno */
+  transition: box-shadow 0.3s ease, transform 0.3s ease !important; /* Transiciones suaves */
+}
 .text-muted { color: #6b7280 !important; }
 .text-dark { color: #23272f !important; }
 .textDark { color: #23272f !important; }
@@ -20,6 +28,17 @@
 .w500 { width: 500px !important; }
 .w600 { width: 600px !important; }
 .w700 { width: 700px !important; }
+.w_10 { width: 10% !important; }
+.w_20 { width: 20% !important; }
+.w_30 { width: 30% !important; }
+.w_40 { width: 40% !important; }
+.w_50 { width: 50% !important; }
+.w_60 { width: 60% !important; }
+.w_70 { width: 70% !important; }
+.w_80 { width: 80% !important; }
+.w_90 { width: 90% !important; }
+.w_95 { width: 95% !important; }
+.w_100 { width: 100% !important; }
 
 
 /* Padding completo de 2 en 2 hasta p50 */
@@ -41,6 +60,18 @@
 .p30 {
   padding: 30px !important;
 }
+.pt-6  { padding-top: 6px  !important; }
+.pt-8  { padding-top: 8px  !important; }
+.pt-10 { padding-top: 10px !important; }
+.pt-12 { padding-top: 12px !important; }
+.pt-14 { padding-top: 14px !important; }
+.pb-2  { padding-bottom: 2px  !important; }
+.pb-4  { padding-bottom: 4px  !important; }
+.pb-6  { padding-bottom: 6px  !important; }
+.pb-8  { padding-bottom: 8px  !important; }
+.pb-10 { padding-bottom: 10px !important; }
+.pb-12 { padding-bottom: 12px !important; }
+.pb-14 { padding-bottom: 14px !important; }
 .p32 { padding: 32px !important; }
 .p34 { padding: 34px !important; }
 .p36 { padding: 36px !important; }
@@ -317,3 +348,17 @@
   border-radius: 8px !important;
 }
 
+.border-black {
+  border-color: black !important;
+}
+.border-black-300 {
+  border-color: #d1d5db !important;
+}
+
+.border-black-500 {
+  border-color: #6b7280 !important;
+}
+
+.border-black-800 {
+  border-color: #1f2937 !important;
+}

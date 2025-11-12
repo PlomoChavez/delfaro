@@ -16,9 +16,6 @@ exports.getAll = async (req, res) => {
     fieldsExclude: [
       "data",
       "archivos",
-      "created_at",
-      "updated_at",
-      "cliente_id",
       "subAgente_id",
       "compania_id",
       "ramo_id",
@@ -119,8 +116,8 @@ exports.getAll = async (req, res) => {
       },
     ],
   };
-  let rows = [];
-  rows = await queryWithRelations(query);
+
+  let rows = await queryWithRelations(query);
 
   res.json({
     result: true,

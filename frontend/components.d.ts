@@ -75,6 +75,7 @@ declare module 'vue' {
     PanelValidarAntesEmitir: typeof import('./src/components/forms/cotizaciones/panelValidarAntesEmitir.vue')['default']
     PaymentProvidersDialog: typeof import('./src/components/dialogs/PaymentProvidersDialog.vue')['default']
     PolizaAsegurados: typeof import('./src/components/forms/polizas/PolizaAsegurados.vue')['default']
+    PolizaDetalles: typeof import('./src/components/managers/polizas/PolizaDetalles.vue')['default']
     PolizaHistorial: typeof import('./src/components/forms/polizas/PolizaHistorial.vue')['default']
     PolizaRecibos: typeof import('./src/components/forms/polizas/PolizaRecibos.vue')['default']
     PolizasWizard: typeof import('./src/components/forms/polizas/PolizasWizard.vue')['default']

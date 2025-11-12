@@ -1,6 +1,6 @@
 <!-- filepath: /Users/plomochavez/Documents/GitHub/delfaro/frontend/src/components/ui/BtnAtras.vue -->
 <template>
-  <div class="d-flex justify-start align-center">
+  <div class="d-flex justify-start align-center fontBold">
     <VBtn
       icon="tabler-arrow-left"
       class="cursor-pointer"

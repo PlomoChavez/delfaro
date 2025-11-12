@@ -511,7 +511,7 @@ onMounted(async () => {
             <!-- Campo de texto -->
             <!-- prettier-ignore -->
             <div v-if="field.type === 'label'" :class="field.classElement">
-               <label> {{ field.label }} </label>
+               <label class="fontBold"> {{ field.label }} </label>
                <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
                <p class="ml-3"> {{ obtenerPropiedad(formLocal, field.model) || '' }} </p>
              </div>
