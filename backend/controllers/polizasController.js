@@ -1,24 +1,128 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { deleteById, getAllFrom } = require("./controller");
-const tabla = "poliza";
+const { deleteById } = require("./controller");
+const { getAllFromm, queryWithRelations } = require("../db/functionsSQL");
+const tabla = "polizas";
+const modelo = tabla;
 /**
  * Obtener todos los registros de la tabla clientes.
  */
 exports.getAll = async (req, res) => {
-  const include = {
-    cliente: true,
-    formaPago: true,
-    tipoVencimiento: true,
-    compania: true,
-    subAgente: true,
-    ramo: true,
-    metodoPago: true,
-    estatus: true,
-    moneda: true,
-    producto: true,
+  let filtros = {};
+
+  let query = {
+    modelo,
+    filtros,
+    fieldsExclude: [
+      "data",
+      "archivos",
+      "created_at",
+      "updated_at",
+      "cliente_id",
+      "subAgente_id",
+      "compania_id",
+      "ramo_id",
+      "producto_id",
+      "frecuenciaPago_id",
+      "metodoPago_id",
+      "moneda_id",
+      "estatus_id",
+      "tipoVencimiento_id",
+      "asegurado_id",
+      "cotizacion_id",
+    ],
+
+    include: [
+      // {
+      //   tabla: "poliza_historial",
+      //   foreignKey: "poliza_id",
+      //   localKey: "id",
+      //   labelKey: "historial",
+      //   type: "many",
+      // },
+      // {
+      //   tabla: "poliza_asegurados",
+      //   foreignKey: "poliza_id",
+      //   localKey: "id",
+      //   labelKey: "asegurados",
+      //   type: "many",
+      // },
+      // {
+      //   tabla: "poliza_recibos",
+      //   foreignKey: "poliza_id",
+      //   localKey: "id",
+      //   labelKey: "recibos",
+      //   type: "many",
+      // },
+      {
+        tabla: "clientes",
+        foreignKey: "id",
+        localKey: "cliente_id",
+        labelKey: "cliente",
+        fields: ["nombre", "curp", "rfc"],
+      },
+      {
+        tabla: "compania",
+        foreignKey: "id",
+        localKey: "compania_id",
+        labelKey: "compania",
+        fields: ["nombre", "nombreCorto", "rfc"],
+      },
+      {
+        tabla: "ramos",
+        foreignKey: "id",
+        localKey: "ramo_id",
+        labelKey: "ramo",
+        fields: ["label"],
+      },
+      {
+        tabla: "companias_productos",
+        foreignKey: "id",
+        localKey: "producto_id",
+        labelKey: "producto",
+        fields: ["nombre"],
+      },
+      {
+        tabla: "formas_de_pago",
+        foreignKey: "id",
+        localKey: "frecuenciaPago_id",
+        labelKey: "frecuenciaPago",
+        fields: ["label"],
+      },
+      {
+        tabla: "metodos_de_pago",
+        foreignKey: "id",
+        localKey: "metodoPago_id",
+        labelKey: "metodoPago",
+        fields: ["label"],
+      },
+      {
+        tabla: "monedas",
+        foreignKey: "id",
+        localKey: "moneda_id",
+        labelKey: "moneda",
+        fields: ["label"],
+      },
+      {
+        tabla: "estatus_polizas",
+        foreignKey: "id",
+        localKey: "estatus_id",
+        labelKey: "estatusPoliza",
+        fields: ["label"],
+      },
+      {
+        tabla: "tipos_de_vencimiento",
+        foreignKey: "id",
+        localKey: "tipoVencimiento_id",
+        labelKey: "tipoVencimiento",
+        fields: ["label"],
+      },
+    ],
   };
-  res.json(getAllFromCustom(tabla, {}, include));
+  let rows = [];
+  rows = await queryWithRelations(query);
+
+  res.json(rows);
 };
 
 /**

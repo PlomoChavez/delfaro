@@ -4,6 +4,7 @@ import { deleteById } from "./functions/deleteById.js";
 import { findOne } from "./functions/findOne.js";
 import { getAllFrom } from "./functions/getAllFrom.js";
 import { updateOne } from "./functions/updateOne.js";
+import { queryWithRelations } from "./functions/queryWithRelations.js";
 // Aquí puedes agregar más funciones SQL en el futuro:
 // import { findAll } from "./findAll.js";
 // import { insertOne } from "./insertOne.js";
@@ -16,4 +17,5 @@ export {
   findOne,
   getAllFrom,
   updateOne,
+  queryWithRelations,
 };
