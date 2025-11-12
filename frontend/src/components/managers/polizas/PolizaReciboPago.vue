@@ -113,6 +113,20 @@ const getColor = (estatus: string) => {
       return "#333333";
   }
 };
+const handleShowModalContrasenia = (estatus: string) => {
+  switch (estatus) {
+    case "Pendiente":
+      return "#ecb100";
+    case "Pagado":
+      return "#0bac30";
+    case "Atrasado":
+      return "#e61e32 ";
+    case "Cancelado":
+      return "#7f7f7f";
+    default:
+      return "#333333";
+  }
+};
 </script>
 
 <template>
@@ -122,40 +136,60 @@ const getColor = (estatus: string) => {
       <h1 class="pl-4 my-auto fontBold">Registrar un pago</h1>
     </div>
     <div class="wFull gap-4 d-flex">
-      <template v-for="(row, index) in recibos" :key="index">
-        <!-- prettier-ignore -->
-        <VCard class="rounded-lg w500">
-          <div class="w-full">
+      <!-- prettier-ignore -->
+
+      <!-- prettier-ignore -->
+      <VCard class="w600 rounded-lg">
             <div class="p-4 d-flex flex-justify ml-2 mt-1 mx-5">
               <div class="mx-auto p-4 d-flex flex-justify ml-5 mt-4">
-                <VAvatar :size="42" rounded="xl" :color="getColor(row.estatus)" variant="tonal">
-                  <VIcon :icon="'tabler-receipt-2'" size="26" :color="getColor(row.estatus)" />
+                <VAvatar :size="42" rounded="xl" :color="'success'" variant="tonal">
+                  <VIcon :icon="'tabler-receipt-2'" size="26" :color="'success'" />
                 </VAvatar>
                 <div>
-                  <h3 class="pl-4 my-auto fontBold" :class="getColorEstatus(row.estatus)" >{{ row.estatus }}</h3>
-                  <h4 class="pl-4 my-auto fontBold">{{ formatDateMoment(row.fechaInicio, "DD/MM/YYYY") }}</h4>
+                  <h3 class="pl-4 my-auto fontBold textTonalGreen" >{{ "Pendiente" }}</h3>
+                  <h4 class="pl-4 my-auto fontBold">{{ formatDateMoment(props.data.fechaInicio, "DD/MM/YYYY") }}</h4>
                 </div>
               </div>
-              <h2 class="my-auto ml-auto"># {{ row.numeroRecibo }}</h2>
+              <h2 class="my-auto ml-auto"># 001</h2>
             </div>
-            <div class="w_100 mx-auto border-t border-gray mt-2" />
-          </div>
+            <div class="w_100 mx-auto border-t border-gray mt-4 mb-4 " />
           <div class="p30 pt-10 pb-12">
-            <p class="mb-0 text-muted ">Importe</p>
-            <h2 class="fontBold ml-2">{{ formatCurrency(row.importe) }}</h2>
-          </div>
-          <div class="wFull p0 m0" :class="getBGColorEstatus(row.estatus)">
-            <div class="d-flex pl-4 py-3">
-              <VAvatar :size="25" rounded="xl" :color="getColor(row.estatus)" variant="tonal">
-                <VIcon :icon="'tabler-calendar'" size="20" />
-              </VAvatar>
-              <div>
-                <h4 class="ml-2 my-auto fontBold">Vencio {{ formatDateMoment(row.vencimiento, "DD/MM/YYYY") }}</h4>
-              </div>
+            <div class="wFull flex flex-wrap gap-4">
+                <div class="w-full d-flex mb-3">
+                    <div class="mr-auto font-medium text-gray-700">No. poliza</div>
+                    <div class="ml-auto font-bold">{{ (props.data.numeroPoliza) }}</div>
+                </div>
+                <div class="w-full d-flex mb-3">
+                    <div class="mr-auto font-medium text-gray-700">Asegurado</div>
+                    <div class="ml-auto font-bold">{{ (props.data.cliente.nombre) }}</div>
+                </div>
+                <div class="w-full d-flex mb-3">
+                    <div class="mr-auto font-medium text-gray-700">Concepto</div>
+                    <div class="ml-auto font-bold">Pago del recibo {{ props.data.recibos[0].numeroRecibo }}  de la poliza {{ props.data.numeroPoliza }}</div>
+                </div>
+                <div class="w-full d-flex mb-3">
+                  <div class="wFull mr-auto font-medium text-gray-700">Periodo de cubre</div>
+                  <div class="wFull ml-auto font-bold text-right">{{ formatDateMoment(props.data.fechaInicio, "DD/MM/YYYY") }} - {{ formatDateMoment(props.data.fechaFin, "DD/MM/YYYY") }}</div>
+                </div>
+                <div class="w-full d-flex mb-3">
+                    <div class="mr-auto font-medium text-gray-700">Fecha de vencimiento</div>
+                    <div class="ml-auto font-bold text-right">{{ formatDateMoment(props.data.vencimiento, "DD/MM/YYYY") }}</div>
+                </div>
+            </div>
+            <div class="col-11 mx-auto mt-2">
+              <VBtn
+                block
+                size="small"
+                variant="outlined"
+                rounded="primary"
+                @click="handleShowModalContrasenia"
+              >
+                <VIcon start icon="tabler-receipt-2" />
+                Registrar pago
+              </VBtn>
             </div>
           </div>
         </VCard>
-      </template>
     </div>
   </div>
 </template>
