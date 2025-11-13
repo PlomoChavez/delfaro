@@ -172,6 +172,8 @@ const getCompanias = async () => {
       ramo: 3,
     },
   });
+
+  console.log(response.data);
   if (response.data.result) {
     let tmp: any = [];
     response.data.data.forEach((item: any) => {
@@ -362,7 +364,7 @@ onMounted(async () => {
 
   step.value = localData.value?.configuracion?.step ?? 1;
 
-  if (step.value === 1) {
+  if (step.value === 1 || step.value === 2) {
     await getCompanias();
   }
 });
@@ -383,6 +385,7 @@ watch(step, async (nuevoValor) => {
     <!-- prettier-ignore -->
     <BtnAtras titulo="Volver a cotizaciones" @atras="handleCancelarCotizacion" />
     <h1 class="module-title">Cotizador de Seguros de Autos</h1>
+    <p>{{ step }}</p>
     <div v-if="editandoTitular">
       <div class="card cardForm mx-auto mt-3">
         <h2 class="w-full mb-5">Información del cliente:</h2>
@@ -409,6 +412,7 @@ watch(step, async (nuevoValor) => {
       </div>
       <!-- Selección de compañias -->
       <div v-if="step == 2">
+        <pre>{{ companias }}</pre>
         <h2 class="title wFull text-center">Selecciona las compañias</h2>
         <div class="divRows mt-3">
           <!-- prettier-ignore -->

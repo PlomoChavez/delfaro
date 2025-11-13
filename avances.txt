@@ -237,3 +237,213 @@ inicio de vigencia
   },
   compania: 'qualitas'
 }
+
+
+
+{
+  "id": 20,
+  "numeroPoliza": "0810326356",
+  "cliente_id": 33,
+  "inicioVigencia": "1899-11-30T06:36:36.000Z",
+  "finVigencia": "1899-11-30T06:36:36.000Z",
+  "comisionAgente": null,
+  "primaNeta": "29621.35",
+  "proximoPagoFecha": "2025-11-09T04:00:02.211Z",
+  "proximoPagoMonto": "9744.89",
+  "primaTotal": "31683.17",
+  "pagoInicial": "9744.89",
+  "pagoSubsecuente": "9002.53",
+  "financiamiento": "1421.82",
+  "archivos": null,
+  "data": {
+    "carro": {
+      "conductorHabitual": "Jesus",
+      "placas": "ABC0001",
+      "numeroSerie": "1HGCM82633A004354",
+      "numeroMotor": "MTR8A2345",
+      "color": "Rojo",
+      "repuve": "REP00001",
+      "numeroEconomico": "ECO0034",
+      "marca": "HONDA",
+      "modelo": "CR-V",
+      "anio": "2024",
+      "version": "TOURING 5P L4 BA MP3 USB AC AUT 5 OCUP"
+    },
+    "compania": "qualitas",
+    "numeroPoliza": "0810326356",
+    "detalles": {
+      "accesorios": [],
+      "frecuenciaPago": "Trimestral",
+      "coberturasBasicas": [
+        {
+          "cobertura": "Daños materiales",
+          "sumaAsegurada": "594,000",
+          "deducible": "20%",
+          "prima": "$30,801.67"
+        },
+        {
+          "cobertura": "Robo total",
+          "sumaAsegurada": "594,000",
+          "deducible": "20%",
+          "prima": "$22,280.07"
+        },
+        {
+          "cobertura": "Responsabilidad Civil",
+          "sumaAsegurada": "3,000,000",
+          "deducible": "50 UMA",
+          "prima": "$4,553.63"
+        },
+        {
+          "cobertura": "Gastos Medicos Ocupantes",
+          "sumaAsegurada": "200,000",
+          "deducible": null,
+          "prima": "$497.47"
+        },
+        {
+          "cobertura": "Muerte del Conductor X AA",
+          "sumaAsegurada": "200,000",
+          "deducible": null,
+          "prima": "$122.40"
+        },
+        {
+          "cobertura": "Gastos Legales",
+          "sumaAsegurada": "Amparada",
+          "deducible": null,
+          "prima": "$437.00"
+        },
+        {
+          "cobertura": "Asistencia Vial",
+          "sumaAsegurada": "send",
+          "deducible": null,
+          "prima": "$565.00"
+        },
+        {
+          "cobertura": "RC Daños a Terceros EUA",
+          "sumaAsegurada": "Amparada",
+          "deducible": null,
+          "prima": "$0.00"
+        }
+      ],
+      "numeroCotizacion": "1044265529",
+      "primerPago": "$9,744.89",
+      "pagoSubsecuente": "$9,002.53",
+      "primaNeta": "$29,621.35",
+      "tasaFin": "$1421.82",
+      "expedicionPoliza": "$640",
+      "iVA": "$5,069.31",
+      "subtotal": "$31,683.17",
+      "archivo": "http://localhost:3000/files/cotizaciones/qualitas/cotizacion_1044265529.pdf"
+    }
+  },
+  "created_at": "09/11/2025 10:00 PM",
+  "updated_at": "2025-11-10T04:00:02.000Z",
+  "frecuencia": "Trimestral",
+  "historial": [],
+  "asegurados": [
+    {
+      "id": 7,
+      "cliente_id": 33,
+      "rfc": "CAQJ9406101G5",
+      "nombre": "Jesu Ramon Chavez Quirox",
+      "edad": "31",
+      "genero": "Hombre",
+      "fechaNacimiento": "1994-06-10T06:00:00.000Z",
+      "direccion": "La Laja, Acapulco, Guerrero, CP 39600",
+      "colonia": "La Laja",
+      "codigoPostal": "39600",
+      "estado_id": 13,
+      "ciudad": "Acapulco",
+      "correo": "de@de.com",
+      "telefono": null,
+      "celular": "7442077733",
+      "oficina": "7442077733",
+      "observaciones": null,
+      "created_at": "2025-11-10T04:00:02.000Z",
+      "updated_at": "2025-11-10T04:00:02.000Z"
+    }
+  ],
+  "recibos": [
+    {
+      "id": 54,
+      "numeroRecibo": "001",
+      "fechaInicio": "2025-11-09T04:00:02.211Z",
+      "fechaFin": "2026-02-09T04:00:02.211Z",
+      "vencimiento": "2025-11-23T04:00:02.211Z",
+      "fechaPago": null,
+      "fechaCancelado": null,
+      "estatus": "Pendiente",
+      "importe": "9744.89",
+      "evidencia": null,
+      "created_at": "2025-11-10T04:00:02.000Z",
+      "updated_at": "2025-11-12T04:26:32.000Z"
+    },
+    {
+      "id": 55,
+      "numeroRecibo": "002",
+      "fechaInicio": "2026-02-09T04:00:02.211Z",
+      "fechaFin": "2026-05-09T04:00:02.211Z",
+      "vencimiento": "2026-02-23T04:00:02.211Z",
+      "fechaPago": null,
+      "fechaCancelado": null,
+      "estatus": "Pendiente",
+      "importe": "9002.53",
+      "evidencia": null,
+      "created_at": "2025-11-10T04:00:02.000Z",
+      "updated_at": "2025-11-12T04:26:32.000Z"
+    },
+    {
+      "id": 56,
+      "numeroRecibo": "003",
+      "fechaInicio": "2026-05-09T04:00:02.211Z",
+      "fechaFin": "2026-08-09T04:00:02.211Z",
+      "vencimiento": "2026-05-23T04:00:02.211Z",
+      "fechaPago": null,
+      "fechaCancelado": null,
+      "estatus": "Pendiente",
+      "importe": "9002.53",
+      "evidencia": null,
+      "created_at": "2025-11-10T04:00:02.000Z",
+      "updated_at": "2025-11-12T04:26:32.000Z"
+    },
+    {
+      "id": 57,
+      "numeroRecibo": "004",
+      "fechaInicio": "2026-08-09T04:00:02.211Z",
+      "fechaFin": "2026-11-09T04:00:02.211Z",
+      "vencimiento": "2026-08-23T04:00:02.211Z",
+      "fechaPago": null,
+      "fechaCancelado": null,
+      "estatus": "Pendiente",
+      "importe": "9002.53",
+      "evidencia": null,
+      "created_at": "2025-11-10T04:00:02.000Z",
+      "updated_at": "2025-11-10T04:00:02.000Z"
+    }
+  ],
+  "cliente": {
+    "nombre": "Jesu Ramon Chavez Quirox",
+    "curp": "CAQJ940610HGRHRS03",
+    "rfc": "CAQJ9406101G5",
+    "label": "Jesu Ramon Chavez Quirox"
+  },
+  "compania": {
+    "nombre": "QUALITAS",
+    "nombreCorto": "QUALITAS",
+    "rfc": "q"
+  },
+  "ramo": {
+    "label": "AUTOS"
+  },
+  "producto": {
+    "nombre": "AUTOS INDIVIDUAL"
+  },
+  "frecuenciaPago": {
+    "label": "Trimestral"
+  },
+  "moneda": {
+    "label": "MXN - Peso Mexicano"
+  },
+  "estatusPoliza": {
+    "label": "Emitida"
+  }
+}
