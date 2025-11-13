@@ -1,6 +1,7 @@
 const { getAllFromCustom } = require("../db/customFunctions");
 const {
   findOne,
+  queryWithRelations,
   getAllFrom,
   deleteById,
   createOrUpdate,
@@ -125,7 +126,17 @@ exports.search = async (req, res) => {
       isCliente: data.isCliente ? 1 : 0,
     };
 
-    const rows = await getAllFrom("clientes", filtro);
+    const rows = await queryWithRelations({
+      modelo: "clientes",
+      filtros: {
+        $or: [
+          { rfc: data.referencia },
+          { curp: data.referencia },
+          { nombre: data.referencia },
+        ],
+        isCliente: data.isCliente ? 1 : 0,
+      },
+    });
 
     return res.json({
       result: true,

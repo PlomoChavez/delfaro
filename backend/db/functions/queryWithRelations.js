@@ -1,4 +1,4 @@
-const { executeQuery } = require("../executeQuery");
+const { safeExecuteQuery } = require("../safeExecuteQuery");
 
 const queryWithRelations = async ({
   modelo,
@@ -11,7 +11,9 @@ const queryWithRelations = async ({
 }) => {
   try {
     // 1. Obtener las columnas de la tabla
-    const columnsRows = await executeQuery(`SHOW COLUMNS FROM \`${modelo}\``);
+    const columnsRows = await safeExecuteQuery(
+      `SHOW COLUMNS FROM \`${modelo}\``
+    );
     const allFields = columnsRows.map((col) => col.Field);
 
     // Asegurar que los campos clave para las relaciones estén incluidos
@@ -29,20 +31,39 @@ const queryWithRelations = async ({
       .join(", ")} FROM \`${modelo}\``;
 
     const params = [];
+
+    // 2. Construir la cláusula WHERE
     if (Object.keys(filtros).length) {
       const whereClauses = Object.keys(filtros).map((key) => {
         const value = filtros[key];
-        if (value === undefined || value === null) {
-          throw new Error(
-            `El filtro '${key}' tiene un valor inválido: ${value}`
-          );
+
+        if (key === "$or" && Array.isArray(value)) {
+          // Manejar el operador $or
+          const orClauses = value.map((condition) => {
+            const [field, val] = Object.entries(condition)[0];
+            params.push(val);
+            return `\`${field}\` = ?`;
+          });
+          return `(${orClauses.join(" OR ")})`;
+        } else if (value && typeof value === "object" && "$in" in value) {
+          // Manejar el operador $in
+          const placeholders = value.$in.map(() => "?").join(", ");
+          params.push(...value.$in);
+          return `\`${key}\` IN (${placeholders})`;
+        } else {
+          if (value === undefined || value === null) {
+            throw new Error(
+              `El filtro '${key}' tiene un valor inválido: ${value}`
+            );
+          }
+          params.push(value);
+          return `\`${key}\` = ?`;
         }
-        params.push(value);
-        return `\`${key}\` = ?`;
       });
       sql += ` WHERE ${whereClauses.join(" AND ")}`;
     }
 
+    // 3. Agregar límite si está definido
     if (limit) {
       sql += ` LIMIT ${limit}`;
     }
@@ -52,10 +73,10 @@ const queryWithRelations = async ({
       console.log("Parámetros de consulta principal:", params);
     }
 
-    // 2. Ejecutar la consulta principal
-    let rows = await executeQuery(sql, params);
+    // 4. Ejecutar la consulta principal
+    let rows = await safeExecuteQuery(sql, params);
 
-    // 3. Consultar y agregar las relaciones
+    // 5. Consultar y agregar las relaciones
     if (include && include.length) {
       for (const rel of include) {
         if (!rel.tabla || !rel.foreignKey || !rel.localKey) {
@@ -72,7 +93,7 @@ const queryWithRelations = async ({
           continue;
         }
 
-        const relFieldsRows = await executeQuery(
+        const relFieldsRows = await safeExecuteQuery(
           `SHOW COLUMNS FROM \`${rel.tabla}\``
         );
         const relFields = relFieldsRows.map((col) => col.Field);
@@ -95,7 +116,7 @@ const queryWithRelations = async ({
           console.log("Parámetros de relación:", ids);
         }
 
-        const relRows = await executeQuery(relSql, ids);
+        const relRows = await safeExecuteQuery(relSql, ids);
 
         const groupedRelRows = relRows.reduce((acc, relRow) => {
           const key = relRow[rel.foreignKey];
@@ -125,7 +146,7 @@ const queryWithRelations = async ({
       }
     }
 
-    // 4. Excluir los campos especificados en fieldsExclude del resultado final
+    // 6. Excluir los campos especificados en fieldsExclude del resultado final
     if (fieldsExclude && fieldsExclude.length) {
       rows = rows.map((row) => {
         fieldsExclude.forEach((field) => {

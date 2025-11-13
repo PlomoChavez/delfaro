@@ -3,6 +3,7 @@ const {
   getAllFrom,
   deleteById,
   createOrUpdate,
+  queryWithRelations,
 } = require("../db/functionsSQL");
 
 const { escaparBarras } = require("../utils/helper");
@@ -25,8 +26,12 @@ exports.getCompniasByRamo = async (req, res) => {
     }
 
     // 1. Trae todos los productos de compañías para el ramo solicitado
-    const productos = await getAllFrom("companias_productos", {
-      ramo_id: ramoId,
+
+    const productos = await queryWithRelations({
+      modelo: "companias_productos",
+      filtros: {
+        ramo_id: ramoId,
+      },
     });
 
     // 2. Extrae los IDs únicos de las compañías que tienen productos en ese ramo
@@ -41,7 +46,10 @@ exports.getCompniasByRamo = async (req, res) => {
     }
 
     // 3. Trae las compañías correspondientes
-    const companias = await getAllFrom("compania", { id: companiaIds });
+    const companias = await queryWithRelations({
+      modelo: "compania",
+      filtros: { id: { $in: companiaIds } },
+    });
 
     // 4. Une productos a cada compañía
     const companiasConProductos = companias.map((compania) => ({
