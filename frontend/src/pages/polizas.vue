@@ -46,6 +46,7 @@ const handleActionsEdit = (dataRow: any) => {
       label: dataRow["cliente"]["nombre"],
     },
     subAgente: dataRow["sub_agente"],
+    archivos: JSON.parse(dataRow["archivos"] || "[]"),
   };
   showFormEdit.value = true;
 };
@@ -66,15 +67,15 @@ const handleActionsCreate = () => {
     <h1>Polizas</h1>
     <CrudManager
       title="Polizas"
+      :emitEdit="true"
       :formModal="true"
       :show-title="false"
-      :emitEdit="true"
-      :emitNew="true"
+      :showBtnNuevo="false"
       :formSchema="formSchema"
       :tableHeaders="tableHeaders"
-      :filtroAgrupador="'compania.nombreCorto'"
-      :filtroAgrupadorInicial="'Todos'"
       :apiEndpoints="apiEndpoints"
+      :filtroAgrupadorInicial="'Todos'"
+      :filtroAgrupador="'compania.nombreCorto'"
       @customEdit="handleActionsEdit"
       @customCreate="handleActionsCreate"
     />

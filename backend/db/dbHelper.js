@@ -11,7 +11,7 @@
 exports.sanitizeData = async (data, config = {}) => {
   const localConfig = {
     estatusDefault: true,
-    keysHaEliminar: ["created_at", "deleted_at", "updated_at"],
+    keysHaEliminar: ["created_at", "createdAt", "deleted_at", "updated_at"],
     nestedToId: [],
     ...config,
   };

@@ -23,6 +23,7 @@ const props = withDefaults(
 const handleCancelarCotizacion = () => {
   emit("cancelar");
 };
+const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
 const step = ref(1);
 const companias: any = ref([]);
@@ -204,6 +205,7 @@ const handleUpdateCotizacion = async (data = null) => {
   // prettier-ignore
   let tmp = {
     ...localDataRaw,
+    agente_id: userData?.id,
     nombre: nombreCompleto,
     configuracion: {
       ...localDataRaw.configuracion,
@@ -412,7 +414,6 @@ watch(step, async (nuevoValor) => {
       </div>
       <!-- Selección de compañias -->
       <div v-if="step == 2">
-        <pre>{{ companias }}</pre>
         <h2 class="title wFull text-center">Selecciona las compañias</h2>
         <div class="divRows mt-3">
           <!-- prettier-ignore -->

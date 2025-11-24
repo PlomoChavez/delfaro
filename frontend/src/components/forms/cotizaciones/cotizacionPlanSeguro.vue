@@ -617,9 +617,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-
-    <!-- <pre>{{ formTmpValores }}</pre> -->
-    <!-- <pre>{{ cotizacion.parametrosFlexibles }}</pre> -->
   </div>
 </template>
 

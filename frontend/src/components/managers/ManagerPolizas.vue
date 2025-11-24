@@ -157,13 +157,19 @@ onMounted(() => {
       <!-- prettier-ignore -->
       <BtnAtras titulo="Volver al detalle de la póliza" @atras="handleChangePanel(1)" />
       <template v-if="panel == 2">
-        <PolizaAsegurados :registroId="props.data.id" />
+        <PolizaAsegurados
+          :registroId="props.data.id"
+          :asegurados="props.data.asegurados"
+        />
       </template>
       <template v-if="panel == 3">
         <PolizaReciboPago :data="props.data" />
       </template>
       <template v-if="panel == 4">
-        <PolizaRecibos :registroId="props.data.id" />
+        <PolizaRecibos
+          :registroId="props.data.id"
+          :recibos="props.data.recibos"
+        />
       </template>
       <template v-if="panel == 5">
         <p>Panel 5</p>

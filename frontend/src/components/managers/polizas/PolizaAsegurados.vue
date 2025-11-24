@@ -3,6 +3,7 @@
 const props = withDefaults(
   defineProps<{
     registroId: any;
+    asegurados: any;
   }>(),
   {}
 );
@@ -12,71 +13,7 @@ const emit = defineEmits<{
   (event: "changePanel", idx?: any): void;
 }>();
 
-const asegurados = ref([
-  {
-    id: 7,
-    cliente_id: 33,
-    rfc: "CAQJ9406101G5",
-    nombre: "Jesu Ramon Chavez Quirox",
-    edad: "31",
-    genero: "Hombre",
-    fechaNacimiento: "1994-06-10T06:00:00.000Z",
-    direccion: "La Laja, Acapulco, Guerrero, CP 39600",
-    colonia: "La Laja",
-    codigoPostal: "39600",
-    estado_id: 13,
-    ciudad: "Acapulco",
-    correo: "de@de.com",
-    telefono: null,
-    celular: "7442077733",
-    oficina: "7442077733",
-    observaciones: null,
-    created_at: "2025-11-10T04:00:02.000Z",
-    updated_at: "2025-11-10T04:00:02.000Z",
-  },
-  {
-    id: 7,
-    cliente_id: 33,
-    rfc: "CAQJ9406101G5",
-    nombre: "Jesu Ramon Chavez Quirox",
-    edad: "31",
-    genero: "Hombre",
-    fechaNacimiento: "1994-06-10T06:00:00.000Z",
-    direccion: "La Laja, Acapulco, Guerrero, CP 39600",
-    colonia: "La Laja",
-    codigoPostal: "39600",
-    estado_id: 13,
-    ciudad: "Acapulco",
-    correo: "de@de.com",
-    telefono: null,
-    celular: "7442077733",
-    oficina: "7442077733",
-    observaciones: null,
-    created_at: "2025-11-10T04:00:02.000Z",
-    updated_at: "2025-11-10T04:00:02.000Z",
-  },
-  {
-    id: 7,
-    cliente_id: 33,
-    rfc: "CAQJ9406101G5",
-    nombre: "Jesu Ramon Chavez Quirox",
-    edad: "31",
-    genero: "Hombre",
-    fechaNacimiento: "1994-06-10T06:00:00.000Z",
-    direccion: "La Laja, Acapulco, Guerrero, CP 39600",
-    colonia: "La Laja",
-    codigoPostal: "39600",
-    estado_id: 13,
-    ciudad: "Acapulco",
-    correo: "de@de.com",
-    telefono: null,
-    celular: "7442077733",
-    oficina: "7442077733",
-    observaciones: null,
-    created_at: "2025-11-10T04:00:02.000Z",
-    updated_at: "2025-11-10T04:00:02.000Z",
-  },
-]);
+const asegurados: any = ref([]);
 const schemaAsegurado = [
   {
     label: "Fecha de nacimiento",
@@ -127,6 +64,12 @@ const schemaAsegurado = [
     classElement: " col-3",
   },
 ];
+
+onMounted(() => {
+  if (props.asegurados) {
+    asegurados.value = props.asegurados;
+  }
+});
 </script>
 
 <template>

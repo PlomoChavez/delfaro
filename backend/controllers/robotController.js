@@ -79,3 +79,15 @@ exports.handleEmitirPolizas = async (data) => {
 
   return resultado;
 };
+exports.handleReprocesarPolizas = async (data) => {
+  let resultado = null;
+  let compania = data.compania.toLowerCase() || null;
+  console.log("Emitiendo poliza para la compañia:", compania);
+  switch (compania) {
+    case "qualitas":
+      resultado = await EmitirPolizaQualitas.handleReprocesarPoliza(data);
+      break;
+  }
+
+  return resultado;
+};

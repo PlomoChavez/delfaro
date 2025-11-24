@@ -28,6 +28,7 @@ router.post('/api/wizard/cotizacion/companias', (req, res) => cotizacionesContro
 router.post('/api/demo/bots', robotController.demoRobots);
 router.post('/api/cotizaciones/estimar', procesosAutomatizadosController.estimarCotizaciones);
 router.post('/api/cotizaciones/emitir', procesosAutomatizadosController.emitirCotizaciones);
+router.post('/api/cotizaciones/reprocesar', procesosAutomatizadosController.reprocesarPoliza);
 
 
 // Catálogos Generales

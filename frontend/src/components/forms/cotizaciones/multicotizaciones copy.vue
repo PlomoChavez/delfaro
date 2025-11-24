@@ -556,8 +556,6 @@ watch(
 </style>
 
 <template>
-  <pre>Step: {{ step }}</pre>
-  <!-- <pre>{{ configuracion.productos }}</pre> -->
   <div class="d-flex justify-start align-center mb-5">
     <VBtn
       icon="tabler-arrow-left"
@@ -720,8 +718,4 @@ watch(
       <VBtn :disabled="!configuracion.productos.length" v-if="step != 4 || todosProductosTerminados" @click="sendToCotizar">Estimar cotizaciones</VBtn>
     </div>
   </div>
-
-  <!-- <pre>{{ localData }}</pre> -->
-  <!-- <pre>{{ configuracion }}</pre> -->
-  <!-- <pre>{{ configuracion }}</pre> -->
 </template>

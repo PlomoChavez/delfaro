@@ -49,21 +49,21 @@ const schemaResumenPoliza = [
     classElement: " col-sm-12 col-md-6  col-lg-6 ",
   },
   {
-    label: "Estatus",
-    type: "label",
-    model: "estatusPoliza.label",
-    classElement: " col-sm-12 col-md-6  col-lg-6 ",
-  },
-  {
     label: "Inicio de vigencia",
     type: "label",
-    model: "inicioVigencia",
+    model: "data.detalles.inicioVigencia",
     classElement: " col-sm-12 col-md-6  col-lg-6 ",
   },
   {
     label: "Fin de vigencia",
     type: "label",
-    model: "finVigencia",
+    model: "data.detalles.finVigencia",
+    classElement: " col-sm-12 col-md-6  col-lg-6 ",
+  },
+  {
+    label: "Estatus",
+    type: "label",
+    model: "estatusPoliza.label",
     classElement: " col-sm-12 col-md-6  col-lg-6 ",
   },
   {
@@ -97,6 +97,35 @@ const schemaCliente = [
     label: "CURP",
     type: "label",
     model: "cliente.curp",
+    classElement: " col-4 ",
+  },
+];
+
+// prettier-ignore
+const schemaAutos = [
+  { label: "Marca",  type: "label",  model: "marca", classElement: " col-3 "},
+  { label: "Modelo",  type: "label",  model: "modelo", classElement: " col-3 "},
+  { label: "Año",  type: "label",  model: "anio", classElement: " col-3 "},
+  { label: "Color",  type: "label",  model: "color", classElement: " col-3 "},
+  { label: "Version",  type: "label",  model: "version", classElement: " col-6 "},
+  { label: "Conductor Habitual", type: "label", model: "conductorHabitual",  classElement: " col-6 ",  },
+  { label: "Placas",  type: "label",  model: "placas", classElement: " col-3 "},
+  { label: "Numero de motor",  type: "label",  model: "numeroMotor", classElement: " col-3 "},
+  { label: "Numero de Serie",  type: "label",  model: "numeroSerie", classElement: " col-3 "},
+  { label: "Numero Economico",  type: "label",  model: "numeroEconomico", classElement: " col-3 "},
+];
+
+const schemaAgente = [
+  {
+    label: "Nombre",
+    type: "label",
+    model: "nombre",
+    classElement: " col-4 ",
+  },
+  {
+    label: "Correo",
+    type: "label",
+    model: "correo",
     classElement: " col-4 ",
   },
 ];
@@ -157,8 +186,8 @@ const handleChangePanel = (idx?: any) => {
 };
 
 const handleVerPoliza = () => {
-  let url =
-    "http://localhost:3000/files/polizas/qualitas/0810326356/poliza_040810326356000000.pdf";
+  let url = props.data.archivos[0]?.url;
+
   window.open(url, "_blank");
 };
 
@@ -177,8 +206,7 @@ watch(
 </script>
 
 <template>
-  <!-- <pre>{{ props.data }}</pre> -->
-  <div class="w-full">
+  <div v-if="true" class="w-full">
     <div class="text-right w-full mb-3">
       <!-- <VBtn
         class="ml-2"
@@ -267,15 +295,15 @@ watch(
         <VCard class="rounded-lg">
           <div class="w-full">
             <div class="p-4">
-              <h3 class="pl-4 pt-4 fontBold">Inmueble asegurado</h3>
+              <h3 class="pl-4 pt-4 fontBold">Activo asegurado</h3>
             </div>
             <div class="w_100 mx-auto border-t border-gray mt-2" />
           </div>
           <div class="wFull p30">
             <FormFactory
-              :schema="schemaCliente"
+              :schema="schemaAutos"
               :formLive="true"
-              :modelValue="props.data"
+              :modelValue="props.data.data.carro"
               :showButtonsAction="false"
             />
           </div>
@@ -307,9 +335,9 @@ watch(
           </div>
           <div class="wFull p30">
             <FormFactory
-              :schema="schemaCliente"
+              :schema="schemaAgente"
               :formLive="true"
-              :modelValue="props.data"
+              :modelValue="props.data.agente"
               :showButtonsAction="false"
             />
           </div>
@@ -332,9 +360,8 @@ watch(
             <h4 class="fontItalic textSecondary mt-3">
               Fecha de limite de pago
             </h4>
-            <h3 class="fontBold">
-              {{ formatDateMoment(props.data.proximoPagoFecha, "DD/MM/YYYY") }}
-            </h3>
+            <!-- prettier-ignore -->
+            <h3 class="fontBold">{{ (props.data.proximoPagoFecha) }}</h3>
             <div class="col-11 mx-auto mt-2">
               <VBtn
                 block
@@ -344,7 +371,7 @@ watch(
                 @click="handleChangePanel(3)"
               >
                 <VIcon start icon="tabler-wallet" />
-                Realizar pago
+                Registrar pago
               </VBtn>
             </div>
           </div>
@@ -374,10 +401,6 @@ watch(
                     <div class="mr-auto font-medium text-gray-700">Financiamiento</div>
                     <div class="ml-auto font-bold">{{ formatCurrency(props.data.financiamiento) }}</div>
                 </div>
-                <div class="w-full d-flex">
-                    <div class="mr-auto font-medium text-gray-700">Comisión agente</div>
-                    <div class="ml-auto font-bold">{{ formatCurrency(props.data.comisionAgente) }}</div>
-                </div>
             </div>
             <div class="col-11 mx-auto mt-2">
               <VBtn
@@ -404,7 +427,7 @@ watch(
             <div class="wFull flex flex-wrap gap-4">
                 <div class="w-full d-flex">
                     <div class="mr-auto font-medium text-gray-700">Creación</div>
-                    <div class="ml-auto font-bold">{{ formatDateMoment(props.data.created_at, "DD/MM/YYYY hh:mm A") }}</div>
+                    <div class="ml-auto font-bold">{{ (props.data.createdAt) }}</div>
                 </div>
                 <div class="w-full d-flex">
                     <div class="mr-auto font-medium text-gray-700">Utl. Actualización</div>

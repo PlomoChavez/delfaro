@@ -677,9 +677,30 @@ async function generadorCotizacion(driver, data) {
     sleeptime: 1000,
     by: "xpath",
   });
+  await sleep(1000);
+
+  await waitForElement(driver, { locator: "selectGracePeriod" });
+
+  // prettier-ignore
+  const elementos = [
+    { key: "inicioVigencia", locator: "BeginningOfValidity", by: "id" },
+    { key: "finVigencia",   locator: "EndOfValidity", by: "id" },
+    { key: "sumaAsegurada", locator: "sumAssured", by: "id" },
+    { key: "periodoGracia", locator: "selectGracePeriod", by: "id",  selectReturnType: "text",},
+  ];
+
+  for (const elemento of elementos) {
+    let tmp = await getElementValue(driver, {
+      locator: elemento.locator,
+      selectReturnType: elemento.selectReturnType || "value", // Valor por defecto si no se especifica
+      sleeptime: 1000,
+    });
+    data.detalles[elemento.key] = tmp;
+  }
+
+  await waitForElement(driver, { locator: "selectPolicyRight" });
 
   // Saltando de formulario
-  await waitForElement(driver, { locator: "selectPolicyRight" });
   await sleep(1000);
   await scrollToBottom(driver);
   await clickElement(driver, {

@@ -3,8 +3,8 @@ function sumarFechas(
   fecha,
   { formatoSalida, años = 0, meses = 0, dias = 0, operacion = "sumar" }
 ) {
-  // Convertir la fecha a un objeto moment
-  let fechaMoment = moment(fecha, moment.ISO_8601, true);
+  // Convertir la fecha a un objeto moment con el formato explícito
+  let fechaMoment = moment(fecha, "DD/MM/YYYY", true);
 
   if (!fechaMoment.isValid()) {
     throw new Error(`La fecha proporcionada no es válida: ${fecha}`);

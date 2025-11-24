@@ -3,6 +3,7 @@
 const props = withDefaults(
   defineProps<{
     registroId: any;
+    recibos: any;
   }>(),
   {}
 );
@@ -112,49 +113,93 @@ const getColor = (estatus: string) => {
     default:
       return "#333333";
   }
+}; // Función para dividir el array en subgrupos de tamaño `chunkSize`
+const chunkArray = (array: any[], chunkSize: number) => {
+  const result = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    result.push(array.slice(i, i + chunkSize));
+  }
+  return result;
 };
+
+// Agrupar los recibos en filas de 4
+const groupedRecibos = computed(() => chunkArray(recibos.value, 4));
+
+onMounted(() => {
+  if (props.recibos) {
+    recibos.value = props.recibos;
+  }
+});
 </script>
 
 <template>
+  <pre>{{ recibos[0] }}</pre>
   <div class="w-full">
     <div class="d-flex mb-6">
       <VIcon :icon="'tabler-receipt-2'" size="40" />
       <h1 class="pl-4 my-auto fontBold">Recibos</h1>
     </div>
-    <div class="wFull gap-4 d-flex">
-      <template v-for="(row, index) in recibos" :key="index">
-        <!-- prettier-ignore -->
-        <VCard class="rounded-lg w500">
-          <div class="w-full">
-            <div class="p-4 d-flex flex-justify ml-2 mt-1 mx-5">
-              <div class="mx-auto p-4 d-flex flex-justify ml-5 mt-4">
-                <VAvatar :size="42" rounded="xl" :color="getColor(row.estatus)" variant="tonal">
-                  <VIcon :icon="'tabler-receipt-2'" size="26" :color="getColor(row.estatus)" />
-                </VAvatar>
-                <div>
-                  <h3 class="pl-4 my-auto fontBold" :class="getColorEstatus(row.estatus)" >{{ row.estatus }}</h3>
-                  <h4 class="pl-4 my-auto fontBold">{{ formatDateMoment(row.fechaInicio, "DD/MM/YYYY") }}</h4>
+    <div class="wFull gap-4">
+      <template v-for="(group, groupIndex) in groupedRecibos" :key="groupIndex">
+        <div class="d-flex gap-4 mb-4">
+          <template v-for="(row, index) in group" :key="index">
+            <VCard class="rounded-lg w500">
+              <div class="w-full">
+                <div class="p-4 d-flex flex-justify ml-2 mt-1 mx-5">
+                  <div class="mx-auto p-4 d-flex flex-justify ml-5 mt-4">
+                    <VAvatar
+                      :size="42"
+                      rounded="xl"
+                      :color="getColor(row.estatus)"
+                      variant="tonal"
+                    >
+                      <VIcon
+                        :icon="'tabler-receipt-2'"
+                        size="26"
+                        :color="getColor(row.estatus)"
+                      />
+                    </VAvatar>
+                    <div>
+                      <h3
+                        class="pl-4 my-auto fontBold"
+                        :class="getColorEstatus(row.estatus)"
+                      >
+                        {{ row.estatus }}
+                      </h3>
+                      <h4 class="pl-4 my-auto fontBold">
+                        {{ row.fechaInicio }}
+                      </h4>
+                    </div>
+                  </div>
+                  <h2 class="my-auto ml-auto"># {{ row.numeroRecibo }}</h2>
+                </div>
+                <div class="w_100 mx-auto border-t border-gray mt-2" />
+              </div>
+              <div class="p30 pt-10 pb-12">
+                <p class="mb-0 text-muted">Importe</p>
+                <h2 class="fontBold ml-2">{{ formatCurrency(row.importe) }}</h2>
+              </div>
+              <div class="wFull p0 m0" :class="getBGColorEstatus(row.estatus)">
+                <div class="d-flex pl-4 py-3">
+                  <VAvatar
+                    :size="25"
+                    rounded="xl"
+                    :color="getColor(row.estatus)"
+                    variant="tonal"
+                  >
+                    <VIcon :icon="'tabler-calendar'" size="20" />
+                  </VAvatar>
+                  <div>
+                    <h4 class="ml-2 my-auto fontBold">
+                      Venció
+                      {{ row.vencimiento }}
+                    </h4>
+                  </div>
                 </div>
               </div>
-              <h2 class="my-auto ml-auto"># {{ row.numeroRecibo }}</h2>
-            </div>
-            <div class="w_100 mx-auto border-t border-gray mt-2" />
-          </div>
-          <div class="p30 pt-10 pb-12">
-            <p class="mb-0 text-muted ">Importe</p>
-            <h2 class="fontBold ml-2">{{ formatCurrency(row.importe) }}</h2>
-          </div>
-          <div class="wFull p0 m0" :class="getBGColorEstatus(row.estatus)">
-            <div class="d-flex pl-4 py-3">
-              <VAvatar :size="25" rounded="xl" :color="getColor(row.estatus)" variant="tonal">
-                <VIcon :icon="'tabler-calendar'" size="20" />
-              </VAvatar>
-              <div>
-                <h4 class="ml-2 my-auto fontBold">Vencio {{ formatDateMoment(row.vencimiento, "DD/MM/YYYY") }}</h4>
-              </div>
-            </div>
-          </div>
-        </VCard>
+            </VCard>
+          </template>
+        </div>
       </template>
     </div>
   </div>

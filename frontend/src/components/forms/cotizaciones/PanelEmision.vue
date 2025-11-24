@@ -24,6 +24,7 @@ const props = withDefaults(
     dataEmitir: null,
   }
 );
+const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
 // prettier-ignore
 function convertirDatosSeguro(data :  any) {
@@ -207,6 +208,7 @@ function handleAseguradoIgual(accion: string) {
 async function handleEmitir() {
   let tmp = toRaw(data.value);
   tmp.cotizacion = toRaw(props.registro);
+  tmp.agente_id = userData.id;
   tmp.compania = tmp.cotizacion.compania.toLowerCase();
   tmp.cliente.isCliente = true;
   tmp.asegurado.isCliente = false;
@@ -320,7 +322,6 @@ watch(
 
 <template>
   <div>
-    <pre>Paso: {{ paso }}</pre>
     <OpcionSelector
       v-if="paso === 1"
       :config="{
@@ -392,7 +393,6 @@ watch(
       <!-- Aquí puedes colocar tu formulario final -->
     </div>
     <div v-if="paso === 8">
-      <!-- <pre>{{ data }}</pre> -->
       <ModuladorFormFactory
         class="col-sm-10 col-md-8 col-lg-8 mx-auto"
         :title="'Información del Carro'"

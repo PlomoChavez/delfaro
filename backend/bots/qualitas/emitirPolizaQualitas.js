@@ -507,7 +507,7 @@ async function consultaPoliza(driver, data) {
   // insertar el numero de poliza
   await setInputValue(driver, {
     locator: "numberPolicy",
-    value: "0810326356",
+    value: "0810329938",
     sleeptime: 1000,
   });
 
@@ -700,32 +700,24 @@ async function validarModalAbierto(driver, options = {}) {
 }
 
 async function handleProcesarArchivosPoliza(driver, data, options = {}) {
-  console.log("Esperando 5 segundos antes de la descarga...");
   await sleep(5000);
 
-  console.log("Iniciando espera de carga completa...");
   await esperarCargaCompleta(driver);
 
-  console.log("Esperando número de póliza...");
   await waitForElement(driver, {
     locator: "nPol",
     by: "id",
   });
 
-  console.log("Esperando info de consulta de póliza...");
   await waitForElement(driver, {
     locator: "info-consulta-poliza",
     by: "id",
   });
 
-  console.log("Esperando para descargar");
-  console.log("Esperando 5 segundos antes de la descarga...");
   await sleep(5000);
   // // Si hay tabla, obtener la informacion de la poliza
   // // prettier-ignore
   const numeroPoliza = await getElementText(driver, { locator: "nPol" });
-
-  console.log("numeroPoliza", numeroPoliza);
 
   // prettier - ignore;
   let resultadoDescarga = await descargarTodosLosDocumentos(driver, {
@@ -737,10 +729,9 @@ async function handleProcesarArchivosPoliza(driver, data, options = {}) {
   }
 
   // prettier-ignore
-  const rutaCarpetaPolizas = obtenerRutaBackendFiles( "polizas", numeroPoliza );
+  const rutaCarpetaPolizas = obtenerRutaBackendFiles( "polizas","qualitas", numeroPoliza );
   // prettier-ignore
   const rutaCompleta = resultadoDescarga.rutaCompleta;
-  // const rutaCompleta = "/Users/plomochavez/Downloads/Poliza_0810326356_Documentos.zip";
 
   await existeCarpeta(rutaCarpetaPolizas, {
     crearSiNoExiste: true,
@@ -1251,7 +1242,7 @@ async function formatearRegistroPoliza(data) {
     frecuenciaPago_id: frecuenciaPagoId ?? '',
     cliente_id:        data.cliente.id,
     asegurado_id:      data.asegurado.id,
-    subAgente_id:      data.cliente.id,
+    subAgente_id:      data.agente_id,
     compania_id:       data.cotizacion.compania_id,
     cotizacion_id:     data.cotizacion.id,
     ramo_id:           data.cotizacion.ramo_id,
@@ -1264,7 +1255,8 @@ async function formatearRegistroPoliza(data) {
     pagoInicial:       extraerNumeroFlotante(data.cotizacion.detalles.primerPago),
     pagoSubsecuente:   extraerNumeroFlotante(data.cotizacion.detalles.pagoSubsecuente),
     financiamiento:    extraerNumeroFlotante(data.cotizacion.detalles.tasaFin),
-    // archivos:          JSON.stringify(data.archivos),
+    archivos:          JSON.stringify(data.archivos),
+    subAgente_id:         data.agente_id,
     data:              JSON.stringify(dataTmp),
   };
 
@@ -1277,6 +1269,8 @@ async function formatearRegistroPoliza(data) {
 async function createRecibos(data) {
   let frecuenciaPago = data.cotizacion.detalles.frecuenciaPago.toLowerCase();
   let fechaInicio = data.cotizacion.detalles.inicioVigencia ?? null;
+
+  console.log("fechaInicio", fechaInicio);
 
   if (fechaInicio == null) {
     fechaInicio = now();
@@ -1291,6 +1285,8 @@ async function createRecibos(data) {
     formatoSalida: "DD/MM/YYYY",
     meses: 12,
   });
+  console.log("fechaInicio", fechaInicio);
+  console.log("fechaFin", fechaFin);
 
   let frecuencias = {
     anual: 1,
@@ -1320,10 +1316,12 @@ async function createRecibos(data) {
     let fechaInicioRecibo = inicio;
 
     let fechaFinRecibo = sumarFechas(fechaInicioRecibo, {
+      formatoSalida: "DD/MM/YYYY",
       meses: aumentoFechas[frecuenciaPago],
     });
 
     let fechaVencimiento = sumarFechas(fechaInicioRecibo, {
+      formatoSalida: "DD/MM/YYYY",
       dias: 14,
     });
 
@@ -1331,9 +1329,9 @@ async function createRecibos(data) {
     let reciboData = {
       poliza_id     : data.poliza_id,
       numeroRecibo  : (i + 1).toString().padStart(3, "0"),
-      vencimiento   : new Date(fechaVencimiento).toISOString(),
-      fechaInicio   : new Date(fechaInicioRecibo).toISOString(),
-      fechaFin      : new Date(fechaFinRecibo).toISOString(),
+      vencimiento   : fechaVencimiento,
+      fechaInicio   : fechaInicioRecibo,
+      fechaFin      : fechaFinRecibo,
       importe       : montoRecibo,
     };
 
@@ -1384,7 +1382,7 @@ async function descargarTodosLosDocumentos(driver, options = {}) {
 
     if (resultadoEspera.nombreArchivo.toLowerCase().endsWith(".zip")) {
       // prettier-ignore
-      const rutaCarpetaPolizas = obtenerRutaBackendFiles( "polizas", numeroPoliza );
+      const rutaCarpetaPolizas = obtenerRutaBackendFiles( "polizas","qualitas", numeroPoliza );
 
       // prettier-ignore
       await existeCarpeta(rutaCarpetaPolizas, { crearSiNoExiste: true });
@@ -1476,34 +1474,34 @@ async function handleEmitirPoliza(data) {
   }
 }
 
-// async function handleEmitirPoliza(data) {
-//   let driver;
+async function handleReprocesarPoliza(data) {
+  let driver;
 
-//   try {
-//     driver = await openPage("https://agentes360.qualitas.com.mx/", {
-//       headless: false,
-//     });
+  try {
+    driver = await openPage("https://agentes360.qualitas.com.mx/", {
+      headless: false,
+    });
 
-//     await iniciarSesion(driver, data);
+    await iniciarSesion(driver, data);
 
-//     await sleep(2000);
+    await sleep(2000);
 
-//     await consultaPoliza(driver, data);
+    await consultaPoliza(driver, data);
 
-//     await handleProcesarArchivosPoliza(driver, data);
+    await handleProcesarArchivosPoliza(driver, data);
 
-//     await handleRegitroPoliza(data);
+    await handleRegitroPoliza(data);
 
-//     return await formatearData(data);
-//   } catch (error) {
-//     error = traducirError(error, "Error general en la emitir la poliza: ");
-//     console.log(error);
-//     return await formatearData({
-//       mssgError: error,
-//       result: false,
-//     });
-//   } finally {
-//     if (driver) await driver.quit();
-//   }
-// }
-module.exports = { handleEmitirPoliza };
+    return await formatearData(data);
+  } catch (error) {
+    error = traducirError(error, "Error general en la emitir la poliza: ");
+    console.log(error);
+    return await formatearData({
+      mssgError: error,
+      result: false,
+    });
+  } finally {
+    if (driver) await driver.quit();
+  }
+}
+module.exports = { handleEmitirPoliza, handleReprocesarPoliza };

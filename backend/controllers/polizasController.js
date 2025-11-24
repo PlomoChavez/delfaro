@@ -1,7 +1,13 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { deleteById } = require("./controller");
-const { getAllFromm, queryWithRelations } = require("../db/functionsSQL");
+const {
+  findOne,
+  getAllFrom,
+  deleteById,
+  createOrUpdate,
+  getAllFromm,
+  queryWithRelations,
+} = require("../db/functionsSQL");
 const tabla = "polizas";
 const modelo = tabla;
 /**
@@ -14,7 +20,6 @@ exports.getAll = async (req, res) => {
     modelo,
     filtros,
     fieldsExclude: [
-      "subAgente_id",
       "compania_id",
       "ramo_id",
       "producto_id",
@@ -48,6 +53,13 @@ exports.getAll = async (req, res) => {
         localKey: "id",
         labelKey: "recibos",
         type: "many",
+      },
+      {
+        tabla: "usuarios",
+        foreignKey: "id",
+        localKey: "subAgente_id",
+        labelKey: "agente",
+        fields: ["nombre", "correo"],
       },
       {
         tabla: "clientes",
@@ -128,13 +140,9 @@ exports.getAll = async (req, res) => {
  * Eliminar un registro específico de la tabla clientes.
  */
 exports.delete = async (req, res) => {
-  const { id } = req.body;
+  const id = req.body.id;
   const result = await deleteById(tabla, id);
-  if (!result.result) {
-    await prisma.polizaRecibo.deleteMany({ where: { poliza_id: Number(id) } });
-    await prisma.poliza.delete({ where: { id: Number(id) } });
-  }
-  return res.json(result);
+  res.json(result);
 };
 
 /**

@@ -7,9 +7,9 @@ const instance = getCurrentInstance();
 // instance?.appContext.app.directive("money", VMoney);
 
 interface Field {
-  label: string;
-  type: string; // Tipo de input: text, number, email, select, etc.
-  model: string; // Nombre de la propiedad en el modelo
+  label?: string;
+  type?: string; // Tipo de input: text, number, email, select, etc.
+  model?: string; // Nombre de la propiedad en el modelo
   options?: {
     id?: string | number | boolean;
     value?: string | number | boolean;
@@ -162,7 +162,7 @@ function handleSubmit() {
   }
   let tmp = { ...formLocal };
   const filteredForm = Object.fromEntries(
-    props.schema.map((field) => [field.model, tmp[field.model]])
+    props.schema.map((field: any) => [field.model, tmp[field.model]])
   );
   if (props.modelValue) {
     tmp = {
@@ -264,6 +264,41 @@ function handleRangeDateChange(field: any, modelKey: "minModel" | "maxModel") {
 
 // Lógica para cargar catálogos dinámicos
 const { obtenerCatalogo } = useCatalogo();
+
+const formateadorValueLabel = (field: any, value: any) => {
+  if (field.type === "label") {
+    if (field.formatter && typeof field.formatter === "function") {
+      return field.formatter(value);
+    } else if (field.formatter && typeof field.formatter === "string") {
+      // Si el formateador es una cadena, intenta usarlo como plantilla
+      try {
+        switch (field.formatter) {
+          case "dateMoment":
+            return formatDateMoment(value, field.format || "DD/MM/YYYY HH:mm");
+          case "uppercase":
+            return String(value).toUpperCase();
+          case "lowercase":
+            return String(value).toLowerCase();
+          case "currency":
+            return new Intl.NumberFormat("es-ES", {
+              style: "currency",
+              currency: "EUR",
+            }).format(Number(value));
+          case "date":
+            return new Date(value).toLocaleDateString("es-ES");
+          default:
+            return value;
+        }
+      } catch (error) {
+        console.error("Error al evaluar el formateador:", error);
+        return value;
+      }
+    } else {
+      return value;
+    }
+  }
+  return value;
+};
 
 onMounted(async () => {
   let tmp: any = [...props.schema];
@@ -513,13 +548,17 @@ onMounted(async () => {
             <div v-if="field.type === 'label'" :class="field.classElement">
                <label class="fontBold"> {{ field.label }} </label>
                <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
-               <p class="ml-3"> {{ obtenerPropiedad(formLocal, field.model) || '' }} </p>
-             </div>
+               <p class="ml-3"> {{ formateadorValueLabel(field,(obtenerPropiedad(formLocal, field.model) || '')) }} </p>
+            </div>
             <!-- prettier-ignore -->
             <div v-if="field.type === 'separador'" :class="field.classElement">
                <h3 class="titleForm"> {{ field.label }} </h3>
                <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
-             </div>
+            </div>
+            <!-- prettier-ignore -->
+            <div v-if="field.type === 'span'" :class="field.classElement">
+               <!-- <p class="ml-3"> {{ formLocal[field.model] }} </p> -->
+            </div>
 
             <div v-if="field.type === 'text'" :class="field.classElement">
               <!-- prettier-ignore -->

@@ -5,7 +5,6 @@
       <p class="p-0 m-0">Compañia: <span>{{ props.cotizacion.compania }}</span></p>
       <!-- prettier-ignore -->
       <p class="p-0 m-0">Ramo: <span>{{ props.cotizacion.ramo }}</span></p>
-
       <!-- prettier-ignore -->
       <div v-if="props.cotizacion.compania == 'QUALITAS' || props.cotizacion.ramo == 'AUTOS'" >
         <EditQualitas
