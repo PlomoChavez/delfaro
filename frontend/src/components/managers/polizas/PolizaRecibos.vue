@@ -1,8 +1,70 @@
+<template>
+  <div class="d-flex mb-6">
+    <VIcon :icon="'tabler-receipt-2'" size="40" />
+    <h1 class="pl-4 my-auto fontBold">Recibos</h1>
+  </div>
+  <div v-if="reciboSelected == null" class="wFull">
+    <!-- Recibos actuales -->
+    <div>
+      <div class="d-flex align-center justify-between mb-2 mt-4">
+        <h2 class="fontBold">Recibos Actuales</h2>
+      </div>
+      <div class="recibos-grid">
+        <template v-for="(recibo, index) in groupedRecibos.actual" :key="index">
+          <CardRecibo :row="recibo" @click="reciboSelected = recibo" />
+        </template>
+      </div>
+    </div>
+
+    <!-- Recibos pasados -->
+    <!-- prettier-ignore -->
+    <div>
+      <div class="d-flex align-center justify-between mb-2 mt-4  cursor-pointer" @click="showPasados = !showPasados">
+        <VIcon :icon="showPasados ? 'tabler-eye' : 'tabler-eye-closed'" size="24" class="mr-2 cursor-pointer" />
+        <h2 class="fontBold">Pasados <span class="text-muted-italic"> Número de recibos ( {{ groupedRecibos.pasado.length }} )</span></h2>
+      </div>
+      <div v-if="showPasados" class="recibos-grid">
+        <template v-for="(recibo, index) in groupedRecibos.pasado" :key="index">
+          <CardRecibo :row="recibo" />
+        </template>
+      </div>
+    </div>
+
+    <!-- Recibos pendientes -->
+    <!-- prettier-ignore -->
+    <div>
+      <div class="d-flex align-center justify-between mb-2 mt-4  cursor-pointer" @click="showPendientes = !showPendientes">
+        <VIcon :icon="showPendientes ? 'tabler-eye' : 'tabler-eye-closed'" size="24" class="mr-2" />
+        <h2 class="fontBold">Pendientes <span class="text-muted-italic"> Número de recibos ( {{ groupedRecibos.pendientes.length }} )</span></h2>
+      </div>
+      <div v-if="showPendientes" class="recibos-grid">
+        <template v-for="(recibo, index) in groupedRecibos.pendientes" :key="index">
+          <CardRecibo :row="recibo" :isDisabled="true" />
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <ReciboDetalle
+    v-else
+    :data="props.data"
+    :recibo="reciboSelected"
+    :btnCancelar="true"
+    @cancelar="reciboSelected = null"
+  />
+</template>
+
 <script lang="ts" setup>
+import moment from "moment";
+import { ref } from "vue";
+import CardRecibo from "./CardRecibo.vue";
+import ReciboDetalle from "./ReciboDetalle.vue";
+
 // Props y eventos
 const props = withDefaults(
   defineProps<{
     registroId: any;
+    data: any;
     recibos: any;
   }>(),
   {}
@@ -13,117 +75,58 @@ const emit = defineEmits<{
   (event: "changePanel", idx?: any): void;
 }>();
 
-const recibos = ref([
-  {
-    id: 54,
-    numeroRecibo: "001",
-    fechaInicio: "2025-11-09T04:00:02.211Z",
-    fechaFin: "2026-02-09T04:00:02.211Z",
-    vencimiento: "2025-11-23T04:00:02.211Z",
-    fechaPago: null,
-    fechaCancelado: null,
-    estatus: "Pendiente",
-    importe: "9744.89",
-    evidencia: null,
-    created_at: "2025-11-10T04:00:02.000Z",
-    updated_at: "2025-11-12T04:26:32.000Z",
-  },
-  {
-    id: 55,
-    numeroRecibo: "002",
-    fechaInicio: "2026-02-09T04:00:02.211Z",
-    fechaFin: "2026-05-09T04:00:02.211Z",
-    vencimiento: "2026-02-23T04:00:02.211Z",
-    fechaPago: null,
-    fechaCancelado: null,
-    estatus: "Pagado",
-    importe: "9002.53",
-    evidencia: null,
-    created_at: "2025-11-10T04:00:02.000Z",
-    updated_at: "2025-11-12T04:26:32.000Z",
-  },
-  {
-    id: 56,
-    numeroRecibo: "003",
-    fechaInicio: "2026-05-09T04:00:02.211Z",
-    fechaFin: "2026-08-09T04:00:02.211Z",
-    vencimiento: "2026-05-23T04:00:02.211Z",
-    fechaPago: null,
-    fechaCancelado: null,
-    estatus: "Cancelado",
-    importe: "9002.53",
-    evidencia: null,
-    created_at: "2025-11-10T04:00:02.000Z",
-    updated_at: "2025-11-12T04:26:32.000Z",
-  },
-  {
-    id: 57,
-    numeroRecibo: "004",
-    fechaInicio: "2026-08-09T04:00:02.211Z",
-    fechaFin: "2026-11-09T04:00:02.211Z",
-    vencimiento: "2026-08-23T04:00:02.211Z",
-    fechaPago: null,
-    fechaCancelado: null,
-    estatus: "Atrasado",
-    importe: "9002.53",
-    evidencia: null,
-    created_at: "2025-11-10T04:00:02.000Z",
-    updated_at: "2025-11-10T04:00:02.000Z",
-  },
-]);
-const getColorEstatus = (estatus: string) => {
-  switch (estatus) {
-    case "Pendiente":
-      return "textTonalYellow";
-    case "Pagado":
-      return "textTonalGreen";
-    case "Atrasado":
-      return "textTonalRed ";
-    case "Cancelado":
-      return "textTonalGray ";
-    default:
-      return "textTonalGray";
-  }
+const recibos: any = ref([]);
+const reciboSelected: any = ref(null);
+
+// Estados para controlar la visibilidad de las secciones
+const showPasados = ref(false);
+const showPendientes = ref(false);
+
+// Función para agrupar recibos en "pasado", "actual" y "pendientes"
+const groupRecibosByDate = (recibos: any[]) => {
+  const pasado: any[] = [];
+  const actual: any[] = [];
+  const pendientes: any[] = [];
+
+  const now = moment(); // Fecha actual
+  const currentMonth = now.month(); // Mes actual (0 = enero, 11 = diciembre)
+  const currentYear = now.year(); // Año actual
+
+  // Mes y año del mes anterior
+  const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+  // Mes y año del mes siguiente
+  const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+  const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
+  recibos.forEach((recibo) => {
+    const vencimiento = moment(recibo.vencimiento, "DD/MM/YYYY"); // Especificar el formato de la fecha
+    const vencimientoMonth = vencimiento.month(); // Obtener el mes del vencimiento
+    const vencimientoYear = vencimiento.year(); // Obtener el año del vencimient
+
+    if (
+      vencimientoYear < currentYear || // Año anterior
+      (vencimientoYear === currentYear && vencimientoMonth < previousMonth)
+    ) {
+      pasado.push(recibo);
+    } else if (
+      (vencimientoYear === previousYear &&
+        vencimientoMonth === previousMonth) || // Mes anterior
+      (vencimientoYear === currentYear && vencimientoMonth === currentMonth) || // Mes actual
+      (vencimientoYear === nextYear && vencimientoMonth === nextMonth) // Mes siguiente
+    ) {
+      actual.push(recibo);
+    } else {
+      pendientes.push(recibo);
+    }
+  });
+
+  return { pasado, actual, pendientes };
 };
 
-const getBGColorEstatus = (estatus: string) => {
-  switch (estatus) {
-    case "Pendiente":
-      return "bgTonalYellow";
-    case "Pagado":
-      return "bgTonalGreen";
-    case "Atrasado":
-      return "bgTonalRed ";
-    case "Cancelado":
-      return "bgTonalGray ";
-    default:
-      return "bgTonalGray";
-  }
-};
-const getColor = (estatus: string) => {
-  switch (estatus) {
-    case "Pendiente":
-      return "#ecb100";
-    case "Pagado":
-      return "#0bac30";
-    case "Atrasado":
-      return "#e61e32 ";
-    case "Cancelado":
-      return "#7f7f7f";
-    default:
-      return "#333333";
-  }
-}; // Función para dividir el array en subgrupos de tamaño `chunkSize`
-const chunkArray = (array: any[], chunkSize: number) => {
-  const result = [];
-  for (let i = 0; i < array.length; i += chunkSize) {
-    result.push(array.slice(i, i + chunkSize));
-  }
-  return result;
-};
-
-// Agrupar los recibos en filas de 4
-const groupedRecibos = computed(() => chunkArray(recibos.value, 4));
+// Computed para agrupar los recibos
+const groupedRecibos = computed(() => groupRecibosByDate(recibos.value));
 
 onMounted(() => {
   if (props.recibos) {
@@ -132,75 +135,23 @@ onMounted(() => {
 });
 </script>
 
-<template>
-  <pre>{{ recibos[0] }}</pre>
-  <div class="w-full">
-    <div class="d-flex mb-6">
-      <VIcon :icon="'tabler-receipt-2'" size="40" />
-      <h1 class="pl-4 my-auto fontBold">Recibos</h1>
-    </div>
-    <div class="wFull gap-4">
-      <template v-for="(group, groupIndex) in groupedRecibos" :key="groupIndex">
-        <div class="d-flex gap-4 mb-4">
-          <template v-for="(row, index) in group" :key="index">
-            <VCard class="rounded-lg w500">
-              <div class="w-full">
-                <div class="p-4 d-flex flex-justify ml-2 mt-1 mx-5">
-                  <div class="mx-auto p-4 d-flex flex-justify ml-5 mt-4">
-                    <VAvatar
-                      :size="42"
-                      rounded="xl"
-                      :color="getColor(row.estatus)"
-                      variant="tonal"
-                    >
-                      <VIcon
-                        :icon="'tabler-receipt-2'"
-                        size="26"
-                        :color="getColor(row.estatus)"
-                      />
-                    </VAvatar>
-                    <div>
-                      <h3
-                        class="pl-4 my-auto fontBold"
-                        :class="getColorEstatus(row.estatus)"
-                      >
-                        {{ row.estatus }}
-                      </h3>
-                      <h4 class="pl-4 my-auto fontBold">
-                        {{ row.fechaInicio }}
-                      </h4>
-                    </div>
-                  </div>
-                  <h2 class="my-auto ml-auto"># {{ row.numeroRecibo }}</h2>
-                </div>
-                <div class="w_100 mx-auto border-t border-gray mt-2" />
-              </div>
-              <div class="p30 pt-10 pb-12">
-                <p class="mb-0 text-muted">Importe</p>
-                <h2 class="fontBold ml-2">{{ formatCurrency(row.importe) }}</h2>
-              </div>
-              <div class="wFull p0 m0" :class="getBGColorEstatus(row.estatus)">
-                <div class="d-flex pl-4 py-3">
-                  <VAvatar
-                    :size="25"
-                    rounded="xl"
-                    :color="getColor(row.estatus)"
-                    variant="tonal"
-                  >
-                    <VIcon :icon="'tabler-calendar'" size="20" />
-                  </VAvatar>
-                  <div>
-                    <h4 class="ml-2 my-auto fontBold">
-                      Venció
-                      {{ row.vencimiento }}
-                    </h4>
-                  </div>
-                </div>
-              </div>
-            </VCard>
-          </template>
-        </div>
-      </template>
-    </div>
-  </div>
-</template>
+<style scoped>
+.recibos-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 20px;
+  padding-right: 20px;
+  justify-content: center;
+  gap: 16px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.text-muted-italic {
+  font-size: 0.875rem; /* Letra pequeña */
+  color: #6c757d; /* Color tenue (muted) */
+  font-style: italic; /* Estilo itálico */
+}
+</style>

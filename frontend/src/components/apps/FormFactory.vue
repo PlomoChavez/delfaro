@@ -562,7 +562,7 @@ onMounted(async () => {
 
             <div v-if="field.type === 'text'" :class="field.classElement">
               <!-- prettier-ignore -->
-              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
+              <label class="fontBold" :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
 
               <VTextField
                 variant="outlined"
@@ -574,12 +574,24 @@ onMounted(async () => {
                 @input="handleInputChange(field.model, $event.target.value)"
               />
             </div>
+            <!-- prettier-ignore -->
+            <div v-if="field.type === 'textarea'" :class="field.classElement">
+              <label class="fontBold" :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
+              <VTextarea
+                variant="outlined"
+                v-model="formLocal[field.model]"
+                :disabled="props.isDisabled || field.disabled"
+                :placeholder="field.placeholder || `Introduce el dato requerido`"
+                rows="field.rows || 3"
+                @input="handleInputChange(field.model, $event.target.value)"
+              />
+            </div>
 
             <!-- Campo number -->
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'number'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
+              <label class="fontBold" :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
 
                <VTextField
                  @input="handleNumberInput($event, field)"
@@ -594,7 +606,7 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'date'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
+              <label class="fontBold" :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
               <!-- prettier-ignore -->
               <AppDateTimePicker
                 :key="`${field.model}`"
@@ -642,7 +654,7 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'select'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
+              <label class="fontBold" :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
               <!-- prettier-ignore -->
               <VSelect
                 :items="field.options || []"
@@ -663,7 +675,7 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'switch'" :class="field.classElement">
               <!-- prettier-ignore -->   
-              <label :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
+              <label class="fontBold" :for="field.model" v-html="props.formRequired ? (field.label + spanRequired) : (field.required ? field.label + spanRequired : field.label)"></label>
 
               <VSwitch
                 v-model="formLocal[field.model]"

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import moment from "moment";
 import { ref } from "vue";
 import PolizaAsegurados from "./polizas/PolizaAsegurados.vue";
 import PolizaDetalles from "./polizas/PolizaDetalles.vue";
@@ -24,6 +25,7 @@ const emit = defineEmits<{
   (event: "cancelar"): void;
 }>();
 
+const dataPoliza: any = ref(null);
 // prettier-ignore
 const formSchema : any = [
   { label: "Numero de poliza",          type: "label",      model: "numeroPoliza",    },
@@ -51,7 +53,7 @@ const formSchema : any = [
 
 async function getRecibos() {
   let url = "/api/polizas/recibos";
-  let payload = { poliza_id: props.data.id };
+  let payload = { poliza_id: dataPoliza.id };
   let response = await customRequest({
     url: url,
     method: "POST",
@@ -68,7 +70,7 @@ async function getRecibos() {
 }
 async function getHistorial() {
   let url = "/api/polizas/historial";
-  let payload = { poliza_id: props.data.id };
+  let payload = { poliza_id: dataPoliza.id };
   let response = await customRequest({
     url: url,
     method: "POST",
@@ -85,6 +87,16 @@ async function getHistorial() {
 }
 
 // prettier-ignore
+const findReciboByVencimiento = (recibos: any[], proximoPagoFecha: string) => {
+  return recibos.find((recibo) => {
+    const fechaComparar = moment(recibo.fechaInicio, "DD/MM/YYYY");
+    const proximoPago = moment(proximoPagoFecha, "DD/MM/YYYY");
+
+    return fechaComparar.isSame(proximoPago, "day");
+  });
+};
+
+// prettier-ignore
 const handleEditForm = () => { formDisabled.value = !formDisabled.value; };
 // prettier-ignore
 const handleBack = () => { emit("cancelar"); };
@@ -93,6 +105,13 @@ const handleChangePanel = (idx?: any) => {
   if (typeof idx !== "undefined") {
     panel.value = idx;
   }
+};
+
+// Función para calcular los días entre la fecha de vencimiento y la fecha actual
+const getDaysDifference = (vencimiento: string): number => {
+  const now = moment(); // Fecha actual
+  const vencimientoDate = moment(vencimiento, "DD/MM/YYYY"); // Convertir la fecha de vencimiento
+  return now.diff(vencimientoDate, "days"); // Diferencia en días
 };
 
 watch(
@@ -137,38 +156,75 @@ watch(
 );
 
 onMounted(() => {
-  props.data.data = JSON.parse(props.data.data);
+  let tmpData = JSON.parse(JSON.stringify(props.data));
+  tmpData.data = JSON.parse(tmpData.data);
+
+  // Función para agrupar recibos en "pasado", "actual" y "pendientes"
+
+  const now = moment(); // Fecha actual
+
+  tmpData.recibos.forEach((recibo: any) => {
+    const vencimiento = moment(recibo.vencimiento, "DD/MM/YYYY"); // Especificar el formato de la fecha
+
+    recibo.isPagado = !(
+      recibo.fechaPago == null && recibo.fechaCancelado == null
+    );
+
+    recibo.concepto = `Pago del recibo ${recibo.numeroRecibo} de la poliza ${tmpData.numeroPoliza}`;
+    recibo.montoFormateado = formatCurrency(recibo.importe);
+
+    recibo.diferenciaDias = getDaysDifference(recibo.vencimiento);
+
+    recibo.isVencido = vencimiento.isBefore(now, "day"); // true si la fecha de vencimiento es anterior a hoy
+
+    if (recibo.isVencido) {
+      recibo.estatus = "Atrasado";
+    }
+  });
+
+  tmpData.reciboActual = findReciboByVencimiento(
+    tmpData.recibos,
+    tmpData.proximoPagoFecha
+  );
+
+  dataPoliza.value = tmpData;
 });
 </script>
 
 <template>
-  <div class="d-flex flex-column gap-4">
+  <div v-if="dataPoliza != null" class="d-flex flex-column gap-4">
     <template v-if="panel == 1">
       <div class="w-full">
         <!-- prettier-ignore -->
         <BtnAtras titulo="Volver a polizas" @atras="handleBack" />
 
         <!-- prettier-ignore -->
-        <h1 class="ml-4 wFull text-right">{{ props.data.numeroPoliza }} - {{  props.data.ramo.label }} - {{ props.data.compania.nombreCorto }}</h1>
+        <h1 class="ml-4 wFull text-right">{{ dataPoliza.numeroPoliza }} - {{  dataPoliza.ramo.label }} - {{ dataPoliza.compania.nombreCorto }}</h1>
       </div>
-      <PolizaDetalles :data="props.data" @changePanel="handleChangePanel" />
+      <PolizaDetalles :data="dataPoliza" @changePanel="handleChangePanel" />
     </template>
     <template v-if="panel != 1">
       <!-- prettier-ignore -->
       <BtnAtras titulo="Volver al detalle de la póliza" @atras="handleChangePanel(1)" />
       <template v-if="panel == 2">
         <PolizaAsegurados
-          :registroId="props.data.id"
-          :asegurados="props.data.asegurados"
+          :registroId="dataPoliza.id"
+          :asegurados="dataPoliza.asegurados"
         />
       </template>
       <template v-if="panel == 3">
-        <PolizaReciboPago :data="props.data" />
+        <PolizaReciboPago
+          :data="dataPoliza"
+          :recibo="dataPoliza.reciboActual"
+          @changePanel="handleChangePanel"
+        />
       </template>
       <template v-if="panel == 4">
         <PolizaRecibos
-          :registroId="props.data.id"
-          :recibos="props.data.recibos"
+          :data="dataPoliza"
+          :registroId="dataPoliza.id"
+          :recibos="dataPoliza.recibos"
+          @changePanel="handleChangePanel"
         />
       </template>
       <template v-if="panel == 5">
