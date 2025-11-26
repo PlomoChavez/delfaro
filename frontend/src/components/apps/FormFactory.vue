@@ -36,6 +36,7 @@ const props = withDefaults(
     showButtonCancel?: boolean;
     formRequired?: boolean;
     validarCambios?: boolean;
+    showMessageRequired?: boolean;
   }>(),
   {
     title: null,
@@ -52,6 +53,7 @@ const props = withDefaults(
     showButtonCancel: true,
     textButtonCancel: null,
     textButtonSubmit: null,
+    showMessageRequired: true,
   }
 );
 
@@ -482,65 +484,67 @@ onMounted(async () => {
       <div class="formWrapper">
         <!-- Render dynamic fields -->
         <!-- prettier-ignore -->
-        <h6 v-if="tieneRequeridos" class="mb16" style="color: #535353; font-size: 0.80rem;">
-          Este formulario cuenta con campos obligatorios, los puedes identificar porque tienen este símbolo <span style="color:red">*</span>
-        </h6>
-
-        <div
-          v-if="camposFaltantes.length"
-          ref="mensajeRef"
-          class="mb14 faltantes-alert mx-auto"
-        >
-          <div class="faltantes-header">
-            <span class="faltantes-icon">⚠️</span>
-            <span class="faltantes-title">Campos obligatorios pendientes</span>
-          </div>
-          <div class="faltantes-desc">
-            Por favor completa los siguientes campos requeridos antes de
-            continuar:
-          </div>
-          <div class="">
-            <ul
-              class="faltantes-list"
-              :class="{
-                'faltantes-list-2col':
-                  camposFaltantes.length > 10 && mostrarTodosFaltantes,
-              }"
-            >
-              <li
-                v-for="campo in mostrarTodosFaltantes
-                  ? camposFaltantes
-                  : camposFaltantes.slice(0, 5)"
-                :key="campo"
-              >
-                {{ campo }}
-              </li>
-            </ul>
-          </div>
-          <div
-            v-if="camposFaltantes.length > 5"
-            style="margin-top: 6px"
-            class="text-center"
-          >
-            <button
-              @click="toggleFaltantes"
-              style="
-                background: none;
-                border: none;
-                color: #b85c00;
-                cursor: pointer;
-                font-size: 0.8rem;
-                text-decoration: underline;
-              "
-            >
-              {{
-                mostrarTodosFaltantes
-                  ? "Ocultar otros campos"
-                  : `Ver otros campos (${camposFaltantes.length - 5})`
-              }}
-            </button>
-          </div>
-        </div>
+        <div v-if="props.showMessageRequired" >
+           <h6 v-if="tieneRequeridos" class="mb16" style="color: #535353; font-size: 0.80rem;">
+             Este formulario cuenta con campos obligatorios, los puedes identificar porque tienen este símbolo <span style="color:red">*</span>
+           </h6>
+   
+           <div
+             v-if="camposFaltantes.length"
+             ref="mensajeRef"
+             class="mb14 faltantes-alert mx-auto"
+           >
+             <div class="faltantes-header">
+               <span class="faltantes-icon">⚠️</span>
+               <span class="faltantes-title">Campos obligatorios pendientes</span>
+             </div>
+             <div class="faltantes-desc">
+               Por favor completa los siguientes campos requeridos antes de
+               continuar:
+             </div>
+             <div class="">
+               <ul
+                 class="faltantes-list"
+                 :class="{
+                   'faltantes-list-2col':
+                     camposFaltantes.length > 10 && mostrarTodosFaltantes,
+                 }"
+               >
+                 <li
+                   v-for="campo in mostrarTodosFaltantes
+                     ? camposFaltantes
+                     : camposFaltantes.slice(0, 5)"
+                   :key="campo"
+                 >
+                   {{ campo }}
+                 </li>
+               </ul>
+             </div>
+             <div
+               v-if="camposFaltantes.length > 5"
+               style="margin-top: 6px"
+               class="text-center"
+             >
+               <button
+                 @click="toggleFaltantes"
+                 style="
+                   background: none;
+                   border: none;
+                   color: #b85c00;
+                   cursor: pointer;
+                   font-size: 0.8rem;
+                   text-decoration: underline;
+                 "
+               >
+                 {{
+                   mostrarTodosFaltantes
+                     ? "Ocultar otros campos"
+                     : `Ver otros campos (${camposFaltantes.length - 5})`
+                 }}
+               </button>
+             </div>
+           </div>
+         </div>
         <v-row>
           <template v-for="field in schemaLocal" :key="field.model">
             <!-- Campo de texto -->

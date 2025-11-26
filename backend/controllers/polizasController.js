@@ -34,6 +34,12 @@ exports.getAll = async (req, res) => {
 
     include: [
       {
+        tabla: "poliza_recibos",
+        foreignKey: "id",
+        localKey: "recibo_id",
+        labelKey: "recibo",
+      },
+      {
         tabla: "poliza_historial",
         foreignKey: "poliza_id",
         localKey: "id",

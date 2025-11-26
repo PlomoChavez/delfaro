@@ -168,4 +168,72 @@ export function showErrorMessage({
   });
 }
 
+export function showConfirmationMessage({
+  title = "¿Estás seguro?",
+  message = "Confirma que deseas realizar esta acción.",
+  confirmText = "Confirmar",
+  cancelText = "Cancelar",
+  onConfirm,
+  onCancel,
+}: {
+  title?: string;
+  message?: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
+}) {
+  Swal.fire({
+    title,
+    html: `
+      <p style="
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 0px;
+        margin-bottom: 0px;
+      ">
+        ${message}
+      </p>
+      <div
+        style="display: flex; justify-content: center; gap: 10px; margin-top: 20px"
+      >
+        <button id="cancelButton" style="
+          background-color: white;
+          color: black;
+          font-weight: bold;
+          padding: 10px 20px;
+          border: 2px solid black;
+          border-radius: 5px;
+          cursor: pointer;
+        ">${cancelText}</button>
+        <button id="confirmButton" style="
+          background-color: #4E9F6E;
+          color: white;
+          font-weight: bold;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        ">${confirmText}</button>
+      </div>
+    `,
+    icon: "question",
+    showConfirmButton: false,
+    showCancelButton: false,
+    didRender: () => {
+      const confirmButton = document.getElementById("confirmButton");
+      const cancelButton = document.getElementById("cancelButton");
+      confirmButton?.addEventListener("click", () => {
+        Swal.close();
+        onConfirm();
+      });
+      cancelButton?.addEventListener("click", () => {
+        Swal.close();
+        if (onCancel) onCancel();
+      });
+    },
+  });
+}
+
 // Swal.fire("Eliminado", "El elemento ha sido eliminado.", "success");

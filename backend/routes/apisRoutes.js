@@ -8,6 +8,7 @@ const companiaRepresentantesController = require('../controllers/companiaReprese
 const clienteController = require('../controllers/clienteController');
 const usuarioController = require('../controllers/usuarioController');
 const polizasController = require('../controllers/polizasController');
+const reciboController = require('../controllers/reciboController');
 const polizaAseguradosController = require('../controllers/polizaAseguradosController');
 const robotController = require('../controllers/robotController');
 const catalogosController = require('../controllers/catalogosController');
@@ -111,6 +112,7 @@ router.post('/api/polizas/asegurados/delete', polizaAseguradosController.delete)
 // Pólizas Recibos e Historial
 router.post('/api/polizas/recibos', polizasController.getRecibos);
 router.post('/api/polizas/historial', polizasController.getHistorial);
+router.post('/api/recibo/pagar', reciboController.pagar);
 
 // Cotizaciones
 router.post('/api/cotizaciones', cotizacionesController.getAllCotizaciones);

@@ -7,12 +7,15 @@
         :formLive="true"
         :modelValue="formPago"
         :showButtonsAction="false"
+        :showMessageRequired="false"
       />
+
+      <p class="fontBold ptDiv">Documento de soporte</p>
 
       <!-- Área para agregar o arrastrar un documento -->
       <div
         v-if="!documento"
-        class="dropzone w-full p-6 border-dashed border-2 border-gray-300 rounded-lg text-center mt-4 hover:border-blue-500 hover:bg-blue-50 transition-all"
+        class="dropzone w-full p-6 border-dashed border-2 border-gray-300 rounded-lg text-center hover:border-blue-500 hover:bg-blue-50 transition-all"
         @dragover.prevent
         @drop="handleFileDrop"
       >
@@ -34,7 +37,7 @@
       <!-- Mostrar archivo seleccionado -->
       <div
         v-if="documento"
-        class="mt-4 p-4 border border-gray-300 rounded-lg bg-gray-50"
+        class="p-4 border border-gray-300 rounded-lg bg-gray-50"
       >
         <div class="flex items-center justify-between text-center">
           <div class="mb10">
@@ -55,12 +58,28 @@
           </VBtn>
         </div>
       </div>
+
+      <VBtn
+        class="mt-3"
+        block
+        size="small"
+        variant="outlined"
+        color="primary"
+        @click="handleShowMessage"
+      >
+        <VIcon start icon="tabler-location-check" />
+        Registrar pago
+      </VBtn>
     </div>
   </VCard>
   <pre>{{ formPago }}</pre>
 </template>
 
 <script setup lang="ts">
+import {
+  showConfirmationMessage,
+  showErrorMessage,
+} from "@/components/apps/sweetAlerts/SweetAlets";
 // Props y eventos
 const props = withDefaults(
   defineProps<{
@@ -79,6 +98,33 @@ const emit = defineEmits<{
 
 const formPago: any = reactive({});
 const documento: any = ref(null);
+
+const handleSubmit = () => {
+  console.log("Formulario enviado");
+};
+
+const handleShowMessage = () => {
+  if (!documento.value || !formPago.formaPago || !formPago.fechaPago) {
+    showErrorMessage({
+      title: "Formulario incompleto",
+      message:
+        "Para poder registrar el pago, debes completar todos los campos obligatorios.",
+    });
+  } else if (!documento.value) {
+    showConfirmationMessage({
+      title: "¿Deseas continuar?",
+      message: "No se ha seleccionado ningún archivo, deseas continuar?",
+      confirmText: "Sí, continuar",
+      cancelText: "Cancelar",
+      onConfirm: () => {
+        handleSubmit();
+      },
+      onCancel: () => {},
+    });
+  } else {
+    handleSubmit();
+  }
+};
 
 // En onMounted:
 onMounted(() => {
@@ -106,12 +152,14 @@ const schemaAsegurado = [
     label: "Fecha de pago",
     type: "date",
     model: "fechaPago",
+    required: true,
     classElement: " col-12",
   },
   {
     label: "Forma de pago",
     type: "select",
     model: "formaPago",
+    required: true,
     options: [
       { label: "Efectivo", value: "Efectivo" },
       { label: "Tarjeta de crédito", value: "Tarjeta de crédito" },
@@ -149,6 +197,11 @@ const removeFile = () => {
 </script>
 
 <style scoped>
+.ptDiv {
+  padding: 0;
+  margin: 0;
+  padding-top: 1rem;
+}
 .dropzone {
   cursor: pointer;
   transition: all 0.3s ease;
