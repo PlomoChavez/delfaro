@@ -20,9 +20,6 @@ const props = withDefaults(
   }
 );
 
-const handleCancelarCotizacion = () => {
-  emit("cancelar");
-};
 const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
 const step = ref(1);
@@ -40,6 +37,10 @@ const localData: any = ref(props.registro ? { ...props.registro } : {
     cotizaciones: []
   }
 });
+
+const handleCancelarCotizacion = () => {
+  emit("cancelar");
+};
 
 await function handleGoEmitir() {
   handleStepNext(false);
@@ -314,6 +315,10 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
   estimando.value = true; // Indica que se está estimando
 
   let localDataEstimacion = data || deepToRaw(localData.value);
+  console.log("Datos para estimación:", localDataEstimacion);
+
+  // localDataEstimacion.configuracion.detalles.frecuenciaPago =
+  //   localDataEstimacion.configuracion.titular.frecuenciaPago.label;
 
   const response = await customRequest({
     url: "/api/cotizaciones/estimar",

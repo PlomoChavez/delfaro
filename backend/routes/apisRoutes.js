@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const upload = require("./multerConfig"); 
 
 const procesosAutomatizadosController = require('../controllers/procesosAutomatizadosController');
 const catalogoController = require('../controllers/catalogoController');
@@ -19,18 +20,14 @@ const authController = require('../controllers/authController');
 router.post('/api/login', authController.login);
 router.post('/api/verificar', authController.verificarToken);
 
-
-
 router.post('/api/catalogos/ramos', (req, res) => catalogosController.getCatalogo(req, res, 'ramos'));
 router.post('/api/wizard/cotizacion/companias', (req, res) => cotizacionesController.getCompniasByRamo(req, res));
-
 
 // // Robot
 router.post('/api/demo/bots', robotController.demoRobots);
 router.post('/api/cotizaciones/estimar', procesosAutomatizadosController.estimarCotizaciones);
 router.post('/api/cotizaciones/emitir', procesosAutomatizadosController.emitirCotizaciones);
 router.post('/api/cotizaciones/reprocesar', procesosAutomatizadosController.reprocesarPoliza);
-
 
 // Catálogos Generales
 router.post('/api/catalogo/actividades/get', (req, res) => catalogoController.getAll(req, res, 'actividades'));
@@ -112,7 +109,7 @@ router.post('/api/polizas/asegurados/delete', polizaAseguradosController.delete)
 // Pólizas Recibos e Historial
 router.post('/api/polizas/recibos', polizasController.getRecibos);
 router.post('/api/polizas/historial', polizasController.getHistorial);
-router.post('/api/recibo/pagar', reciboController.pagar);
+router.post('/api/recibos/pagar', upload.single("soporte"), reciboController.pagar);
 
 // Cotizaciones
 router.post('/api/cotizaciones', cotizacionesController.getAllCotizaciones);

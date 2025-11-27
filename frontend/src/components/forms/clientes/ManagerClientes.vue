@@ -120,7 +120,7 @@ const schemaForm : any = [
     label: "Paquete de cobertura",
     type: "select",
     model: "paqueteCobertura",
-    classElement: " col-sm-12 col-md-6  col-lg-4 ",
+    classElement: " col-sm-12 col-md-6  col-lg-3 ",
       options: [
       {label:"Basica",id:"Basica"},
       {label:"Limitada",id:"Limitada"},
@@ -198,17 +198,29 @@ const schemaClienteCotizacion : any = [
     label: "Paquete de cobertura",
     type: "select",
     model: "paqueteCobertura",
-    classElement: " col-sm-12 col-md-6  col-lg-6 ",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
       options: [
       {label:"Basica",id:"Basica"},
       {label:"Limitada",id:"Limitada"},
       {label:"Amplia",id:"Amplia"},
     ]
   },
+  {
+    label: "Tipo de frecuencia de pago",
+    type: "select",
+    model: "frecuenciaPago",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
+      options: [
+      {label:"Contado",id:"Contado"},
+      {label:"Mensual",id:"Mensual"},
+      {label:"Trimestral",id:"Trimestral"},
+      {label:"Semestral",id:"Semestral"},
+    ]
+  },
   { 
     label: "Obtener los detalles de accesorios",
     type: "switch",
-    classElement: " col-sm-12 col-md-6  col-lg-6 ",
+    classElement: " col-sm-12 col-md-6  col-lg-4 ",
     model: "obtenerDetallesAccesorios",
     options: [ 
       {label:"Si",id:"Si"}, 
@@ -255,10 +267,18 @@ const dataTmp = {
     label: "Mujer",
     id: "Mujer",
   },
+  paqueteCobertura: {
+    label: "Basica",
+    id: "Basica",
+  },
+  frecuenciaPago: {
+    label: "Contado",
+    id: "Contado",
+  },
   telefono: "7442077733",
   correo: "de@de.com",
   marca: "Honda",
-  modelo: "CR-B",
+  modelo: "CR-V",
   anio: "2024",
   codigoPostal: "39600",
 };

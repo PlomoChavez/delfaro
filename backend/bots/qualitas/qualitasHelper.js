@@ -145,27 +145,56 @@ async function esperarFilasTablaCotizaciones(driver, timeout = 10000) {
   return false;
 }
 
-async function obtenerFrecuenciasPago(driver) {
+async function obtenerFrecuenciasPago(driver, frecuenciaSeleccionada = null) {
+  console.log("Obteniendo frecuencias de pago...");
+  console.log("Frecuencia seleccionada:", frecuenciaSeleccionada);
   const resultados = [];
-  // Selecciona todos los divs de tipo paymentTypeItem
-  const items = await driver.findElements(By.css(".paymentTypeItem"));
 
-  for (const item of items) {
-    // Dentro de cada item, busca el monto y el tipo
-    const montoElem = await item.findElement(By.css(".text-secondary.c4.mt-1"));
-    const tipoElem = await item.findElement(
-      By.css(".text-muted.c5.mt-1:not(.d-sm-none)")
+  try {
+    // Selecciona todos los divs de tipo paymentTypeItem
+    const items = await driver.findElements(By.css(".paymentTypeItem"));
+    console.log(`Se encontraron ${items.length} frecuencias de pago.`);
+
+    for (const item of items) {
+      try {
+        // Asegúrate de que el elemento esté visible desplazándolo al viewport
+        await driver.executeScript("arguments[0].scrollIntoView(true);", item);
+        await driver.sleep(500); // Espera breve para asegurar que el elemento sea interactuable
+
+        // Dentro de cada item, busca el monto y el tipo
+        const montoElem = await item.findElement(
+          By.css(".text-secondary.c4.mt-1")
+        );
+        const tipoElem = await item.findElement(
+          By.css(".text-muted.c5.mt-1:not(.d-sm-none)")
+        );
+
+        const monto = await montoElem.getText();
+        const tipo = await tipoElem.getText();
+
+        // Agregar el resultado al array
+        resultados.push({ tipo, monto });
+
+        // Si la frecuencia seleccionada coincide con el tipo, hacer clic
+        if (frecuenciaSeleccionada && tipo === frecuenciaSeleccionada) {
+          console.log(`Haciendo clic en el elemento con frecuencia: ${tipo}`);
+          await item.click(); // Hacer clic en el div correspondiente
+        }
+      } catch (error) {
+        console.error(
+          `Error procesando un elemento de frecuencia de pago: ${error.message}`
+        );
+        continue; // Continúa con el siguiente elemento
+      }
+    }
+  } catch (error) {
+    console.error(
+      `Error general al obtener frecuencias de pago: ${error.message}`
     );
-
-    const monto = await montoElem.getText();
-    const tipo = await tipoElem.getText();
-
-    resultados.push({ tipo, monto });
   }
 
   return resultados;
 }
-
 async function redireccionarCotizacionGuardada(driver, row) {
   let fila = row.fila || null; // Asegura que fila sea un elemento WebDriver
   // Extrae el href de la columna 8 (columna 7 en índice 0)

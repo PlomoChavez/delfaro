@@ -314,26 +314,11 @@ async function getDetallesCotizacion(driver, data, darClick = true) {
     data.detalles = {};
   }
 
-  await sleep(1000);
-  if (data.detalles.frecuenciaPago) {
-    const frecuenciaTexto = data.detalles.frecuenciaPago; // Ejemplo: "Trimestral
+  await sleep(500);
 
-    // Acerca el elemento y haz clic
-    await acercarHaElemento(driver, {
-      locator: `//p[contains(@class, 'text-muted') and contains(@class, 'c5') and contains(@class, 'mt-1') and normalize-space(text())='${frecuenciaTexto}']`,
-      by: "xpath",
-    });
+  const frecuenciaTexto = data.titular.frecuenciaPago.label ?? "Contado"; // Ejemplo: "Trimestral
 
-    await clickElement(driver, {
-      locator: `//p[contains(@class, 'text-muted') and contains(@class, 'c5') and contains(@class, 'mt-1') and normalize-space(text())='${frecuenciaTexto}']`,
-      sleeptime: 1000,
-      by: "xpath",
-    });
-  } else {
-    data.detalles.frecuenciaPago = "Contado";
-  }
-
-  let frecuenciasPago = await obtenerFrecuenciasPago(driver);
+  const frecuenciasPago = await obtenerFrecuenciasPago(driver, frecuenciaTexto);
   data.detalles.frecuenciasPago = frecuenciasPago;
 
   let coberturasBasicas = await obtenerCoberturasBasicas(

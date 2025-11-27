@@ -4,7 +4,9 @@ import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import OpcionSelector from "@/components/custom/OpcionSelector.vue";
 import ClienteBuscador from "@/components/forms/clientes/clienteBuscador.vue";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { toast } from "vue3-toastify";
+const router = useRouter();
 const paso = ref(1);
 const formData: any = ref({});
 const data: any = ref({});
@@ -239,6 +241,8 @@ async function handleEmitirApi(payload: any) {
   if (dataResponse.result) {
     // prettier-ignore
     toast.success("¡Cotización guardada!", { theme: "dark",});
+
+    router.push("/polizas");
   } else {
     showErrorMessage({
       title: "Error",

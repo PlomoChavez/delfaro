@@ -851,6 +851,23 @@ async function getPathFolderCotizaciones(folders = null) {
   }
   return tmp;
 }
+/**
+ * 📍 Ruta específica a carpeta de cotizaciones del proyecto
+ * @param {string|Array} folders - Subcarpetas adicionales (opcional)
+ * @returns {string} Ruta completa a la carpeta de cotizaciones
+ */
+async function getPathFolderFiles(folders = null) {
+  let tmp = await currentPath();
+  tmp = path.join(tmp, "../", "files");
+  if (folders) {
+    if (Array.isArray(folders)) {
+      tmp = path.join(tmp, ...folders);
+    } else if (typeof folders === "string") {
+      tmp = path.join(tmp, folders);
+    }
+  }
+  return tmp;
+}
 
 /**
  * 📍 Resuelve ruta absoluta de archivo (wrapper de path.resolve)
@@ -891,6 +908,47 @@ async function createNewPath(folder = "Downloads") {
   return path.join(folder);
 }
 
+const handleFilePostMulter = (options = {}) => {
+  const { folderContenedor, newFileName, file } = options;
+
+  if (!file) {
+    throw new Error("El archivo es obligatorio.");
+  }
+
+  // Crear la carpeta si no existe
+  if (!fs.existsSync(folderContenedor)) {
+    fs.mkdirSync(folderContenedor, { recursive: true });
+  }
+
+  // Obtener la extensión del archivo
+  const fileExtension = path.extname(file.originalname);
+
+  // Determinar el nombre final del archivo
+  const finalFileName = newFileName
+    ? `${newFileName}${fileExtension}` // Si hay un nuevo nombre, úsalo
+    : file.originalname; // Si no, usa el nombre original
+
+  // Ruta final del archivo
+  const finalFilePath = path.join(folderContenedor, finalFileName);
+
+  // Mover el archivo a la carpeta de destino
+  fs.renameSync(file.path, finalFilePath);
+
+  // Convertir la ruta absoluta en una ruta relativa
+  const relativeFolder = `.${path.sep}${path.relative(
+    process.cwd(),
+    folderContenedor
+  )}`;
+
+  // Retornar información del archivo procesado
+  return {
+    originalName: file.originalname,
+    finalName: finalFileName,
+    finalPath: finalFilePath,
+    folder: relativeFolder, // Ruta relativa
+  };
+};
+
 // ========================================
 // 📦 EXPORTACIONES ORGANIZADAS POR CATEGORÍA
 // ========================================
@@ -930,6 +988,8 @@ module.exports = {
   createNewPath, // Construye rutas genéricas
   obtenerPathArchivo, // Ruta absoluta de archivo
   getPathFolderCotizaciones, // Ruta específica cotizaciones
+  getPathFolderFiles,
+  handleFilePostMulter,
 };
 
 /*

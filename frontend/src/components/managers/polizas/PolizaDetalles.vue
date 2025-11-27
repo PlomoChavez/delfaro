@@ -230,10 +230,28 @@ watch(
         class="ml-2"
         size="small"
         variant="outlined"
+        @click="handleChangePanel(6)"
+      >
+        <VIcon start icon="tabler-eye" />
+        Ver Archivos
+      </VBtn>
+      <VBtn
+        class="ml-2"
+        size="small"
+        variant="outlined"
         @click="handleVerPoliza"
       >
         <VIcon start icon="tabler-eye" />
-        Ver póliza
+        Siniestrar
+      </VBtn>
+      <VBtn
+        class="ml-2"
+        size="small"
+        variant="outlined"
+        @click="handleVerPoliza"
+      >
+        <VIcon start icon="tabler-eye" />
+        Renovar póliza
       </VBtn>
       <VBtn
         class="ml-2"

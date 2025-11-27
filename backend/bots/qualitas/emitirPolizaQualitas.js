@@ -507,7 +507,7 @@ async function consultaPoliza(driver, data) {
   // insertar el numero de poliza
   await setInputValue(driver, {
     locator: "numberPolicy",
-    value: "0810329938",
+    value: "0810330250",
     sleeptime: 1000,
   });
 
@@ -1422,6 +1422,8 @@ async function handleEmitirPoliza(data) {
     driver = await openPage("https://agentes360.qualitas.com.mx/", {
       headless: false,
     });
+
+    console.log("Datos para emitir póliza:", data);
 
     await iniciarSesion(driver, data);
 

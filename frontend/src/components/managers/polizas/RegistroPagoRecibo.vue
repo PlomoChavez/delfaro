@@ -79,7 +79,11 @@
 import {
   showConfirmationMessage,
   showErrorMessage,
+  showSuccessMessage,
 } from "@/components/apps/sweetAlerts/SweetAlets";
+import { useRouter } from "vue-router";
+const router = useRouter();
+
 // Props y eventos
 const props = withDefaults(
   defineProps<{
@@ -99,8 +103,54 @@ const emit = defineEmits<{
 const formPago: any = reactive({});
 const documento: any = ref(null);
 
-const handleSubmit = () => {
-  console.log("Formulario enviado");
+const handleSubmit = async () => {
+  try {
+    // Crear un objeto FormData para enviar los datos y el archivo
+    const formData = new FormData();
+    formData.append("reciboId", formPago.id || ""); // ID del recibo
+    formData.append("formaPago", formPago.formaPago.label || "");
+    formData.append("fechaPago", formPago.fechaPago || "");
+    formData.append("comentarios", formPago.comentarios || "");
+
+    // Agregar el archivo si se seleccionó
+    if (documento.value) {
+      formData.append("soporte", documento.value);
+    }
+
+    // Realizar la solicitud usando customRequest
+    const response: any = await customRequest({
+      url: "/api/recibos/pagar", // Ruta relativa al backend
+      method: "post",
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data", // Necesario para enviar archivos
+      },
+    });
+
+    if (response.data.result) {
+      showSuccessMessage({
+        title: "Guardado",
+        message: "El pago ha sido registrado correctamente.",
+      });
+
+      router.push("/");
+    } else {
+      showErrorMessage({
+        title: "Error",
+        message: response.data.message,
+      });
+    }
+
+    // Manejar la respuesta del servidor
+    console.log("Pago registrado con éxito:", response.data);
+    // Aquí puedes mostrar un mensaje de éxito al usuario
+  } catch (error: any) {
+    console.error(
+      "Error al registrar el pago:",
+      error.response?.data || error.message
+    );
+    // Aquí puedes mostrar un mensaje de error al usuario
+  }
 };
 
 const handleShowMessage = () => {

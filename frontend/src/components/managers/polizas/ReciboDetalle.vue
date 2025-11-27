@@ -129,6 +129,7 @@ const handleShowModalContrasenia = (estatus: string) => {
         </div>
         <div class="col-11 mx-auto mt-2">
           <VBtn
+          v-if="!(props.recibo.estatus =='Pagado')"
             block
             size="small"
             variant="outlined"
