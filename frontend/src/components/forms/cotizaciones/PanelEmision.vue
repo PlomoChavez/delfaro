@@ -207,7 +207,7 @@ function handleAseguradoIgual(accion: string) {
   paso.value = accion === "igual" ? 8 : 5;
 }
 
-async function handleEmitir() {
+async function handleActualizarEmision() {
   let tmp = toRaw(data.value);
   tmp.cotizacion = toRaw(props.registro);
   tmp.agente_id = userData.id;
@@ -227,8 +227,16 @@ async function handleEmitir() {
   delete tmp.cotizacion.detalles.titular;
 
   props.actualizarFN(tmp);
+  return tmp;
+}
 
+async function handleEmitir() {
+  let tmp = await handleActualizarEmision();
   await handleEmitirApi(tmp);
+}
+
+async function handleGuardarEmision() {
+  await handleActualizarEmision();
 }
 
 async function handleEmitirApi(payload: any) {
@@ -417,6 +425,7 @@ watch(
       v-if="paso === 9"
       :data="data"
       @back="handleBack"
+      @guardar="handleGuardarEmision"
       @cancelar="$emit('cancelar')"
       @continuar="handleEmitir"
     />

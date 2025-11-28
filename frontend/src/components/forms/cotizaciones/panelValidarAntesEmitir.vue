@@ -31,18 +31,26 @@
               </div>
             </div>
           </div>
-          <div class="wFull row">
-            <VBtn
-              variant="outlined"
-              class="mr-auto"
-              color="black"
-              @click="$emit('cancelar')"
-            >
+          <div class="wFull row divBotones">
+            <VBtn variant="outlined" color="black" @click="$emit('cancelar')">
               <VIcon start class="font-bold" icon="tabler-x" size="24" />
               Cancelar
             </VBtn>
-            <VBtn variant="tonal" class="ml-auto" @click="$emit('continuar')">
-              Emitir poliza
+            <VBtn variant="outlined" color="primary" @click="$emit('guardar')">
+              <VIcon
+                start
+                class="font-bold"
+                icon="tabler-device-floppy"
+                size="24"
+              />
+              Guardar
+            </VBtn>
+            <VBtn
+              variant="outlined"
+              color="primary"
+              @click="$emit('continuar')"
+            >
+              Emitir
               <VIcon
                 end
                 class="font-bold"
@@ -63,6 +71,7 @@ import { VCard, VCardText } from "vuetify/components";
 const emit = defineEmits<{
   (event: "cancelar"): void;
   (event: "continuar"): void;
+  (event: "guardar"): void;
   (event: "back", idx: number): void;
 }>();
 const props = withDefaults(
@@ -142,3 +151,10 @@ const sections = [
   },
 ];
 </script>
+
+<style scoped>
+.divBotones {
+  display: flex;
+  justify-content: space-between;
+}
+</style>
