@@ -38,11 +38,20 @@ const localData: any = ref(props.registro ? { ...props.registro } : {
   }
 });
 
-const handleCancelarCotizacion = () => {
+await function handleGoEmitir() {
+  handleStepNext(false);
+};
+
+const handleVolverCotizaciones = () => {
   emit("cancelar");
 };
 
-await function handleGoEmitir() {
+const handleCancelarCotizacion = () => {
+  localData.value.configuracion.seleccionadas = [];
+  handleStepPrev();
+};
+
+const handleSiguiente = () => {
   handleStepNext(false);
 };
 
@@ -396,9 +405,8 @@ watch(step, async (nuevoValor) => {
 <template>
   <div>
     <!-- prettier-ignore -->
-    <BtnAtras titulo="Volver a cotizaciones" @atras="handleCancelarCotizacion" />
+    <BtnAtras titulo="Volver a cotizaciones" @atras="handleVolverCotizaciones" />
     <h1 class="module-title">Cotizador de Seguros de Autos</h1>
-    <p>{{ step }}</p>
     <div v-if="editandoTitular">
       <div class="card cardForm mx-auto mt-3">
         <h2 class="w-full mb-5">Información del cliente:</h2>
@@ -504,7 +512,7 @@ watch(step, async (nuevoValor) => {
                 <!-- prettier-ignore -->
                 <VBtn
                   :disabled=" !(localData.configuracion.seleccionadas || []).length "
-                  @click="handleStepNext"
+                  @click="handleSiguiente"
                 >
                   Siguiente
                 </VBtn>
