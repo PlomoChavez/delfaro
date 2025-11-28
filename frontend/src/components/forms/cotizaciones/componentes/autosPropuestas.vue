@@ -25,10 +25,7 @@
           </div>
           <div>
             <!-- prettier-ignore -->
-            <VBtn
-              :disabled=" !(companiasSeleccionadas || []).length "
-              @click="handleAgregarCotizacion"
-            >
+            <VBtn :disabled=" !(companiasSeleccionadas || []).length " @click="handleAgregarCotizacion" >
               Agregar cotizaciones
             </VBtn>
           </div>
@@ -104,29 +101,25 @@
                 <!-- Columna 3: Iconos -->
                 <div class="">
                    <div v-if="!moodDelete" class="col-iconos">
-                     <i
-                     v-if="typeof item.inicial !== 'undefined' && item.inicial == false"
-                       class="fa fa-exclamation-circle font22 icono-accion text-info"
-                       :title="
-                         abiertos.includes(item.id)
-                           ? 'Ocultar detalle'
-                           : 'Ver detalle'
-                       "
-                       @click="toggleAcordeon(item.id)"
-                       style="cursor: pointer"
-                     />
-                     <a
-                       v-if="item?.detalles?.archivo"
-                       :href="item.detalles.archivo"
-                       target="_blank"
-                       rel="noopener"
-                       class="btn-icon"
-                       :title="'Descargar PDF'"
-                     >
-                       <i
-                         class="fa fa-download font22 text-secondary"
-                         aria-hidden="true"
-                       ></i>
+                    <!-- prettier-ignore -->
+                    <i 
+                      v-if="typeof 
+                      item.inicial !== 'undefined' && item.inicial == false" 
+                      class="fa fa-exclamation-circle font22 icono-accion text-info" 
+                      :title="abiertos.includes(item.id)? 'Ocultar detalle': 'Ver detalle'"
+                      @click="toggleAcordeon(item.id)"
+                      style="cursor: pointer"
+                    />
+                    <!-- prettier-ignore -->
+                    <a
+                      v-if="item?.detalles?.archivo"
+                      :href="item.detalles.archivo"
+                      target="_blank"
+                      rel="noopener"
+                      class="btn-icon"
+                      :title="'Descargar PDF'"
+                    >
+                       <i class="fa fa-download font22 text-secondary" aria-hidden="true" />
                      </a>
                      <i
                        class="fa fa-pencil font22 icono-accion text-warning"
@@ -134,17 +127,21 @@
                        title="Editar"
                        @click="editarPropuesta(item)"
                      />
+                     <i
+                       class="fa fa-refresh font22 icono-accion text-secondary"
+                       aria-hidden="true"
+                       title="Editar"
+                       @click="handleEstimarCotizacion(item)"
+                     />
 
                    </div>
                    <div v-else class="col-iconos">
-                    
                      <i
                        class="fa fa-eraser font22 icono-accion textDanger"
                        aria-hidden="true"
                        title="Editar"
                        @click="deleteItem(item)"
                      />
-
                    </div>
                 </div>
               </div>
@@ -220,6 +217,9 @@ function handleCancelarAgregarCotizaciones(item: any) {
 
 function editarPropuesta(item: any) {
   emit("editar", item);
+}
+function handleEstimarCotizacion(item: any) {
+  console.log("Estimando cotizacion", toRaw(item));
 }
 
 async function handleAddCotizacion() {

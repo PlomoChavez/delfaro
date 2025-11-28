@@ -317,8 +317,19 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
   let localDataEstimacion = data || deepToRaw(localData.value);
   console.log("Datos para estimación:", localDataEstimacion);
 
-  // localDataEstimacion.configuracion.detalles.frecuenciaPago =
-  //   localDataEstimacion.configuracion.titular.frecuenciaPago.label;
+  localDataEstimacion.configuracion.cotizaciones.forEach((cotizacion: any) => {
+    if (cotizacion.titular.frecuenciaPago.tipo) {
+      cotizacion.titular.frecuenciaPago = {
+        label: cotizacion.titular.frecuenciaPago.tipo,
+        value: cotizacion.titular.frecuenciaPago.tipo,
+      };
+      console.log("Frecuencia de pago ajustada:", cotizacion.id);
+      console.log(
+        "Frecuencia de pago ajustada:",
+        cotizacion.titular.frecuenciaPago
+      );
+    }
+  });
 
   const response = await customRequest({
     url: "/api/cotizaciones/estimar",

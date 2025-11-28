@@ -1,5 +1,10 @@
 const { until, By } = require("selenium-webdriver");
-const { filePathToPublicUrl } = require("../../utils/filesHelper");
+const {
+  filePathToPublicUrl,
+  mergePDFs,
+  obtenerRutaBackendFiles,
+} = require("../../utils/filesHelper");
+
 const {
   openPage,
   waitForElement,
@@ -310,75 +315,86 @@ async function redireccionarMenuCotizaciones(driver, data) {
 }
 
 async function getDetallesCotizacion(driver, data, darClick = true) {
-  if (!data.detalles) {
-    data.detalles = {};
-  }
+  try {
+    if (!data.detalles) {
+      data.detalles = {};
+    }
 
-  await sleep(500);
+    await sleep(1000);
 
-  const frecuenciaTexto = data.titular.frecuenciaPago.label ?? "Contado"; // Ejemplo: "Trimestral
+    const frecuenciaTexto = data.detalles.frecuenciaPago ?? "Contado"; // Ejemplo: "Trimestral"
 
-  const frecuenciasPago = await obtenerFrecuenciasPago(driver, frecuenciaTexto);
-  data.detalles.frecuenciasPago = frecuenciasPago;
-
-  let coberturasBasicas = await obtenerCoberturasBasicas(
-    driver,
-    data.detalles.coberturasBasicas
-  );
-
-  data.detalles.coberturasBasicas = coberturasBasicas;
-
-  await scrollToBottom(driver);
-
-  let accesorios = [];
-
-  // prettier-ignore
-  let obtenerDetallesAccesorios = data.titular.obtenerDetallesAccesorios || false;
-
-  if (obtenerDetallesAccesorios) {
-    // prettier-ignore
-    accesorios = await obtenerNombresCoberturasAccesorias(driver, { 
-      darClick: darClick,
-      accesorios: data.detalles.accesorios || []
-    });
-
-    let accesoriosSeleccionados = accesorios.filter(
-      (item) => item.selected === true
+    await sleep(1000);
+    const frecuenciasPago = await obtenerFrecuenciasPago(
+      driver,
+      frecuenciaTexto
     );
 
-    if (accesoriosSeleccionados.length > 0) {
-      let mensajeError = await guardandoCambios(driver, data);
+    data.detalles.frecuenciasPago = frecuenciasPago;
 
-      if (mensajeError) {
-        let tmp = { ...data, msgError: mensajeError };
-        return tmp;
-      }
-      // prettier-ignore
-      let actualizacionesAccesorios = await actualizarAccesorios(driver, accesoriosSeleccionados);
-      // prettier-ignore
-      for (const actualizacion of actualizacionesAccesorios) {
-        const accesorio = accesorios.find(item => item.label_id === actualizacion.label_id);
-        if (accesorio) {
-          accesorio.prima = actualizacion.prima;
-        }
-      }
+    let coberturasBasicas = await obtenerCoberturasBasicas(
+      driver,
+      data.detalles.coberturasBasicas
+    );
 
-      let resultadoModal = await validarModalAbierto(driver, {
-        maxIntentos: 3,
+    data.detalles.coberturasBasicas = coberturasBasicas;
+
+    await scrollToBottom(driver);
+
+    let accesorios = [];
+
+    // prettier-ignore
+    let obtenerDetallesAccesorios = data.titular.obtenerDetallesAccesorios || false;
+
+    if (obtenerDetallesAccesorios) {
+      // prettier-ignore
+      accesorios = await obtenerNombresCoberturasAccesorias(driver, { 
+        darClick: darClick,
+        accesorios: data.detalles.accesorios || []
       });
 
-      if (resultadoModal.continue) {
-        return await formatearData({
-          mssgError: resultadoModal.mensaje,
-          result: false,
+      let accesoriosSeleccionados = accesorios.filter(
+        (item) => item.selected === true
+      );
+
+      if (accesoriosSeleccionados.length > 0) {
+        let mensajeError = await guardandoCambios(driver, data);
+
+        if (mensajeError) {
+          let tmp = { ...data, msgError: mensajeError };
+          return tmp;
+        }
+        // prettier-ignore
+        let actualizacionesAccesorios = await actualizarAccesorios(driver, accesoriosSeleccionados);
+        // prettier-ignore
+        for (const actualizacion of actualizacionesAccesorios) {
+          const accesorio = accesorios.find(item => item.label_id === actualizacion.label_id);
+          if (accesorio) {
+            accesorio.prima = actualizacion.prima;
+          }
+        }
+
+        let resultadoModal = await validarModalAbierto(driver, {
+          maxIntentos: 3,
         });
+
+        if (resultadoModal.continue) {
+          return await formatearData({
+            mssgError: resultadoModal.mensaje,
+            result: false,
+          });
+        }
       }
     }
+
+    data.detalles.accesorios = accesorios;
+
+    return data;
+  } catch (error) {
+    console.error("Error en getDetallesCotizacion:", error.message);
+    data.msgError = `Error en getDetallesCotizacion: ${error.message}`;
+    return data;
   }
-
-  data.detalles.accesorios = accesorios;
-
-  return data;
 }
 
 async function guardandoCambios(driver, data) {
@@ -400,6 +416,11 @@ async function guardandoCambios(driver, data) {
 async function preparacionData(data) {
   if (!data.detalles) {
     data.detalles = {};
+  }
+
+  if (data.titular.frecuenciaPago) {
+    data.detalles.frecuenciaPago = data.titular.frecuenciaPago.label;
+    // delete data.titular.frecuenciaPago;
   }
 
   if (data.msgError) {
@@ -755,6 +776,15 @@ async function generadorCotizacion(driver, data) {
 
   // prettier-ignore
   let responseFile = await descargarArchivoHipervinculo( driver,href,"cotizacion_" + tmp.numeroCotizacion);
+
+  const rutaPlantilla = obtenerRutaBackendFiles("plantillas", "Portada.pdf");
+
+  const resultadoMerge = await mergePDFs({
+    archivoOriginal: responseFile.path,
+    archivosMerge: rutaPlantilla,
+    eliminarOriginal: true,
+  });
+
   let archivo = null;
 
   if (responseFile.status) {

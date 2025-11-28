@@ -146,14 +146,11 @@ async function esperarFilasTablaCotizaciones(driver, timeout = 10000) {
 }
 
 async function obtenerFrecuenciasPago(driver, frecuenciaSeleccionada = null) {
-  console.log("Obteniendo frecuencias de pago...");
-  console.log("Frecuencia seleccionada:", frecuenciaSeleccionada);
   const resultados = [];
 
   try {
     // Selecciona todos los divs de tipo paymentTypeItem
     const items = await driver.findElements(By.css(".paymentTypeItem"));
-    console.log(`Se encontraron ${items.length} frecuencias de pago.`);
 
     for (const item of items) {
       try {
@@ -177,7 +174,6 @@ async function obtenerFrecuenciasPago(driver, frecuenciaSeleccionada = null) {
 
         // Si la frecuencia seleccionada coincide con el tipo, hacer clic
         if (frecuenciaSeleccionada && tipo === frecuenciaSeleccionada) {
-          console.log(`Haciendo clic en el elemento con frecuencia: ${tipo}`);
           await item.click(); // Hacer clic en el div correspondiente
         }
       } catch (error) {
