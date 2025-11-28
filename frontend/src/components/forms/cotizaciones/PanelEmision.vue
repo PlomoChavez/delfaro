@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { createCliente } from "@/apis/clienteApi";
-import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
+import {
+  showConfirmationMessage,
+  showErrorMessage,
+} from "@/components/apps/sweetAlerts/SweetAlets";
 import OpcionSelector from "@/components/custom/OpcionSelector.vue";
 import ClienteBuscador from "@/components/forms/clientes/clienteBuscador.vue";
 import { ref } from "vue";
@@ -231,8 +234,17 @@ async function handleActualizarEmision() {
 }
 
 async function handleEmitir() {
-  let tmp = await handleActualizarEmision();
-  await handleEmitirApi(tmp);
+  showConfirmationMessage({
+    title: "¿Deseas emitir esta cotización?",
+    message: "Este proceso no se puede revertir.",
+    confirmText: "Sí, continuar",
+    cancelText: "Cancelar",
+    onConfirm: async () => {
+      let tmp = await handleActualizarEmision();
+      await handleEmitirApi(tmp);
+    },
+    onCancel: () => {},
+  });
 }
 
 async function handleGuardarEmision() {
