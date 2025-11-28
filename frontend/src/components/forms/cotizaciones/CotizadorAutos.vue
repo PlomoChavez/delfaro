@@ -323,11 +323,6 @@ const estimarCotizaciones = async (data = null, flujoNormal = false) => {
         label: cotizacion.titular.frecuenciaPago.tipo,
         value: cotizacion.titular.frecuenciaPago.tipo,
       };
-      console.log("Frecuencia de pago ajustada:", cotizacion.id);
-      console.log(
-        "Frecuencia de pago ajustada:",
-        cotizacion.titular.frecuenciaPago
-      );
     }
   });
 
