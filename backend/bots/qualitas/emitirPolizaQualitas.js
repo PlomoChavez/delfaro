@@ -507,7 +507,7 @@ async function consultaPoliza(driver, data) {
   // insertar el numero de poliza
   await setInputValue(driver, {
     locator: "numberPolicy",
-    value: "0810330250",
+    value: data.numeroPoliza,
     sleeptime: 1000,
   });
 
@@ -1270,8 +1270,6 @@ async function createRecibos(data) {
   let frecuenciaPago = data.cotizacion.detalles.frecuenciaPago.toLowerCase();
   let fechaInicio = data.cotizacion.detalles.inicioVigencia ?? null;
 
-  console.log("fechaInicio", fechaInicio);
-
   if (fechaInicio == null) {
     fechaInicio = now();
 
@@ -1285,8 +1283,6 @@ async function createRecibos(data) {
     formatoSalida: "DD/MM/YYYY",
     meses: 12,
   });
-  console.log("fechaInicio", fechaInicio);
-  console.log("fechaFin", fechaFin);
 
   let frecuencias = {
     anual: 1,
@@ -1337,6 +1333,12 @@ async function createRecibos(data) {
 
     inicio = fechaFinRecibo;
 
+    const responseRecibo = await createOrUpdate({
+      tabla: "poliza_recibos",
+      returnResponse: true,
+      data: reciboData,
+    });
+
     if (i == 0) {
       const responseCotizacion = await createOrUpdate({
         tabla: "polizas",
@@ -1344,14 +1346,10 @@ async function createRecibos(data) {
           id: data.poliza_id,
           proximoPagoFecha: fechaInicio,
           proximoPagoMonto: montoRecibo,
+          recibo_id: responseRecibo.data.id,
         },
       });
     }
-
-    const responseCotizacion = await createOrUpdate({
-      tabla: "poliza_recibos",
-      data: reciboData,
-    });
   }
 }
 
@@ -1369,7 +1367,7 @@ async function descargarTodosLosDocumentos(driver, options = {}) {
   const resultadoEspera = await esperarArchivoDescargado({
     archivosAntes: resultadoInicio.archivosAntes,
     downloadPath: resultadoInicio.downloadPath,
-    extensiones: [".zip", ".pdf"],
+    extensiones: [".zip"],
     palabrasClave: ["download", "files", "poliza", "policy"],
     maxIntentos: 45, // 90 segundos
     intervalo: 2000,

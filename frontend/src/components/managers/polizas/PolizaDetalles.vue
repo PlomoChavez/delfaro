@@ -285,7 +285,7 @@ watch(
         size="small"
         variant="flat"
         color="error"
-        @click="handleShowModalContrasenia"
+        @click="handleChangePanel(7)"
       >
         <VIcon start icon="tabler-cancel" />
         Cancelar póliza

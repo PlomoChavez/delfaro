@@ -77,6 +77,7 @@ declare module 'vue' {
     PaymentProvidersDialog: typeof import('./src/components/dialogs/PaymentProvidersDialog.vue')['default']
     PolizaArchivos: typeof import('./src/components/managers/polizas/PolizaArchivos.vue')['default']
     PolizaAsegurados: typeof import('./src/components/forms/polizas/PolizaAsegurados.vue')['default']
+    PolizaCancelar: typeof import('./src/components/managers/polizas/PolizaCancelar.vue')['default']
     PolizaDetalles: typeof import('./src/components/managers/polizas/PolizaDetalles.vue')['default']
     PolizaHistorial: typeof import('./src/components/forms/polizas/PolizaHistorial.vue')['default']
     PolizaReciboPago: typeof import('./src/components/managers/polizas/PolizaReciboPago.vue')['default']

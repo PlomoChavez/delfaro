@@ -4,6 +4,7 @@ import moment from "moment";
 import { ref } from "vue";
 import PolizaArchivos from "./polizas/PolizaArchivos.vue";
 import PolizaAsegurados from "./polizas/PolizaAsegurados.vue";
+import PolizaCancelar from "./polizas/PolizaCancelar.vue";
 import PolizaDetalles from "./polizas/PolizaDetalles.vue";
 import PolizaReciboPago from "./polizas/PolizaReciboPago.vue";
 import PolizaRecibos from "./polizas/PolizaRecibos.vue";
@@ -254,12 +255,18 @@ onMounted(() => {
           @changePanel="handleChangePanel"
         />
       </template>
+      <!-- Historial -->
       <template v-if="panel == 5">
         <p>Panel 5</p>
         <div class="wFull text-center"></div>
       </template>
+      <!-- Archivos -->
       <template v-if="panel == 6">
         <PolizaArchivos :data="dataPoliza" @changePanel="handleChangePanel" />
+      </template>
+      <!-- Cancelar -->
+      <template v-if="panel == 7">
+        <PolizaCancelar :data="dataPoliza" @goInicio="handleBack" />
       </template>
     </template>
   </div>

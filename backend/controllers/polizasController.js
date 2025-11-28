@@ -1,5 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const moment = require("moment");
+
 const {
   findOne,
   getAllFrom,
@@ -149,6 +151,68 @@ exports.delete = async (req, res) => {
   const id = req.body.id;
   const result = await deleteById(tabla, id);
   res.json(result);
+};
+
+/**
+ * Eliminar un registro específico de la tabla clientes.
+ */
+exports.cancelarPoliza = async (req, res) => {
+  const id = req.body.poliza_id;
+  const motivoCancelacion = req.body.motivo || "";
+
+  let polizas = await queryWithRelations({
+    modelo: "polizas",
+    filtros: { id },
+  });
+
+  if (polizas.length != 1) {
+    res.json({
+      result: false,
+      message: "Ocurrio un error al cancelar la póliza, inténtelo de nuevo.",
+    });
+  }
+
+  const fechaCancelacion = moment().format("DD/MM/YYYY"); // Fecha actual en formato "DD/MM/YYYY"
+
+  let poliza = polizas[0];
+
+  await createOrUpdate({
+    tabla: "polizas",
+    data: {
+      id,
+      estatus_id: 3,
+      fechaCancelado: fechaCancelacion,
+      motivoCancelacion,
+    },
+  });
+
+  let recibos = await queryWithRelations({
+    modelo: "poliza_recibos",
+    filtros: { poliza_id: id },
+    // filtros: { poliza_id: id, estatus: "Pendiente" },
+  });
+
+  for (let recibo of recibos) {
+    await createOrUpdate({
+      tabla: "poliza_recibos",
+      estatusDefault: false,
+      data: {
+        id: recibo.id,
+        estatus: "Cancelado",
+        fechaCancelado: fechaCancelacion,
+      },
+    });
+  }
+  await createOrUpdate({
+    tabla: "poliza_recibos",
+    estatusDefault: false,
+    data: { id: poliza.recibo_id, estatus: "Vencido" },
+  });
+
+  res.json({
+    result: true,
+    message: "Póliza cancelada con éxito",
+  });
 };
 
 /**
