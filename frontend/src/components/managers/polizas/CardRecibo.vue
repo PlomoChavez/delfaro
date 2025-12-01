@@ -88,7 +88,11 @@ const getDisabledStyle = (recibo: any) => {
 </style>
 
 <template>
-  <VCard class="rounded-lg w400" :class="{ disabled: props.isDisabled }">
+  <VCard
+    v-if="true"
+    class="rounded-lg w400"
+    :class="{ disabled: props.isDisabled }"
+  >
     <div class="w-full">
       <div class="p-4 d-flex flex-justify ml-2 mt-1 mx-5">
         <div class="mx-auto p-4 d-flex flex-justify ml-5 mt-4">

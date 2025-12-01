@@ -163,57 +163,53 @@ onMounted(() => {
 
   // Función para agrupar recibos en "pasado", "actual" y "pendientes"
 
-  const now = moment(); // Fecha actual
+  if (tmpData.recibos) {
+    const now = moment(); // Fecha actual
+    tmpData.recibos.forEach((recibo: any) => {
+      const vencimiento = moment(recibo.vencimiento, "DD/MM/YYYY"); // Especificar el formato de la fecha
 
-  tmpData.recibos.forEach((recibo: any) => {
-    const vencimiento = moment(recibo.vencimiento, "DD/MM/YYYY"); // Especificar el formato de la fecha
+      recibo.isPagado = !(
+        recibo.fechaPago == null && recibo.fechaCancelado == null
+      );
 
-    recibo.isPagado = !(
-      recibo.fechaPago == null && recibo.fechaCancelado == null
-    );
+      recibo.concepto = `Pago del recibo ${recibo.numeroRecibo} de la poliza ${tmpData.numeroPoliza}`;
+      recibo.montoFormateado = formatCurrency(recibo.importe);
+      // if (recibo.estatus !== "Pagado") {
+      //   recibo.diferenciaDias = getDaysDifference(recibo.vencimiento);
+      // } else {
+      //   let fecha2 =
+      //     recibo.fechaCancelado != null
+      //       ? recibo.fechaCancelado
+      //       : recibo.fechaPago;
 
-    recibo.concepto = `Pago del recibo ${recibo.numeroRecibo} de la poliza ${tmpData.numeroPoliza}`;
-    recibo.montoFormateado = formatCurrency(recibo.importe);
-    // if (recibo.estatus !== "Pagado") {
-    //   recibo.diferenciaDias = getDaysDifference(recibo.vencimiento);
-    // } else {
-    //   let fecha2 =
-    //     recibo.fechaCancelado != null
-    //       ? recibo.fechaCancelado
-    //       : recibo.fechaPago;
+      //   recibo.diferenciaDias = getDaysDifference(recibo.vencimiento, fecha2);
+      // }
+      recibo.diferenciaDias = getDaysDifference(recibo.vencimiento);
 
-    //   recibo.diferenciaDias = getDaysDifference(recibo.vencimiento, fecha2);
-    // }
-    recibo.diferenciaDias = getDaysDifference(recibo.vencimiento);
+      console.log(
+        recibo.numeroRecibo,
+        " Vencimiento: ",
+        recibo.vencimiento,
+        " Fecha de pago: ",
+        recibo.fechaPago || recibo.fechaCancelado,
+        " Diferencia dias:",
+        recibo.diferenciaDias,
+        " dias"
+      );
 
-    console.log(
-      recibo.numeroRecibo,
-      " Vencimiento: ",
-      recibo.vencimiento,
-      " Fecha de pago: ",
-      recibo.fechaPago || recibo.fechaCancelado,
-      " Diferencia dias:",
-      recibo.diferenciaDias,
-      " dias"
-    );
+      recibo.diferenciaDias = getDaysDifference(
+        recibo.estatus !== "Pagado"
+          ? recibo.vencimiento
+          : recibo.fechaCancelado || recibo.fechaPago
+      );
 
-    recibo.diferenciaDias = getDaysDifference(
-      recibo.estatus !== "Pagado"
-        ? recibo.vencimiento
-        : recibo.fechaCancelado || recibo.fechaPago
-    );
+      recibo.isVencido = vencimiento.isBefore(now, "day"); // true si la fecha de vencimiento es anterior a hoy
 
-    recibo.isVencido = vencimiento.isBefore(now, "day"); // true si la fecha de vencimiento es anterior a hoy
-
-    if (recibo.isVencido && recibo.estatus !== "Pagado") {
-      recibo.estatus = "Atrasado";
-    }
-  });
-
-  tmpData.reciboActual = findReciboByVencimiento(
-    tmpData.recibos,
-    tmpData.proximoPagoFecha
-  );
+      if (recibo.isVencido && recibo.estatus !== "Pagado") {
+        recibo.estatus = "Atrasado";
+      }
+    });
+  }
 
   dataPoliza.value = tmpData;
 });
@@ -243,7 +239,7 @@ onMounted(() => {
       <template v-if="panel == 3">
         <PolizaReciboPago
           :data="dataPoliza"
-          :recibo="dataPoliza.reciboActual"
+          :recibo="dataPoliza.recibo"
           @changePanel="handleChangePanel"
         />
       </template>

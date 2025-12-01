@@ -36,6 +36,8 @@ const apiEndpoints = {
 };
 
 const handleActionsEdit = (dataRow: any) => {
+  dataRow = toRaw(dataRow);
+
   data.value = {
     ...dataRow,
     metodoPago: dataRow["metodo_pago"],
@@ -43,7 +45,7 @@ const handleActionsEdit = (dataRow: any) => {
     tipoVencimiento: dataRow["tipo_vencimiento"],
     cliente: {
       ...dataRow["cliente"],
-      label: dataRow["cliente"]["nombre"],
+      label: dataRow?.["cliente"]?.["nombre"] ?? "",
     },
     subAgente: dataRow["sub_agente"],
     archivos: JSON.parse(dataRow["archivos"] || "[]"),

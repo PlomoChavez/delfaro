@@ -7,7 +7,7 @@
     <!-- Recibos actuales -->
     <div>
       <div class="d-flex align-center justify-between mb-2 mt-4">
-        <h2 class="fontBold">Recibos Actuales</h2>
+        <h2 class="fontBold">Últimos 3 recibos</h2>
       </div>
       <div class="recibos-grid">
         <template v-for="(recibo, index) in groupedRecibos.actual" :key="index">
@@ -21,7 +21,7 @@
     <div>
       <div class="d-flex align-center justify-between mb-2 mt-4  cursor-pointer" @click="showPasados = !showPasados">
         <VIcon :icon="showPasados ? 'tabler-eye' : 'tabler-eye-closed'" size="24" class="mr-2 cursor-pointer" />
-        <h2 class="fontBold">Pasados <span class="text-muted-italic"> Número de recibos ( {{ groupedRecibos.pasado.length }} )</span></h2>
+        <h2 class="fontBold">Pagados <span class="text-muted-italic"> Número de recibos ( {{ groupedRecibos.pasado.length }} )</span></h2>
       </div>
       <div v-if="showPasados" class="recibos-grid">
         <template v-for="(recibo, index) in groupedRecibos.pasado" :key="index">
@@ -35,7 +35,7 @@
     <div>
       <div class="d-flex align-center justify-between mb-2 mt-4  cursor-pointer" @click="showPendientes = !showPendientes">
         <VIcon :icon="showPendientes ? 'tabler-eye' : 'tabler-eye-closed'" size="24" class="mr-2" />
-        <h2 class="fontBold">Pendientes <span class="text-muted-italic"> Número de recibos ( {{ groupedRecibos.pendientes.length }} )</span></h2>
+        <h2 class="fontBold">Futuros <span class="text-muted-italic"> Número de recibos ( {{ groupedRecibos.pendientes.length }} )</span></h2>
       </div>
       <div v-if="showPendientes" class="recibos-grid">
         <template v-for="(recibo, index) in groupedRecibos.pendientes" :key="index">
@@ -53,12 +53,8 @@
     @cancelar="reciboSelected = null"
   />
 </template>
-
 <script lang="ts" setup>
-import moment from "moment";
 import { ref } from "vue";
-import CardRecibo from "./CardRecibo.vue";
-import ReciboDetalle from "./ReciboDetalle.vue";
 
 // Props y eventos
 const props = withDefaults(
@@ -81,43 +77,36 @@ const reciboSelected: any = ref(null);
 // Estados para controlar la visibilidad de las secciones
 const showPasados = ref(false);
 const showPendientes = ref(false);
+const groupRecibosByNumRecibo = (recibos: any[], reciboActual: any) => {
+  console.log("Recibos:", recibos, "Recibo actual:", reciboActual);
 
-// Función para agrupar recibos en "pasado", "actual" y "pendientes"
-const groupRecibosByDate = (recibos: any[]) => {
+  // Extraer el número de recibo actual del objeto reciboActual
+  const reciboActualNum = reciboActual.numeroRecibo;
+
   const pasado: any[] = [];
   const actual: any[] = [];
   const pendientes: any[] = [];
 
-  const now = moment(); // Fecha actual
-  const currentMonth = now.month(); // Mes actual (0 = enero, 11 = diciembre)
-  const currentYear = now.year(); // Año actual
-
-  // Mes y año del mes anterior
-  const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-  const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
-  // Mes y año del mes siguiente
-  const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
-  const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-
   recibos.forEach((recibo) => {
-    const vencimiento = moment(recibo.vencimiento, "DD/MM/YYYY"); // Especificar el formato de la fecha
-    const vencimientoMonth = vencimiento.month(); // Obtener el mes del vencimiento
-    const vencimientoYear = vencimiento.year(); // Obtener el año del vencimient
+    const numeroRecibo = recibo.numeroRecibo; // Asegúrate de que este campo exista en cada recibo
+    console.log(
+      "Procesando recibo:",
+      numeroRecibo,
+      "Recibo actual:",
+      reciboActualNum
+    );
 
-    if (
-      vencimientoYear < currentYear || // Año anterior
-      (vencimientoYear === currentYear && vencimientoMonth < previousMonth)
-    ) {
+    if (numeroRecibo < incrementarRecibo(reciboActualNum, -1)) {
+      // Recibos anteriores al anterior inmediato
       pasado.push(recibo);
     } else if (
-      (vencimientoYear === previousYear &&
-        vencimientoMonth === previousMonth) || // Mes anterior
-      (vencimientoYear === currentYear && vencimientoMonth === currentMonth) || // Mes actual
-      (vencimientoYear === nextYear && vencimientoMonth === nextMonth) // Mes siguiente
+      numeroRecibo >= incrementarRecibo(reciboActualNum, -1) && // Anterior inmediato
+      numeroRecibo <= incrementarRecibo(reciboActualNum, 1) // Siguiente inmediato
     ) {
+      // Recibos actuales (anterior inmediato, actual, siguiente inmediato)
       actual.push(recibo);
     } else {
+      // Recibos posteriores al siguiente inmediato
       pendientes.push(recibo);
     }
   });
@@ -125,8 +114,17 @@ const groupRecibosByDate = (recibos: any[]) => {
   return { pasado, actual, pendientes };
 };
 
+// Función auxiliar para incrementar o decrementar el número de recibo
+const incrementarRecibo = (numeroRecibo: string, incremento: number) => {
+  const numero = parseInt(numeroRecibo, 10); // Convertir a número
+  const nuevoNumero = numero + incremento; // Incrementar o decrementar
+  return nuevoNumero.toString().padStart(3, "0"); // Formatear con ceros a la izquierda
+};
+
 // Computed para agrupar los recibos
-const groupedRecibos = computed(() => groupRecibosByDate(recibos.value));
+const groupedRecibos = computed(() =>
+  groupRecibosByNumRecibo(toRaw(props.data.recibos), toRaw(props.data.recibo))
+);
 
 onMounted(() => {
   if (props.recibos) {
