@@ -266,7 +266,7 @@ watch(
         class="ml-2"
         size="small"
         variant="outlined"
-        @click="handleShowModalContrasenia"
+        @click="handleChangePanel(8)"
       >
         <VIcon start icon="tabler-mail" />
         Enviar por correo

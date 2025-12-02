@@ -23,7 +23,7 @@ const tableHeaders = [
   { title: "Compañia", key: "compania.nombreCorto" },
   { title: "Ramo", key: "ramo.label" },
   { title: "Producto", key: "producto.nombre" },
-  { title: "Estatus", key: "estatus" },
+  { title: "Estatus", key: "estatusPoliza.label" },
   { title: "Creación", key: "created_at" },
 ];
 

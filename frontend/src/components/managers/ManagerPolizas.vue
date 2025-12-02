@@ -5,6 +5,7 @@ import { ref } from "vue";
 import PolizaArchivos from "./polizas/PolizaArchivos.vue";
 import PolizaAsegurados from "./polizas/PolizaAsegurados.vue";
 import PolizaCancelar from "./polizas/PolizaCancelar.vue";
+import PolizaCorreo from "./polizas/PolizaCorreo.vue";
 import PolizaDetalles from "./polizas/PolizaDetalles.vue";
 import PolizaReciboPago from "./polizas/PolizaReciboPago.vue";
 import PolizaRecibos from "./polizas/PolizaRecibos.vue";
@@ -263,6 +264,10 @@ onMounted(() => {
       <!-- Cancelar -->
       <template v-if="panel == 7">
         <PolizaCancelar :data="dataPoliza" @goInicio="handleBack" />
+      </template>
+      <!-- Mandar por correo -->
+      <template v-if="panel == 8">
+        <PolizaCorreo :data="dataPoliza" @goInicio="handleBack" />
       </template>
     </template>
   </div>

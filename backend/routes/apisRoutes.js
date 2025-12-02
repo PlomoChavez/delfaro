@@ -110,6 +110,7 @@ router.post('/api/polizas/asegurados/delete', polizaAseguradosController.delete)
 router.post('/api/polizas/cancelar', polizasController.cancelarPoliza);
 router.post('/api/polizas/recibos', polizasController.getRecibos);
 router.post('/api/polizas/historial', polizasController.getHistorial);
+router.post('/api/polizas/enviar', polizasController.getHistorial);
 router.post('/api/recibos/pagar', upload.single("soporte"), reciboController.pagar);
 
 // Cotizaciones

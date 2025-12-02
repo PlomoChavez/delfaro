@@ -74,7 +74,7 @@ exports.getAll = async (req, res) => {
         foreignKey: "id",
         localKey: "cliente_id",
         labelKey: "cliente",
-        fields: ["nombre", "curp", "rfc"],
+        fields: ["nombre", "curp", "rfc", "correo"],
       },
       {
         tabla: "compania",
@@ -150,6 +150,28 @@ exports.getAll = async (req, res) => {
 exports.delete = async (req, res) => {
   const id = req.body.id;
   const result = await deleteById(tabla, id);
+  res.json(result);
+};
+
+/**
+ * Eliminar un registro específico de la tabla clientes.
+ */
+exports.enviarPoliza = async (req, res) => {
+  const id = req.body.poliza_id;
+  let query = {
+    modelo,
+    filtros: { id },
+  };
+
+  let rows = await queryWithRelations(query);
+
+  if (rows.length != 1) {
+    return res.json({
+      result: false,
+      message: "Póliza no encontrada",
+    });
+  }
+
   res.json(result);
 };
 

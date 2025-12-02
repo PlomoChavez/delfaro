@@ -1,8 +1,5 @@
 <script lang="ts" setup>
-import {
-  showConfirmationMessage,
-  showErrorMessage,
-} from "@/components/apps/sweetAlerts/SweetAlets";
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import { customRequest } from "@/utils/axiosInstance";
 // Props y eventos
 const props = withDefaults(
@@ -44,73 +41,64 @@ const schemaResumenPoliza = [
     classElement: " col-sm-12 col-md-6  col-lg-6 ",
   },
   {
-    label: "Motivo de cancelación",
+    label: "Correo electrónico",
     type: "text",
-    model: "motivoCancelacion",
+    model: "correoElectronico",
     classElement: " col-12 ",
   },
 ];
 
 const dataform: any = reactive({});
 
-const handleCancelarPoliza = () => {
-  console.log("Iniciar proceso de cancelación de póliza");
-  console.log("Datos del formulario:", toRaw(dataform));
-  if (toRaw(dataform.motivoCancelacion)) {
-    showConfirmationMessage({
-      title: "¿Deseas cancelar esta póliza?",
-      message: "Este proceso no se puede revertir.",
-      confirmText: "Sí, continuar",
-      cancelText: "Cancelar",
-      onConfirm: async () => {
-        cancelarPoliza();
-      },
-      onCancel: () => {},
-    });
-  } else {
-    showErrorMessage({
-      title: "Error",
-      message: "El motivo de cancelación es obligatorio.",
-    });
-  }
+const esCorreoValido = (correo: string): boolean => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Expresión regular para validar correos
+  return regex.test(correo);
 };
 
-const cancelarPoliza = async () => {
-  console.log("Cancelar póliza");
-  let tmp = dataform;
-  console.log("Data del formulario:", tmp);
-  let payload = {
-    poliza_id: tmp.id,
-    motivo: tmp.motivoCancelacion,
-  };
-
-  console.log("Data del formulario:", tmp);
-  console.log("Data del formulario:", payload);
-
-  const response = await customRequest({
-    url: "/api/polizas/cancelar",
-    method: "POST",
-    data: payload,
-  });
-  console.log("Respuesta de cancelar póliza:", response);
-  if (response.data.result) {
-    emit("goInicio");
-  } else {
+const handleEnviarCorreo = async () => {
+  if (!dataform.correoElectronico) {
     showErrorMessage({
       title: "Error",
-      message: response.data.message,
+      message: "El campo de correo electrónico es obligatorio.",
     });
+    return;
+  } else if (!esCorreoValido(dataform.correoElectronico)) {
+    showErrorMessage({
+      title: "Error",
+      message: "El correo electrónico no es válido.",
+    });
+    return;
+  } else {
+    const response = await customRequest({
+      url: "/api/polizas/envio",
+      method: "POST",
+      data: {
+        poliza_id: props.data.id,
+      },
+    });
+    console.log("Respuesta de cancelar póliza:", response);
+    if (response.data.result) {
+      emit("goInicio");
+    } else {
+      showErrorMessage({
+        title: "Error",
+        message: response.data.message,
+      });
+    }
   }
 };
 
 onMounted(() => {
   let tmp = toRaw(props.data);
 
+  console.log("Datos de la póliza para enviar por correo:", tmp);
+
   Object.assign(dataform, {
     numeroPoliza: tmp.numeroPoliza,
     compania: tmp.compania,
     ramo: tmp.ramo,
     producto: tmp.producto,
+    correoElectronico: tmp.cliente.correo || "",
     id: tmp.id,
   });
 });
@@ -118,8 +106,8 @@ onMounted(() => {
 
 <template>
   <div class="d-flex mb-6">
-    <VIcon :icon="'tabler-progress-x'" size="40" />
-    <h1 class="pl-4 my-auto fontBold">Cancelar Póliza</h1>
+    <VIcon :icon="'tabler-mail-fast'" size="40" />
+    <h1 class="pl-4 my-auto fontBold">Enviar archivos de Póliza</h1>
   </div>
   <VCard class="rounded-lg w400 p20 mx-auto">
     <FormFactory
@@ -132,13 +120,13 @@ onMounted(() => {
       <VBtn
         block
         size="small"
-        color="error"
+        color="primary"
         variant="outlined"
         rounded
-        @click="handleCancelarPoliza"
+        @click="handleEnviarCorreo"
       >
-        <VIcon start icon="tabler-eraser" />
-        Cancelar poliza
+        <VIcon start icon="tabler-mail-fast" />
+        Enviar archivos de póliza por correo
       </VBtn>
     </div>
   </VCard>
