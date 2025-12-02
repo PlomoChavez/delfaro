@@ -1,6 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const { enviarCorreo } = require("../utils/emailServiceHelper");
 const moment = require("moment");
+const fs = require("fs");
 
 const {
   findOne,
@@ -156,23 +156,85 @@ exports.delete = async (req, res) => {
 /**
  * Eliminar un registro específico de la tabla clientes.
  */
-exports.enviarPoliza = async (req, res) => {
-  const id = req.body.poliza_id;
-  let query = {
-    modelo,
-    filtros: { id },
-  };
+exports.enviarArchivosPoliza = async (req, res) => {
+  try {
+    const { poliza_id: id, correo } = req.body;
 
-  let rows = await queryWithRelations(query);
+    if (!correo || !id) {
+      return res.status(400).json({
+        result: false,
+        message: "Faltan campos requeridos para enviar el correo",
+      });
+    }
 
-  if (rows.length != 1) {
-    return res.json({
+    const query = {
+      modelo,
+      filtros: { id },
+    };
+
+    const rows = await queryWithRelations(query);
+
+    if (rows.length !== 1) {
+      return res.status(404).json({
+        result: false,
+        message: "Póliza no encontrada",
+      });
+    }
+
+    const poliza = rows[0];
+    const archivos = JSON.parse(poliza.archivos || "[]");
+    const attachments = [];
+
+    archivos.forEach((archivo) => {
+      const filePath = archivo.ruta;
+      if (fs.existsSync(filePath)) {
+        attachments.push({
+          filename: archivo.nombre,
+          path: filePath,
+        });
+      } else {
+        console.error(`El archivo no existe: ${filePath}`);
+      }
+    });
+
+    if (attachments.length === 0) {
+      return res.status(400).json({
+        result: false,
+        message: "No se encontraron archivos adjuntos válidos para enviar.",
+      });
+    }
+
+    const mailOptions = {
+      to: correo,
+      subject: `Envío de Póliza: ${poliza.numeroPoliza || "Sin número"}`,
+      text: `Estimado/a ${
+        poliza.cliente?.nombre || "Cliente"
+      },\n\nAdjunto encontrará la información de su póliza.`,
+      html: `<p>Estimado/a ${poliza.cliente?.nombre || "Cliente"},</p>
+             <p>Adjunto encontrará la información de su póliza.</p>`,
+      attachments,
+    };
+
+    const result = await enviarCorreo(mailOptions);
+
+    if (!result.result) {
+      return res.status(500).json({
+        result: false,
+        message: "Error al enviar el correo: " + result.message,
+      });
+    }
+
+    return res.status(200).json({
+      result: true,
+      message: "Correo enviado con éxito",
+    });
+  } catch (error) {
+    console.error("Error interno al enviar la póliza:", error);
+    return res.status(500).json({
       result: false,
-      message: "Póliza no encontrada",
+      message: "Error interno al enviar la póliza: " + error.message,
     });
   }
-
-  res.json(result);
 };
 
 /**

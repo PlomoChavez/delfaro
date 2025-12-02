@@ -70,10 +70,11 @@ const handleEnviarCorreo = async () => {
     return;
   } else {
     const response = await customRequest({
-      url: "/api/polizas/envio",
+      url: "/api/polizas/enviar",
       method: "POST",
       data: {
         poliza_id: props.data.id,
+        correo: dataform.correoElectronico,
       },
     });
     console.log("Respuesta de cancelar póliza:", response);

@@ -29,6 +29,7 @@
     "moment": "^2.30.1",
     "multer": "^2.0.2",
     "mysql2": "^3.14.1",
+    "nodemailer": "^7.0.11",
     "pdf-lib": "^1.17.1",
     "require-directory": "^2.1.1",
     "rxjs": "^7.8.2",
