@@ -25,7 +25,6 @@
               @submit="handleFormFiltros"
               @cancel="handleClearFiltros"
             />
-            <pre>{{ formFiltros }}</pre>
           </div>
         </VCard>
       </transition>
@@ -168,31 +167,33 @@
 </style>
 
 <script setup lang="ts">
+import { showErrorMessage } from "@/components/apps/sweetAlerts/SweetAlets";
 import moment from "moment";
 import { ref } from "vue";
+import { toast } from "vue3-toastify";
 
 let formFiltros: any = ref({}); // Usar ref para la reactividad
-let showFormFiltros = ref(true); // Controlar la visibilidad del VCard
+let showFormFiltros = ref(false); // Controlar la visibilidad del VCard
 let indicadores = ref({
-  recibosContador: 11,
-  recibosSumatoria: 11,
-  recibosPagadosSumatoria: 11,
-  recibosPagadosContador: 11,
-  recibosPendientesSumatoria: 11,
-  recibosPendientesContador: 11,
-  totalSiniestros: 1,
-  polizasContador: 1,
-  polizasSumatoria: 1,
-  primaNetaSumatoria: 62819.62,
-  primaNetaContador: 55,
-  primaTotalSumatoria: 62819.62,
-  primaTotalContador: 55,
-  nuevosNegociosSumatoria: 62819.62,
-  nuevosNegociosContador: 55,
-  renovacionesSumatoria: 62819.62,
-  renovacionesContador: 55,
-  canceladasSumatoria: 62819.62,
-  canceladasContador: 55,
+  recibosContador: 0,
+  recibosSumatoria: 0,
+  recibosPagadosSumatoria: 0,
+  recibosPagadosContador: 0,
+  recibosPendientesSumatoria: 0,
+  recibosPendientesContador: 0,
+  totalSiniestros: 0,
+  polizasContador: 0,
+  polizasSumatoria: 0,
+  primaNetaSumatoria: 0,
+  primaNetaContador: 0,
+  primaTotalSumatoria: 0,
+  primaTotalContador: 0,
+  nuevosNegociosSumatoria: 0,
+  nuevosNegociosContador: 0,
+  renovacionesSumatoria: 0,
+  renovacionesContador: 0,
+  canceladasSumatoria: 0,
+  canceladasContador: 0,
 }); // Datos de los indicadores
 
 let schemaFiltros: any = ref([
@@ -238,6 +239,11 @@ const handleShowFiltros = () => {
 
 // Función para manejar el envío del formulario
 const handleFormFiltros = async () => {
+  handleGetIndicadores();
+  showFormFiltros.value = false;
+};
+
+const handleGetIndicadores = async () => {
   let tmp = toRaw(formFiltros.value);
   const payload = {
     compania_id: tmp?.compania?.id ?? null,
@@ -246,28 +252,22 @@ const handleFormFiltros = async () => {
     finVigencia: tmp?.finVigencia ?? null,
     agente_id: tmp?.agente?.id ?? null, // Cambié la clave a "agente_id" para mantener consistencia con las demás claves
   };
-  console.log("tmp:", tmp);
-  console.log("Payload de filtros:", payload);
-  // const response = await customRequest({
-  //   url: "/api/cotizaciones/emitir",
-  //   method: "POST",
-  //   data: payload,
-  // });
-  // const dataResponse = response.data;
-  // if (dataResponse.result) {
-  //   showSuccessMessage({
-  //     title: "Guardado",
-  //     message: dataResponse.message,
-  //   });
-  // } else {
-  //   showErrorMessage({
-  //     title: "Error",
-  //     message: dataResponse.message,
-  //   });
-  // }
-  // showFormFiltros.value = false;
+  const response = await customRequest({
+    url: "/api/dashboard/inicio",
+    method: "POST",
+    data: payload,
+  });
+  const dataResponse = response.data;
+  if (dataResponse.result) {
+    indicadores.value = dataResponse.data;
+    toast.success(dataResponse.message, { theme: "dark" });
+  } else {
+    showErrorMessage({
+      title: "Error",
+      message: dataResponse.message,
+    });
+  }
 };
-
 // Función para limpiar los filtros
 const handleClearFiltros = () => {
   formFiltros.value = {}; // Reiniciar el formulario
@@ -297,6 +297,8 @@ onMounted(() => {
       classElement: " col-sm-6 col-md-3  col-lg-3 ",
     });
   }
+
+  handleGetIndicadores();
 });
 </script>
 
