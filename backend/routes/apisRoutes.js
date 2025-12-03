@@ -2,18 +2,19 @@ const express = require('express');
 const router = express.Router();
 const upload = require("./multerConfig"); 
 
+const companiaRepresentantesController = require('../controllers/companiaRepresentantesController');
 const procesosAutomatizadosController = require('../controllers/procesosAutomatizadosController');
+const polizaAseguradosController = require('../controllers/polizaAseguradosController');
+const cotizacionesController = require('../controllers/cotizacionesController');
+const dashboardController = require('../controllers/dashboardController');
+const catalogosController = require('../controllers/catalogosController');
 const catalogoController = require('../controllers/catalogoController');
 const companiaController = require('../controllers/companiaController');
-const companiaRepresentantesController = require('../controllers/companiaRepresentantesController');
 const clienteController = require('../controllers/clienteController');
 const usuarioController = require('../controllers/usuarioController');
 const polizasController = require('../controllers/polizasController');
 const reciboController = require('../controllers/reciboController');
-const polizaAseguradosController = require('../controllers/polizaAseguradosController');
 const robotController = require('../controllers/robotController');
-const catalogosController = require('../controllers/catalogosController');
-const cotizacionesController = require('../controllers/cotizacionesController');
 const authController = require('../controllers/authController');
 
 // Login
@@ -117,6 +118,9 @@ router.post('/api/recibos/pagar', upload.single("soporte"), reciboController.pag
 router.post('/api/cotizaciones', cotizacionesController.getAllCotizaciones);
 router.post('/api/cotizaciones/update', cotizacionesController.createOrUpdateCotizacion);
 router.post('/api/cotizaciones/delete', cotizacionesController.deleteCotizacion);
+
+
+router.post('/api/dashboard/inicio', dashboardController.inicioData);
 
 
 // Catálogos Específicos
