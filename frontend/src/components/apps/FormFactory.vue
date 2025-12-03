@@ -345,11 +345,11 @@ onMounted(async () => {
 
     if (field.type === "rangeDate") {
       field.minConfig = {
-        ...(field?.config || { dateFormat: "Y-m-d" }),
+        ...(field?.minConfig || { dateFormat: "Y-m-d" }),
       };
 
       field.maxConfig = {
-        ...(field?.config || { dateFormat: "Y-m-d" }),
+        ...(field?.maxConfig || { dateFormat: "Y-m-d" }),
       };
     }
 
@@ -628,7 +628,8 @@ onMounted(async () => {
             <!-- prettier-ignore -->
             <template v-else-if="field.type === 'rangeDate'">
                <div :class="field.classElement">
-                 <label :for="field.minModel"> {{ field.minLabel }} </label>
+                 <label  class="fontBold" :for="field.minModel"> {{ field.minLabel }} </label>
+
                  <!-- prettier-ignore -->
                  <AppDateTimePicker
                    :key="field.refreshKey" 
@@ -641,7 +642,7 @@ onMounted(async () => {
                  />
                </div>
                <div :class="field.classElement">
-                 <label :for="field.maxModel"> {{ field.maxLabel }} </label>
+                 <label  class="fontBold" :for="field.maxModel"> {{ field.maxLabel }} </label>
                  <!-- prettier-ignore -->
                  <AppDateTimePicker
                  :key="field.refreshKey" 
@@ -653,7 +654,7 @@ onMounted(async () => {
                    clearable
                  />
                </div>
-             </template>
+            </template>
             <!-- Campo select -->
             <!-- prettier-ignore -->
             <div v-else-if="field.type === 'select'" :class="field.classElement">

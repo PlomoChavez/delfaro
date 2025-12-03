@@ -32,10 +32,7 @@
     </div>
     <transition name="fade">
       <!-- Botón para mostrar el VCard -->
-      <VCard
-        v-if="!showFormFiltros"
-        class="w700 rounded-lg mx-auto p20 pt30 mt30"
-      >
+      <VCard class="w700 rounded-lg mx-auto p20 pt30 mt30">
         <!-- Header -->
         <!-- prettier-ignore -->
         <div class="wFull d-flex align-center items-center justify-space-between">
@@ -171,6 +168,7 @@
 </style>
 
 <script setup lang="ts">
+import moment from "moment";
 import { ref } from "vue";
 
 let formFiltros: any = ref({}); // Usar ref para la reactividad
@@ -222,6 +220,14 @@ let schemaFiltros: any = ref([
     classElement: " col-sm-6 col-md-3  col-lg-3 ",
     maxModel: "finVigencia",
     maxLabel: "Fin de vigencia",
+    minConfig: {
+      dateFormat: "d/m/Y",
+      enableTime: false,
+    },
+    maxConfig: {
+      dateFormat: "d/m/Y",
+      enableTime: false,
+    },
   },
 ]);
 
@@ -277,6 +283,9 @@ onMounted(() => {
   const incluirSubagente = false; // Cambia esta condición según tu lógica
 
   // Crear una copia del esquema base
+  const now = moment();
+
+  formFiltros.value.inicioVigencia = now.startOf("year").format("DD/MM/YYYY");
 
   // Agregar el campo "Subagente" si es necesario
   if (incluirSubagente) {
