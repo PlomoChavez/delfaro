@@ -72,7 +72,6 @@
       </VBtn>
     </div>
   </VCard>
-  <pre>{{ formPago }}</pre>
 </template>
 
 <script setup lang="ts">
