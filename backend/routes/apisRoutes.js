@@ -8,6 +8,7 @@ const polizaAseguradosController = require('../controllers/polizaAseguradosContr
 const cotizacionesController = require('../controllers/cotizacionesController');
 const dashboardController = require('../controllers/dashboardController');
 const catalogosController = require('../controllers/catalogosController');
+const historicoController = require('../controllers/historicoController');
 const catalogoController = require('../controllers/catalogoController');
 const companiaController = require('../controllers/companiaController');
 const clienteController = require('../controllers/clienteController');
@@ -18,6 +19,8 @@ const robotController = require('../controllers/robotController');
 const authController = require('../controllers/authController');
 
 // Login
+router.post('/api/example', historicoController.createAccion);
+
 router.post('/api/login', authController.login);
 router.post('/api/verificar', authController.verificarToken);
 

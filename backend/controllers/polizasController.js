@@ -1,4 +1,5 @@
 const { enviarCorreo } = require("../utils/emailServiceHelper");
+const { registrarAccion } = require("./historicoController");
 const moment = require("moment");
 const fs = require("fs");
 
@@ -293,6 +294,11 @@ exports.cancelarPoliza = async (req, res) => {
     data: { id: poliza.recibo_id, estatus: "Vencido" },
   });
 
+  await registrarAccion({
+    polizaID: id,
+    accion: `Póliza cancelada. Motivo: ${motivoCancelacion}`,
+  });
+
   res.json({
     result: true,
     message: "Póliza cancelada con éxito",
@@ -403,8 +409,18 @@ exports.create = async (req, res) => {
 
     const poliza = await prisma.poliza.create({ data });
     data.poliza_id = poliza.id;
-    await newAccionHistorial("Creación de póliza", poliza.id);
+
+    await registrarAccion({
+      polizaID: poliza.id,
+      accion: "Creación de póliza",
+    });
+
     await createRecibos(data);
+
+    await registrarAccion({
+      polizaID: poliza.id,
+      accion: "Creación de recibos para la póliza",
+    });
 
     return res.json({
       result: true,
@@ -472,10 +488,6 @@ async function createRecibos(data) {
         },
       });
     }
-    await newAccionHistorial(
-      `Creación de recibos, se crearon ${recibosTotal} de recibos`,
-      poliza
-    );
     return true;
   } catch (e) {
     // Puedes agregar logs aquí si lo deseas
@@ -566,21 +578,3 @@ exports.getHistorial = async (req, res) => {
   });
   return res.json(result);
 };
-
-/**
- * Crear una acción en el historial de póliza.
- */
-async function newAccionHistorial(accion, poliza_id = null) {
-  try {
-    if (!poliza_id) return false;
-    await prisma.polizaHistorial.create({
-      data: {
-        accion,
-        poliza_id,
-      },
-    });
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
